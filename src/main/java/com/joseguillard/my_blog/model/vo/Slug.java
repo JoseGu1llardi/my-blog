@@ -4,6 +4,7 @@ import jakarta.persistence.Embeddable;
 
 import java.io.Serializable;
 import java.text.Normalizer;
+import java.util.Objects;
 
 @Embeddable
 public class Slug implements Serializable {
@@ -46,5 +47,26 @@ public class Slug implements Serializable {
 
     public static Slug fromTitle(String title) {
         return new Slug(title);
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Slug slug = (Slug) o;
+        return Objects.equals(value, slug.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(value);
+    }
+
+    @Override
+    public String toString() {
+        return value;
     }
 }
