@@ -1,11 +1,13 @@
 package com.joseguillard.my_blog.model.vo;
 
 import jakarta.persistence.Embeddable;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.text.Normalizer;
 import java.util.Objects;
 
+@Getter
 @Embeddable
 public class Slug implements Serializable {
     private String value;
