@@ -35,4 +35,8 @@ public class Slug implements Serializable {
 
         return normalized;
     }
+
+    public static Slug of(String value) {
+        return new Slug(value);
+    }
 }
