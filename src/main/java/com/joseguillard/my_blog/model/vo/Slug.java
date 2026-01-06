@@ -1,14 +1,12 @@
 package com.joseguillard.my_blog.model.vo;
 
 import jakarta.persistence.Embeddable;
-import lombok.Getter;
 
 import java.io.Serializable;
 import java.text.Normalizer;
 import java.util.Objects;
 
 @Embeddable
-@Getter
 public class Slug implements Serializable {
     private String value;
 
@@ -49,6 +47,10 @@ public class Slug implements Serializable {
 
     public static Slug fromTitle(String title) {
         return new Slug(title);
+    }
+
+    public String getValue() {
+        return value;
     }
 
     @Override
