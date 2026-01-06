@@ -36,7 +36,15 @@ public class Slug implements Serializable {
         return normalized;
     }
 
+    /**
+     * Creates a new instance of {@code Slug} from the given value.
+     * The provided value is normalized to generate a valid slug.
+     */
     public static Slug of(String value) {
         return new Slug(value);
+    }
+
+    public static Slug fromTitle(String title) {
+        return new Slug(title);
     }
 }
