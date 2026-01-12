@@ -54,4 +54,19 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
+
+    /**
+     * Handles generic exceptions and returns a ModelAndView to display a custom 500 error page.
+     */
+    @ExceptionHandler(Exception.class)
+    public ModelAndView handleGenericException(Exception ex, HttpServletRequest request) {
+        ModelAndView mav = new ModelAndView("error/500");
+        mav.addObject("message", "An internal server error occurred. Please try again later.");
+        mav.addObject("path",  request.getRequestURI());
+        mav.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        ex.printStackTrace();
+        
+        return mav;
+    }
 }
