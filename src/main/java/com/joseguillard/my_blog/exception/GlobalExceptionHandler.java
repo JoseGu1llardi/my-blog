@@ -41,4 +41,17 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.badRequest().body(error);
     }
+
+    /**
+     * Handles duplicated resource exception; returns conflict status
+     */
+    @ExceptionHandler(DuplicatedResourceException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicatedResource(DuplicatedResourceException ex) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("timestamp", LocalDateTime.now());
+        error.put("message", ex.getMessage());
+        error.put("status", HttpStatus.CONFLICT.value());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
 }
