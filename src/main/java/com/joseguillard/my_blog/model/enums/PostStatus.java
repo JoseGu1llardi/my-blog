@@ -7,7 +7,6 @@ public enum PostStatus {
     DRAFT("Draft"),
     PUBLISHED("Published"),
     SCHEDULED("Scheduled"),
-    DELETED("Deleted"),
     ARCHIVED("Archived");
 
     private final String description;
