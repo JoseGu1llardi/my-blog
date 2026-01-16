@@ -1,5 +1,6 @@
 package com.joseguillard.my_blog.model;
 
+import com.joseguillard.my_blog.model.enums.UserRole;
 import com.joseguillard.my_blog.model.vo.Email;
 import com.joseguillard.my_blog.model.vo.Slug;
 import jakarta.persistence.*;
@@ -26,4 +27,21 @@ public class Author {
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "slug", unique = true, nullable = false))
     private Slug slug;
+
+    @Column(columnDefinition = "TEXT")
+    private String bio;
+
+    private String avatarUrl;
+
+    private String website;
+
+    private String github;
+
+    private String twitter;
+
+    private String linkedin;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role = UserRole.AUTHOR;
 }
