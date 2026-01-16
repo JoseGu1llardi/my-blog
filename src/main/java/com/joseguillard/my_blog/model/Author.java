@@ -4,8 +4,18 @@ import com.joseguillard.my_blog.model.enums.UserRole;
 import com.joseguillard.my_blog.model.vo.Email;
 import com.joseguillard.my_blog.model.vo.Slug;
 import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
+@Table(name = "authors")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Author {
 
     @Id
@@ -44,4 +54,10 @@ public class Author {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role = UserRole.AUTHOR;
+
+    @Column(nullable = false)
+    private boolean active;
+
+    @OneToMany(mappedBy = "author", cascade =  CascadeType.ALL)
+    private Set<Post> posts = new HashSet<>();
 }
