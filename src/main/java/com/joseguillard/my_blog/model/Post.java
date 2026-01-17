@@ -62,4 +62,17 @@ public class Post {
     @Builder.Default
     private Set<Category> categories = new HashSet<>();
 
+    @Column(nullable = false)
+    private Integer viewsCount;
+
+    private String metaDescription;
+
+    private String metaKeywords;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
 }
