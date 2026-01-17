@@ -1,8 +1,13 @@
 package com.joseguillard.my_blog.model;
 
+import com.joseguillard.my_blog.model.enums.PostStatus;
 import com.joseguillard.my_blog.model.vo.Slug;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "posts", indexes = {
@@ -37,5 +42,24 @@ public class Post {
     private String excerpt;
 
     private String featuredImage;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PostStatus status = PostStatus.DRAFT;
+
+    private LocalDateTime publishedAt = LocalDateTime.now();
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "author_id",  nullable = false)
+    private Author author;
+
+    @ManyToMany
+    @JoinTable(
+            name = "post_categories",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    @Builder.Default
+    private Set<Category> categories = new HashSet<>();
 
 }
