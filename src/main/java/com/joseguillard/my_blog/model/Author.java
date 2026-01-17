@@ -6,6 +6,7 @@ import com.joseguillard.my_blog.model.vo.Slug;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -60,4 +61,27 @@ public class Author {
 
     @OneToMany(mappedBy = "author", cascade =  CascadeType.ALL)
     private Set<Post> posts = new HashSet<>();
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    /**
+     * Sets creation/update timestamps; derives slug from username
+     */
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+        if (slug == null && userName != null) {
+            slug = Slug.fromTitle(userName);
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }
