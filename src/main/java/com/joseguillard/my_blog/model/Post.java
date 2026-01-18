@@ -75,4 +75,26 @@ public class Post {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    /**
+     * Sets timestamps; derives slug; sets publication timestamp
+     */
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+        if (slug == null && title != null) {
+            slug = Slug.fromTitle(this.title);
+        }
+        if (status == PostStatus.PUBLISHED && publishedAt == null) {
+            publishedAt = LocalDateTime.now();
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+        if (status == PostStatus.PUBLISHED && publishedAt == null) {
+            publishedAt = LocalDateTime.now();
+        }
+    }
 }
