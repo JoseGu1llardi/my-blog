@@ -97,4 +97,41 @@ public class Post {
             publishedAt = LocalDateTime.now();
         }
     }
+
+    // Business method
+
+    public void publish() {
+        this.status = PostStatus.PUBLISHED;
+        if (this.publishedAt == null) {
+            this.publishedAt = LocalDateTime.now();
+        }
+    }
+
+    public void unpublish() {
+        this.status = PostStatus.DRAFT;
+    }
+
+    public void archive() {
+        this.status = PostStatus.ARCHIVED;
+    }
+
+    public void incrementViewsCount() {
+        this.viewsCount++;
+    }
+
+    public boolean isPublished() {
+        return status == PostStatus.PUBLISHED
+                && publishedAt != null
+                && !publishedAt.isAfter(LocalDateTime.now());
+    }
+
+    /**
+     * Calculates minimum reading time from content
+     */
+    @Transient
+    public int getReadingTimeMinutes() {
+        if (content == null || content.isBlank()) return 0;
+        int wordCount = content.trim().split("\\s+").length;
+        return Math.max(1, (int) Math.ceil(wordCount / 200.0));
+    }
 }
