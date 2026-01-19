@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Repository
@@ -16,4 +17,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Optional<Post> findBySlug(Slug slug);
 
     Page<Post> findByStatusOrderByPublishedAtDesc(PostStatus status, Pageable pageable);
+
+    Page<Post> findByStatusAndPublishedAtBeforeOrderByPublishedAtDesc(
+            PostStatus status,
+            LocalDateTime publishedAt,
+            Pageable pageable
+    );
 }
