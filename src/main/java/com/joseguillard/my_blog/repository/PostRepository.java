@@ -7,6 +7,8 @@ import com.joseguillard.my_blog.model.vo.Slug;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -27,4 +29,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     );
 
     Page<Post> findByAuthorAndStatus(Author author, PostStatus status, Pageable pageable);
+
+    @Query("SELECT p FROM Post p WHERE p.status = 'PUBLISHED' " +
+    "AND YEAR(p.publishedAt) = :year " +
+    "ORDER BY p.publishedAt DESC")
+    List<Post> findPublishedPostByYear(@Param("year") int year);
 }
