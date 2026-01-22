@@ -34,4 +34,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     "AND YEAR(p.publishedAt) = :year " +
     "ORDER BY p.publishedAt DESC")
     List<Post> findPublishedPostByYear(@Param("year") int year);
+
+    @Query("SELECT p from Post p JOIN p.categories c " +
+    "WHERE c.slug = :categorySlug AND p.status = 'PUBLISHED' " +
+    "ORDER BY p.publishedAt DESC")
+    Page<Post> findPublishedPostByCategorySlug(@Param("categorySlug") Slug categorySlug, Pageable pageable);
 }
