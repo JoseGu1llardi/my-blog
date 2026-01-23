@@ -46,6 +46,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "ORDER BY p.publishedAt DESC")
     Page<Post> searchPublishedPosts(@Param("query") String query, Pageable pageable);
 
+    @Query("SELECT DISTINCT YEAR(p.publishedAt) FROM Post p " +
+            "WHERE p.status = 'PUBLISHED' " +
+            "ORDER BY YEAR(p.publishedAt) DESC")
+    List<Integer> findDistinctYearsWithPublishedPosts();
 
     long countByAuthorAndStatus(Author author, PostStatus status);
 }
