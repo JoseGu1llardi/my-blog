@@ -40,5 +40,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     "ORDER BY p.publishedAt DESC")
     Page<Post> findPublishedPostByCategorySlug(@Param("categorySlug") Slug categorySlug, Pageable pageable);
 
+    @Query("SELECT p FROM Post p WHERE p.status = 'PUBLISHED' " +
+            "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
+            "OR LOWER(p.content) LIKE LOWER(CONCAT('%', :query, '%'))) " +
+            "ORDER BY p.publishedAt DESC")
+    Page<Post> searchPublishedPosts(@Param("query") String query, Pageable pageable);
+
+
     long countByAuthorAndStatus(Author author, PostStatus status);
 }
