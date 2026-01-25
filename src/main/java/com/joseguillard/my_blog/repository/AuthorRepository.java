@@ -5,6 +5,7 @@ import com.joseguillard.my_blog.model.vo.Email;
 import com.joseguillard.my_blog.model.vo.Slug;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface AuthorRepository extends JpaRepository<Author, Long> {
@@ -14,4 +15,10 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
     Optional<Author> findByUserName(String userName);
 
     Optional<Author> findByEmail(Email email);
+
+    boolean existsByUserName(String userName);
+
+    boolean existsByEmail(Email email);
+
+    List<Author> findByActiveTrue();
 }
