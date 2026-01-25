@@ -4,6 +4,7 @@ import com.joseguillard.my_blog.model.Author;
 import com.joseguillard.my_blog.model.vo.Email;
 import com.joseguillard.my_blog.model.vo.Slug;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,4 +22,7 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
     boolean existsByEmail(Email email);
 
     List<Author> findByActiveTrue();
+
+    @Query("SELECT a FROM Author a WHERE SIZE(a.posts) > 0 AND a.active = true")
+    List<Author> findAuthorsWithPublishedPosts();
 }
