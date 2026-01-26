@@ -8,7 +8,6 @@ import java.text.Normalizer;
 import java.util.Objects;
 
 @Getter
-@Embeddable
 public class Slug implements Serializable {
     private String value;
 
