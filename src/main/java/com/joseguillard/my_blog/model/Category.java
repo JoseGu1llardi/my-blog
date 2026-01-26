@@ -24,8 +24,7 @@ public class Category {
     @Column(nullable = false, unique = true, length = 100)
     private String name;
 
-    @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "slug", unique = true, nullable = false))
+    @Column(name = "slug", unique = true, nullable = false, length = 100)
     private Slug  slug;
 
     @Column(columnDefinition = "TEXT")
