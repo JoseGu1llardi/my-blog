@@ -26,10 +26,7 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Embedded
-    @AttributeOverride(
-            name = "value",
-            column = @Column(name = "slug", unique = true, nullable = false))
+    @Column(name = "slug", unique = true, nullable = false)
     private Slug slug;
 
     @Column(nullable = false, length = 500)
