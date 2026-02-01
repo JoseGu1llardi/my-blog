@@ -1,6 +1,5 @@
 package com.joseguillard.my_blog.dto;
 
-import com.joseguillard.my_blog.model.Category;
 import com.joseguillard.my_blog.model.enums.PostStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
 @Data
@@ -40,4 +40,15 @@ public class PostDTO {
     // Timestamps
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // Helper methods for template
+    public String getFormattedPublishedDate() {
+        if (publishedAt == null) return "";
+        return this.publishedAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    }
+
+    public String getFormattedPublishedDateTime() {
+        if (publishedAt == null) return "";
+        return this.publishedAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+    }
 }
