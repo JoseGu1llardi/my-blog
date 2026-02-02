@@ -19,7 +19,11 @@ public class CategoryDTO {
     private String icon;
     private int postCount;
 
+    /**
+     * Maps category entity to data transfer object
+     */
     public static CategoryDTO fromEntity(Category category) {
+        // Maps entity fields to a data transfer object
         return CategoryDTO.builder()
                 .id(category.getId())
                 .name(category.getName())
