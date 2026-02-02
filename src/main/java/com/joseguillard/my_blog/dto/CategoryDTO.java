@@ -20,10 +20,13 @@ public class CategoryDTO {
     private int postCount;
 
     public static CategoryDTO fromEntity(Category category) {
-        return Category.builder()
+        return CategoryDTO.builder()
                 .id(category.getId())
                 .name(category.getName())
                 .slug(category.getSlug().getValue())
-                .
+                .description(category.getDescription())
+                .icon(category.getIcon())
+                .postCount(category.getPostCount())
+                .build();
     }
 }
