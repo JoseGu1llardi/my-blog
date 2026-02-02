@@ -60,6 +60,7 @@ public class PostDTO {
 
     // Factory method
     public static PostDTO fromEntity(Post post) {
+        // Builds DTO with post-ID, slug, and title
         return PostDTO.builder()
                 .id(post.getId())
                 .slug(post.getSlug().getValue())
