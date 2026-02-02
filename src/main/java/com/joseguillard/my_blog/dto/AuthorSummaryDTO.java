@@ -18,6 +18,7 @@ public class AuthorSummaryDTO {
     private String avatarUrl;
 
     public static AuthorSummaryDTO fromEntity(Author author) {
+        // Maps author fields to DTO properties
         return AuthorSummaryDTO.builder()
                 .id(author.getId())
                 .fullName(author.getFullName())
