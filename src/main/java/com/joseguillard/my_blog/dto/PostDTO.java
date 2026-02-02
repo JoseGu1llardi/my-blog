@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 @Builder
@@ -72,7 +73,12 @@ public class PostDTO {
                 .readingTimeMinutes(post.getReadingTimeMinutes())
                 .author(AuthorSummaryDTO.fromEntity(post.getAuthor()))
                 .categories(post.getCategories().stream()
-                        .map())
+                        .map(CategoryDTO::fromEntity)
+                        .collect(Collectors.toSet()))
+                .metaDescription(post.getMetaDescription())
+                .metaKeywords(post.getMetaKeywords())
+                .createdAt(post.getCreatedAt())
+                .updatedAt(post.getUpdatedAt())
                 .build();
     }
 }
