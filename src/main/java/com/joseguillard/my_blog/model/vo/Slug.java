@@ -1,6 +1,5 @@
 package com.joseguillard.my_blog.model.vo;
 
-import jakarta.persistence.Embeddable;
 import lombok.Getter;
 
 import java.io.Serializable;
