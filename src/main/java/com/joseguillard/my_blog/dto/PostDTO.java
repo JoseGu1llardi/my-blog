@@ -1,5 +1,6 @@
 package com.joseguillard.my_blog.dto;
 
+import com.joseguillard.my_blog.model.Post;
 import com.joseguillard.my_blog.model.enums.PostStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -50,5 +51,28 @@ public class PostDTO {
     public String getFormattedPublishedDateTime() {
         if (publishedAt == null) return "";
         return this.publishedAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+    }
+
+    public int getPublishedYear() {
+        return this.publishedAt != null ? this.publishedAt.getYear() : 0;
+    }
+
+    // Factory method
+    public static PostDTO fromEntity(Post post) {
+        return PostDTO.builder()
+                .id(post.getId())
+                .slug(post.getSlug().getValue())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .excerpt(post.getExcerpt())
+                .featuredImage(post.getFeaturedImage())
+                .status(post.getStatus())
+                .publishedAt(post.getPublishedAt())
+                .viewCount(post.getViewsCount())
+                .readingTimeMinutes(post.getReadingTimeMinutes())
+                .author(AuthorSummaryDTO.fromEntity(post.getAuthor()))
+                .categories(post.getCategories().stream()
+                        .map())
+                .build();
     }
 }
