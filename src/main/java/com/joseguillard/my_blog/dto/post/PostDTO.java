@@ -14,6 +14,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Full DTO of Post for displaying details
+ */
 @Data
 @Builder
 @NoArgsConstructor

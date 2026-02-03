@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Summary DTO of Post for listings
+ */
 @Data
 @Builder
 @NoArgsConstructor
