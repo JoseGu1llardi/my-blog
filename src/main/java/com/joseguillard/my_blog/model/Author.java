@@ -48,7 +48,7 @@ public class Author {
 
     private String github;
 
-    private String twitter;
+    private String x;
 
     private String linkedin;
 

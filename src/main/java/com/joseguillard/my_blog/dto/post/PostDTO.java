@@ -1,6 +1,6 @@
 package com.joseguillard.my_blog.dto.post;
 
-import com.joseguillard.my_blog.dto.AuthorSummaryDTO;
+import com.joseguillard.my_blog.dto.author.AuthorSummaryDTO;
 import com.joseguillard.my_blog.dto.CategoryDTO;
 import com.joseguillard.my_blog.model.Post;
 import com.joseguillard.my_blog.model.enums.PostStatus;

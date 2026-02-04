@@ -1,4 +1,4 @@
-package com.joseguillard.my_blog.dto;
+package com.joseguillard.my_blog.dto.author;
 
 import com.joseguillard.my_blog.model.Author;
 import lombok.AllArgsConstructor;
