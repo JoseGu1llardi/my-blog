@@ -112,7 +112,7 @@ public class Post {
         this.status = PostStatus.ARCHIVED;
     }
 
-    public void incrementViewsCount() {
+    public void incrementViewCount() {
         this.viewsCount++;
     }
 
