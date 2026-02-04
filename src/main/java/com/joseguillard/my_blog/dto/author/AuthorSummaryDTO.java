@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Summary DTO of Author (used in Post listings)
+ */
 @Data
 @Builder
 @NoArgsConstructor
