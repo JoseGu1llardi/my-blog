@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +29,7 @@ public class PostService {
     private final CategoryRepository categoryRepository;
 
     /**
-     * Returns published posts (paged)
+     * Returns published Posts (paged)
      */
     public Page<PostSummaryDTO> getPublishedPosts(Pageable pageable) {
         Page<Post> posts = postRepository.findByStatusAndPublishedAtBeforeOrderByPublishedAtDesc(
@@ -62,5 +64,22 @@ public class PostService {
         Post post = postRepository.findBySlug(Slug.of(slug))
                 .orElseThrow(() -> ResourceNotFoundException.postNotFound(slug));
         return PostDTO.fromEntity(post);
+    }
+
+    /**
+     * Returns Post from a specific year
+     */
+    public List<PostSummaryDTO> getPostByYear(int year) {
+        return postRepository.findPublishedPostByYear(year).stream()
+                .map(PostSummaryDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns Post from a Category
+     */
+    public Page<PostSummaryDTO> getPostByCategory(String categorySlug, Pageable pageable) {
+        Page<Post> posts = postRepository.findPublishedPostByCategorySlug(Slug.of(categorySlug), pageable);
+        return posts.map(PostSummaryDTO::fromEntity);
     }
 }
