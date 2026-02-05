@@ -98,4 +98,19 @@ public class PostService {
         );
         return posts.map(PostSummaryDTO::fromEntity);
     }
+
+    /**
+     * Search Posts (simple full text search)
+     */
+    public Page<PostSummaryDTO> searchPosts(String query, Pageable pageable) {
+        Page<Post> posts = postRepository.searchPublishedPosts(query, pageable);
+        return posts.map(PostSummaryDTO::fromEntity);
+    }
+
+    /**
+     * Return years with published Posts
+     */
+    public List<Integer> getYearsWithPosts() {
+        return postRepository.findDistinctYearsWithPublishedPosts();
+    }
 }
