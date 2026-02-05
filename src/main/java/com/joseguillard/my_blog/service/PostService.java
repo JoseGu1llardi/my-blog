@@ -39,7 +39,7 @@ public class PostService {
     }
 
     /**
-     * Search post by slug (increments view count)
+     * Search post by Slug (increments view count)
      */
     @Transactional
     public PostDTO findBySlug(String slug) {
@@ -52,6 +52,15 @@ public class PostService {
             postRepository.save(post);
         }
 
+        return PostDTO.fromEntity(post);
+    }
+
+    /**
+     * Search post by Slug without increment views (for admin)
+     */
+    public PostDTO findBySlugWithoutIncrement(String slug) {
+        Post post = postRepository.findBySlug(Slug.of(slug))
+                .orElseThrow(() -> ResourceNotFoundException.postNotFound(slug));
         return PostDTO.fromEntity(post);
     }
 }
