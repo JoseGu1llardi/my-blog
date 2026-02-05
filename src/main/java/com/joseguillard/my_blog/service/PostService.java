@@ -1,9 +1,11 @@
 package com.joseguillard.my_blog.service;
 
+import com.joseguillard.my_blog.dto.post.PostCreateDTO;
 import com.joseguillard.my_blog.dto.post.PostDTO;
 import com.joseguillard.my_blog.dto.post.PostSummaryDTO;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.model.Author;
+import com.joseguillard.my_blog.model.Category;
 import com.joseguillard.my_blog.model.Post;
 import com.joseguillard.my_blog.model.enums.PostStatus;
 import com.joseguillard.my_blog.model.vo.Slug;
@@ -17,7 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -112,5 +116,42 @@ public class PostService {
      */
     public List<Integer> getYearsWithPosts() {
         return postRepository.findDistinctYearsWithPublishedPosts();
+    }
+
+    /**
+     * Creates a Post with categories; throws if author/category missing
+     */
+    @Transactional
+    public PostDTO createPost(PostCreateDTO dto, Long authorId) {
+        Author author = authorRepository.findById(authorId)
+                .orElseThrow(() -> ResourceNotFoundException.authorNotFound("Author not found"));
+
+        Set<Category> categories = new HashSet<>();
+        if (dto.getCategoryIds() != null) {
+            // Maps category IDs to entities; throws if not found
+            categories = dto.getCategoryIds().stream()
+                    .map(id -> categoryRepository.findById(id)
+                            .orElseThrow(() -> ResourceNotFoundException.categoryNotFound("Category not found"))
+                    ).collect(Collectors.toSet());
+        }
+
+        // Builds post with title, content, excerpt, and image
+        Post post = Post.builder()
+                .title(dto.getTitle())
+                .slug(dto.getSlug() != null && !dto.getSlug().isBlank()
+                        ? Slug.of(dto.getSlug())
+                        : null)
+                .content(dto.getContent())
+                .excerpt(dto.getExcerpt())
+                .featuredImage(dto.getFeaturedImage())
+                .status(dto.getStatus())
+                .author(author)
+                .categories(categories)
+                .metaDescription(dto.getMetaDescription())
+                .metaKeywords(dto.getMetaKeywords())
+                .build();
+
+        Post createdPost = postRepository.save(post);
+        return PostDTO.fromEntity(createdPost);
     }
 }
