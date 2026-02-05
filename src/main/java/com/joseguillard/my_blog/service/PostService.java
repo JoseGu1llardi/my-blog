@@ -3,6 +3,7 @@ package com.joseguillard.my_blog.service;
 import com.joseguillard.my_blog.dto.post.PostDTO;
 import com.joseguillard.my_blog.dto.post.PostSummaryDTO;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
+import com.joseguillard.my_blog.model.Author;
 import com.joseguillard.my_blog.model.Post;
 import com.joseguillard.my_blog.model.enums.PostStatus;
 import com.joseguillard.my_blog.model.vo.Slug;
@@ -41,7 +42,7 @@ public class PostService {
     }
 
     /**
-     * Search post by Slug (increments view count)
+     * Search Post by Slug (increments view count)
      */
     @Transactional
     public PostDTO findBySlug(String slug) {
@@ -58,7 +59,7 @@ public class PostService {
     }
 
     /**
-     * Search post by Slug without increment views (for admin)
+     * Search Post by Slug without increment views (for admin)
      */
     public PostDTO findBySlugWithoutIncrement(String slug) {
         Post post = postRepository.findBySlug(Slug.of(slug))
@@ -67,7 +68,7 @@ public class PostService {
     }
 
     /**
-     * Returns Post from a specific year
+     * Returns Posts from a specific year
      */
     public List<PostSummaryDTO> getPostByYear(int year) {
         return postRepository.findPublishedPostByYear(year).stream()
@@ -76,10 +77,25 @@ public class PostService {
     }
 
     /**
-     * Returns Post from a Category
+     * Returns Posts from a Category
      */
     public Page<PostSummaryDTO> getPostByCategory(String categorySlug, Pageable pageable) {
         Page<Post> posts = postRepository.findPublishedPostByCategorySlug(Slug.of(categorySlug), pageable);
+        return posts.map(PostSummaryDTO::fromEntity);
+    }
+
+    /**
+     * Returns Posts from an Author
+     */
+    public Page<PostSummaryDTO> getPostByAuthor(String authorSlug, Pageable pageable) {
+        Author author = authorRepository.findBySlug(Slug.of(authorSlug))
+                .orElseThrow(() -> ResourceNotFoundException.authorNotFound(authorSlug));
+
+        Page<Post> posts = postRepository.findByAuthorAndStatus(
+                author,
+                PostStatus.PUBLISHED,
+                pageable
+        );
         return posts.map(PostSummaryDTO::fromEntity);
     }
 }
