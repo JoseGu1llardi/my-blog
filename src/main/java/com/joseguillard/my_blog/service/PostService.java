@@ -124,14 +124,14 @@ public class PostService {
     @Transactional
     public PostDTO createPost(PostCreateDTO dto, Long authorId) {
         Author author = authorRepository.findById(authorId)
-                .orElseThrow(() -> ResourceNotFoundException.authorNotFound("Author not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
 
         Set<Category> categories = new HashSet<>();
         if (dto.getCategoryIds() != null) {
             // Maps category IDs to entities; throws if not found
             categories = dto.getCategoryIds().stream()
                     .map(id -> categoryRepository.findById(id)
-                            .orElseThrow(() -> ResourceNotFoundException.categoryNotFound("Category not found"))
+                            .orElseThrow(() -> new ResourceNotFoundException("Category not found"))
                     ).collect(Collectors.toSet());
         }
 
@@ -153,5 +153,39 @@ public class PostService {
 
         Post createdPost = postRepository.save(post);
         return PostDTO.fromEntity(createdPost);
+    }
+
+    /**
+     * Updates post content; persists changes transactionally
+     */
+    @Transactional
+    public PostDTO updatePost(Long id, PostCreateDTO dto) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
+
+        // Updates slug if provided and not blank
+        if (dto.getSlug() != null && !dto.getSlug().isBlank()) {
+            post.setSlug(Slug.of(dto.getSlug()));
+        }
+
+        post.setTitle(dto.getTitle());
+        post.setContent(dto.getContent());
+        post.setExcerpt(dto.getExcerpt());
+        post.setFeaturedImage(dto.getFeaturedImage());
+        post.setStatus(dto.getStatus());
+        post.setMetaDescription(dto.getMetaDescription());
+        post.setMetaKeywords(dto.getMetaKeywords());
+
+        if (dto.getCategoryIds() != null) {
+            // Maps category IDs to a category set
+            Set<Category> categories = dto.getCategoryIds().stream()
+                    .map(categoryId -> categoryRepository.findById(categoryId)
+                            .orElseThrow(() -> new ResourceNotFoundException("Category not found")))
+                    .collect(Collectors.toSet());
+            post.setCategories(categories);
+        }
+
+        Post updatedPost = postRepository.save(post);
+        return PostDTO.fromEntity(updatedPost);
     }
 }
