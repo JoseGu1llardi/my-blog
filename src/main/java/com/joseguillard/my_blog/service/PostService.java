@@ -192,6 +192,7 @@ public class PostService {
     /**
      * Publish a Post
      */
+    @Transactional
     public void publishPost(Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
@@ -202,10 +203,22 @@ public class PostService {
     /**
      * Unpublish a Post
      */
+    @Transactional
     public void unpublishPost(Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
         post.unpublish();
         postRepository.save(post);
+    }
+
+    /**
+     * Delete a Post
+     */
+    @Transactional
+    public void deletePost(Long id) {
+        if (!postRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Post does not exists");
+        }
+        postRepository.deleteById(id);
     }
 }
