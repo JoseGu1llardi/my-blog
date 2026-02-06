@@ -188,4 +188,14 @@ public class PostService {
         Post updatedPost = postRepository.save(post);
         return PostDTO.fromEntity(updatedPost);
     }
+
+    /**
+     * Publish a Post
+     */
+    public void publishPost(Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
+        post.publish();
+        postRepository.save(post);
+    }
 }
