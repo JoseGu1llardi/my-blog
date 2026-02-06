@@ -198,4 +198,14 @@ public class PostService {
         post.publish();
         postRepository.save(post);
     }
+
+    /**
+     * Unpublish a Post
+     */
+    public void unpublishPost(Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
+        post.unpublish();
+        postRepository.save(post);
+    }
 }
