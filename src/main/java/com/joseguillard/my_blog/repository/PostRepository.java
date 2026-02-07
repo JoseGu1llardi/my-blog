@@ -38,7 +38,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("SELECT p from Post p JOIN p.categories c " +
     "WHERE c.slug = :categorySlug AND p.status = 'PUBLISHED' " +
     "ORDER BY p.publishedAt DESC")
-    Page<Post> findPublishedPostByCategorySlug(@Param("categorySlug") Slug categorySlug, Pageable pageable);
+    Page<Post> findPublishedPostByCategorySlug(
+            @Param("categorySlug") Slug categorySlug, Pageable pageable
+    );
 
     @Query("SELECT p FROM Post p WHERE p.status = 'PUBLISHED' " +
             "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
