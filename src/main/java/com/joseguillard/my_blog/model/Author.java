@@ -42,13 +42,9 @@ public class Author {
     private String bio;
 
     private String avatarUrl;
-
     private String website;
-
     private String github;
-
     private String x;
-
     private String linkedin;
 
     @Enumerated(EnumType.STRING)
@@ -59,6 +55,7 @@ public class Author {
     private boolean active;
 
     @OneToMany(mappedBy = "author", cascade =  CascadeType.ALL)
+    @Builder.Default
     private Set<Post> posts = new HashSet<>();
 
     @Column(nullable = false, updatable = false)
