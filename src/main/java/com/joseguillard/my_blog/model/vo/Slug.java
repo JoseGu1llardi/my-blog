@@ -49,6 +49,9 @@ public class Slug implements Serializable {
         return normalized;
     }
 
+    /**
+     * Implements equality check based on the underlying value
+     */
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
