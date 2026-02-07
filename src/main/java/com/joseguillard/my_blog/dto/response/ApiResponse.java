@@ -29,7 +29,7 @@ public class ApiResponse<T> {
     }
 
     /**
-     * Builds success response with message and timestamp
+     * Builds success response with a message
      */
     public static <T> ApiResponse<T> success(String message, T data) {
         return ApiResponse.<T>builder()
