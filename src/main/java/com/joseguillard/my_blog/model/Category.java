@@ -37,11 +37,11 @@ public class Category {
     private Set<Post> posts = new HashSet<>();
 
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdDate;
+    private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
-        this.createdDate = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
         if (slug == null && name != null) {
             slug = Slug.fromTitle(name);
         }

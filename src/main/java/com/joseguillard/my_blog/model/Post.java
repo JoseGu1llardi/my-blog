@@ -60,10 +60,9 @@ public class Post {
     private Set<Category> categories = new HashSet<>();
 
     @Column(nullable = false)
-    private Integer viewsCount;
+    private Integer viewsCount = 0;
 
     private String metaDescription;
-
     private String metaKeywords;
 
     @Column(nullable = false, updatable = false)
