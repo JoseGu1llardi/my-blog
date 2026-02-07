@@ -35,8 +35,7 @@ public class Author {
     @Column(nullable = false)
     private String fullName;
 
-    @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "slug", unique = true, nullable = false))
+    @Column(name = "slug", unique = true, nullable = false)
     private Slug slug;
 
     @Column(columnDefinition = "TEXT")
