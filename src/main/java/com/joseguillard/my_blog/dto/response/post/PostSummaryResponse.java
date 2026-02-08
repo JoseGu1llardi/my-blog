@@ -28,6 +28,6 @@ public class PostSummaryResponse {
 
     public String getFormattedPublishedDate() {
         if (publishedAt == null) return "";
-        return publishedAt.format(DateTimeFormatter.ofPattern("dd 'de' MMMM, yyyy"));
+        return publishedAt.format(DateTimeFormatter.ofPattern("dd 'of' MMMM, yyyy"));
     }
 }
