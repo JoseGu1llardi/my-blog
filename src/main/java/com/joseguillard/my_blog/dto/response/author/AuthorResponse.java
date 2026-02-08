@@ -20,7 +20,7 @@ public class AuthorResponse {
     private String avatarUrl;
     private String website;
     private String github;
-    private String twitter;
+    private String x;
     private String linkedin;
     private UserRole role;
     private boolean active;
