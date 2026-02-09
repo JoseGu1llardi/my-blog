@@ -36,20 +36,19 @@ public class PostService {
     /**
      * Returns published Posts (paged)
      */
-    public Page<PostSummaryDTO> getPublishedPosts(Pageable pageable) {
-        Page<Post> posts = postRepository.findByStatusAndPublishedAtBeforeOrderByPublishedAtDesc(
+    public Page<Post> getPublishedPosts(Pageable pageable) {
+        return postRepository.findByStatusAndPublishedAtBeforeOrderByPublishedAtDesc(
                 PostStatus.PUBLISHED,
                 LocalDateTime.now(),
                 pageable
         );
-        return posts.map(PostSummaryDTO::fromEntity);
     }
 
     /**
      * Search Post by Slug (increments view count)
      */
     @Transactional
-    public PostDTO findBySlug(String slug) {
+    public Post findBySlugAndIncrementViews(String slug) {
         Post post = postRepository.findBySlug(Slug.of(slug))
                 .orElseThrow(() -> ResourceNotFoundException.postNotFound(slug));
 
@@ -58,26 +57,22 @@ public class PostService {
             post.incrementViewCount();
             postRepository.save(post);
         }
-
-        return PostDTO.fromEntity(post);
+        return post;
     }
 
     /**
      * Search Post by Slug without increment views (for admin)
      */
-    public PostDTO findBySlugWithoutIncrement(String slug) {
-        Post post = postRepository.findBySlug(Slug.of(slug))
+    public Post findBySlug(String slug) {
+        return postRepository.findBySlug(Slug.of(slug))
                 .orElseThrow(() -> ResourceNotFoundException.postNotFound(slug));
-        return PostDTO.fromEntity(post);
     }
 
     /**
      * Returns Posts from a specific year
      */
-    public List<PostSummaryDTO> getPostByYear(int year) {
-        return postRepository.findPublishedPostByYear(year).stream()
-                .map(PostSummaryDTO::fromEntity)
-                .collect(Collectors.toList());
+    public List<Post> getPostByYear(int year) {
+        return postRepository.findPublishedPostByYear(year);
     }
 
     /**
