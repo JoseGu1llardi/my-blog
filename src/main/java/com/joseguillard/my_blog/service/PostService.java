@@ -78,24 +78,22 @@ public class PostService {
     /**
      * Returns Posts from a Category
      */
-    public Page<PostSummaryDTO> getPostByCategory(String categorySlug, Pageable pageable) {
-        Page<Post> posts = postRepository.findPublishedPostByCategorySlug(Slug.of(categorySlug), pageable);
-        return posts.map(PostSummaryDTO::fromEntity);
+    public Page<Post> getPostByCategory(String categorySlug, Pageable pageable) {
+        return postRepository.findPublishedPostByCategorySlug(Slug.of(categorySlug), pageable);
     }
 
     /**
      * Returns Posts from an Author
      */
-    public Page<PostSummaryDTO> getPostByAuthor(String authorSlug, Pageable pageable) {
+    public Page<Post> getPostByAuthor(String authorSlug, Pageable pageable) {
         Author author = authorRepository.findBySlug(Slug.of(authorSlug))
                 .orElseThrow(() -> ResourceNotFoundException.authorNotFound(authorSlug));
 
-        Page<Post> posts = postRepository.findByAuthorAndStatus(
+        return postRepository.findByAuthorAndStatus(
                 author,
                 PostStatus.PUBLISHED,
                 pageable
         );
-        return posts.map(PostSummaryDTO::fromEntity);
     }
 
     /**
