@@ -1,8 +1,7 @@
 package com.joseguillard.my_blog.service;
 
-import com.joseguillard.my_blog.dto.post.PostCreateDTO;
-import com.joseguillard.my_blog.dto.post.PostDTO;
-import com.joseguillard.my_blog.dto.post.PostSummaryDTO;
+import com.joseguillard.my_blog.dto.request.post.PostCreateRequest;
+import com.joseguillard.my_blog.dto.request.post.PostUpdateRequest;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.model.Author;
 import com.joseguillard.my_blog.model.Category;
@@ -99,9 +98,8 @@ public class PostService {
     /**
      * Search Posts (simple full text search)
      */
-    public Page<PostSummaryDTO> searchPosts(String query, Pageable pageable) {
-        Page<Post> posts = postRepository.searchPublishedPosts(query, pageable);
-        return posts.map(PostSummaryDTO::fromEntity);
+    public Page<Post> searchPosts(String query, Pageable pageable) {
+        return postRepository.searchPublishedPosts(query, pageable);
     }
 
     /**
@@ -115,7 +113,7 @@ public class PostService {
      * Creates a Post with categories; throws if author/category missing
      */
     @Transactional
-    public PostDTO createPost(PostCreateDTO dto, Long authorId) {
+    public Post createPost(PostCreateRequest dto, Long authorId) {
         Author author = authorRepository.findById(authorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
 
@@ -144,15 +142,14 @@ public class PostService {
                 .metaKeywords(dto.getMetaKeywords())
                 .build();
 
-        Post createdPost = postRepository.save(post);
-        return PostDTO.fromEntity(createdPost);
+        return postRepository.save(post);
     }
 
     /**
      * Updates post content; persists changes transactionally
      */
     @Transactional
-    public PostDTO updatePost(Long id, PostCreateDTO dto) {
+    public Post updatePost(Long id, PostUpdateRequest dto) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
 
@@ -178,8 +175,7 @@ public class PostService {
             post.setCategories(categories);
         }
 
-        Post updatedPost = postRepository.save(post);
-        return PostDTO.fromEntity(updatedPost);
+        return postRepository.save(post);
     }
 
     /**
