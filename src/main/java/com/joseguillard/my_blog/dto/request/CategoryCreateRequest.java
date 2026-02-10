@@ -17,6 +17,8 @@ public class CategoryCreateRequest {
     @Size(max = 100, message = "Name must have a maximum of 100 characters")
     private String name;
 
+    private String slug;
+
     @Size(max = 1000, message = "Description must have a maximum of 1000 characters")
     private String description;
 
