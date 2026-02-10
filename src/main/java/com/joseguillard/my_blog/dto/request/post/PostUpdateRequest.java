@@ -20,6 +20,8 @@ public class PostUpdateRequest {
     @Size(max = 500, message = "Title must have a maximum of 500 characters")
     private String title;
 
+    private String slug;
+
     @NotBlank(message = "Content is mandatory")
     private String content;
 
