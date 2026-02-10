@@ -1,9 +1,9 @@
 package com.joseguillard.my_blog.service;
 
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
-import com.joseguillard.my_blog.model.Author;
-import com.joseguillard.my_blog.model.vo.Email;
-import com.joseguillard.my_blog.model.vo.Slug;
+import com.joseguillard.my_blog.entity.Author;
+import com.joseguillard.my_blog.entity.vo.Email;
+import com.joseguillard.my_blog.entity.vo.Slug;
 import com.joseguillard.my_blog.repository.AuthorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

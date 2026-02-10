@@ -1,7 +1,7 @@
 package com.joseguillard.my_blog.repository;
 
-import com.joseguillard.my_blog.model.Category;
-import com.joseguillard.my_blog.model.vo.Slug;
+import com.joseguillard.my_blog.entity.Category;
+import com.joseguillard.my_blog.entity.vo.Slug;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

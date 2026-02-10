@@ -1,7 +1,6 @@
-package com.joseguillard.my_blog.model.vo;
+package com.joseguillard.my_blog.entity.vo;
 
 import com.joseguillard.my_blog.exception.InvalidEmailException;
-import jakarta.persistence.Embeddable;
 
 import java.util.regex.Pattern;
 

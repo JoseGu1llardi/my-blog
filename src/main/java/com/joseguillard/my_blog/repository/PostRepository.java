@@ -1,9 +1,9 @@
 package com.joseguillard.my_blog.repository;
 
-import com.joseguillard.my_blog.model.Author;
-import com.joseguillard.my_blog.model.Post;
-import com.joseguillard.my_blog.model.enums.PostStatus;
-import com.joseguillard.my_blog.model.vo.Slug;
+import com.joseguillard.my_blog.entity.Author;
+import com.joseguillard.my_blog.entity.Post;
+import com.joseguillard.my_blog.entity.enums.PostStatus;
+import com.joseguillard.my_blog.entity.vo.Slug;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

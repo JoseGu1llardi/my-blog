@@ -2,7 +2,7 @@ package com.joseguillard.my_blog.dto.response.post;
 
 import com.joseguillard.my_blog.dto.response.author.AuthorSummaryResponse;
 import com.joseguillard.my_blog.dto.response.category.CategoryResponse;
-import com.joseguillard.my_blog.model.enums.PostStatus;
+import com.joseguillard.my_blog.entity.enums.PostStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

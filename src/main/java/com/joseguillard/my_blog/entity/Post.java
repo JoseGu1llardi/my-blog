@@ -1,7 +1,7 @@
-package com.joseguillard.my_blog.model;
+package com.joseguillard.my_blog.entity;
 
-import com.joseguillard.my_blog.model.enums.PostStatus;
-import com.joseguillard.my_blog.model.vo.Slug;
+import com.joseguillard.my_blog.entity.enums.PostStatus;
+import com.joseguillard.my_blog.entity.vo.Slug;
 import jakarta.persistence.*;
 import lombok.*;
 

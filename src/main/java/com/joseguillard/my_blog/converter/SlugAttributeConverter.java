@@ -1,6 +1,6 @@
 package com.joseguillard.my_blog.converter;
 
-import com.joseguillard.my_blog.model.vo.Slug;
+import com.joseguillard.my_blog.entity.vo.Slug;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 

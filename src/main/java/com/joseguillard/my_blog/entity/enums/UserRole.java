@@ -1,4 +1,4 @@
-package com.joseguillard.my_blog.model.enums;
+package com.joseguillard.my_blog.entity.enums;
 
 import lombok.Getter;
 

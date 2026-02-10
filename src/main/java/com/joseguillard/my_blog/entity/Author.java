@@ -1,8 +1,8 @@
-package com.joseguillard.my_blog.model;
+package com.joseguillard.my_blog.entity;
 
-import com.joseguillard.my_blog.model.enums.UserRole;
-import com.joseguillard.my_blog.model.vo.Email;
-import com.joseguillard.my_blog.model.vo.Slug;
+import com.joseguillard.my_blog.entity.enums.UserRole;
+import com.joseguillard.my_blog.entity.vo.Email;
+import com.joseguillard.my_blog.entity.vo.Slug;
 import jakarta.persistence.*;
 import lombok.*;
 

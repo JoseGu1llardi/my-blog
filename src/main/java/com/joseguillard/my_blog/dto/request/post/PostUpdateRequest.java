@@ -1,6 +1,6 @@
 package com.joseguillard.my_blog.dto.request.post;
 
-import com.joseguillard.my_blog.model.enums.PostStatus;
+import com.joseguillard.my_blog.entity.enums.PostStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;

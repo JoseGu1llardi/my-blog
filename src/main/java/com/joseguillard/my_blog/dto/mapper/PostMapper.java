@@ -2,7 +2,7 @@ package com.joseguillard.my_blog.dto.mapper;
 
 import com.joseguillard.my_blog.dto.response.post.PostResponse;
 import com.joseguillard.my_blog.dto.response.post.PostSummaryResponse;
-import com.joseguillard.my_blog.model.Post;
+import com.joseguillard.my_blog.entity.Post;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;

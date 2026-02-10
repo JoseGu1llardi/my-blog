@@ -1,4 +1,4 @@
-package com.joseguillard.my_blog.model.vo;
+package com.joseguillard.my_blog.entity.vo;
 
 import lombok.Getter;
 

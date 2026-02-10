@@ -2,7 +2,7 @@ package com.joseguillard.my_blog.dto.mapper;
 
 import com.joseguillard.my_blog.dto.response.author.AuthorResponse;
 import com.joseguillard.my_blog.dto.response.author.AuthorSummaryResponse;
-import com.joseguillard.my_blog.model.Author;
+import com.joseguillard.my_blog.entity.Author;
 import org.springframework.stereotype.Component;
 
 @Component
