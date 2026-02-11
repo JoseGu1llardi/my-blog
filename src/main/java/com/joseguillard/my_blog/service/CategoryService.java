@@ -44,9 +44,10 @@ public class CategoryService {
     }
 
     @Transactional
-    public Category createCategory(CategoryCreateRequest request) {
+    public CategoryResponse createCategory(CategoryCreateRequest request) {
         Category category = categoryMapper.toEntity(request);
+        Category categorySaved = categoryRepository.save(category);
 
-        return categoryRepository.save(category);
+        return categoryMapper.toResponse(categorySaved);
     }
 }
