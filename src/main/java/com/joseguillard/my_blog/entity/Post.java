@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -129,5 +130,17 @@ public class Post {
         if (content == null || content.isBlank()) return 0;
         int wordCount = content.trim().split("\\s+").length;
         return Math.max(1, (int) Math.ceil(wordCount / 200.0));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Post post = (Post) o;
+        return Objects.equals(id, post.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
