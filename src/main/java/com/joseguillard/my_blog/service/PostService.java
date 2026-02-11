@@ -1,7 +1,9 @@
 package com.joseguillard.my_blog.service;
 
+import com.joseguillard.my_blog.dto.mapper.PostMapper;
 import com.joseguillard.my_blog.dto.request.post.PostCreateRequest;
 import com.joseguillard.my_blog.dto.request.post.PostUpdateRequest;
+import com.joseguillard.my_blog.dto.response.post.PostResponse;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.entity.Author;
 import com.joseguillard.my_blog.entity.Category;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +30,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PostService {
+
+    private final PostMapper postMapper;
 
     private final PostRepository postRepository;
     private final AuthorRepository authorRepository;
@@ -113,36 +118,27 @@ public class PostService {
      * Creates a Post with categories; throws if author/category missing
      */
     @Transactional
-    public Post createPost(PostCreateRequest dto, Long authorId) {
+    public PostResponse createPost(PostCreateRequest request, Long authorId) {
         Author author = authorRepository.findById(authorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
 
-        Set<Category> categories = new HashSet<>();
-        if (dto.getCategoryIds() != null) {
-            // Maps category IDs to entities; throws if not found
-            categories = dto.getCategoryIds().stream()
-                    .map(id -> categoryRepository.findById(id)
-                            .orElseThrow(() -> new ResourceNotFoundException("Category not found"))
-                    ).collect(Collectors.toSet());
+        Set<Category> categories = Collections.emptySet();
+
+        // Finds categories; throws if any are missing
+        if (request.getCategoryIds() != null && !request.getCategoryIds().isEmpty()) {
+            List<Category> categoryList =
+                    categoryRepository.findAllById(request.getCategoryIds());
+
+            if (categoryList.size() != request.getCategoryIds().size())
+                throw new ResourceNotFoundException("Some categories were not found");
+
+            categories = new HashSet<>(categoryList);
         }
 
-        // Builds post with title, content, excerpt, and image
-        Post post = Post.builder()
-                .title(dto.getTitle())
-                .slug(dto.getSlug() != null && !dto.getSlug().isBlank()
-                        ? Slug.of(dto.getSlug())
-                        : null)
-                .content(dto.getContent())
-                .excerpt(dto.getExcerpt())
-                .featuredImage(dto.getFeaturedImage())
-                .status(dto.getStatus())
-                .author(author)
-                .categories(categories)
-                .metaDescription(dto.getMetaDescription())
-                .metaKeywords(dto.getMetaKeywords())
-                .build();
+        Post post = postMapper.toEntity(request, author, categories);
+        Post createdPost = postRepository.save(post);
 
-        return postRepository.save(post);
+        return postMapper.toResponse(createdPost);
     }
 
     /**
