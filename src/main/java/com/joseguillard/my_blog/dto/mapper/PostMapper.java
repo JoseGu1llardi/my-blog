@@ -1,10 +1,16 @@
 package com.joseguillard.my_blog.dto.mapper;
 
+import com.joseguillard.my_blog.dto.request.post.PostCreateRequest;
 import com.joseguillard.my_blog.dto.response.post.PostResponse;
 import com.joseguillard.my_blog.dto.response.post.PostSummaryResponse;
+import com.joseguillard.my_blog.entity.Author;
+import com.joseguillard.my_blog.entity.Category;
 import com.joseguillard.my_blog.entity.Post;
+import com.joseguillard.my_blog.entity.vo.Slug;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -16,6 +22,28 @@ public class PostMapper {
     public PostMapper(AuthorMapper authorMapper, CategoryMapper categoryMapper) {
         this.authorMapper = authorMapper;
         this.categoryMapper = categoryMapper;
+    }
+
+    /**
+     * Maps request to entity, including author and categories
+     */
+    public Post toEntity(PostCreateRequest request, Author author, Set<Category> categories) {
+        if (request == null) return null;
+
+        return Post.builder()
+                .title(request.getTitle())
+                .slug(request.getSlug() != null && !request.getSlug().isBlank()
+                        ? Slug.of(request.getSlug())
+                        : null)
+                .content(request.getContent())
+                .excerpt(request.getExcerpt())
+                .featuredImage(request.getFeaturedImage())
+                .status(request.getStatus())
+                .author(author)
+                .categories(categories)
+                .metaDescription(request.getMetaDescription())
+                .metaKeywords(request.getMetaKeywords())
+                .build();
     }
 
     /**
