@@ -145,33 +145,21 @@ public class PostService {
      * Updates post content; persists changes transactionally
      */
     @Transactional
-    public Post updatePost(Long id, PostUpdateRequest dto) {
+    public PostResponse updatePost(Long id, PostUpdateRequest request) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
 
-        // Updates slug if provided and not blank
-        if (dto.getSlug() != null && !dto.getSlug().isBlank()) {
-            post.setSlug(Slug.of(dto.getSlug()));
-        }
+        postMapper.toUpdate(post, request);
 
-        post.setTitle(dto.getTitle());
-        post.setContent(dto.getContent());
-        post.setExcerpt(dto.getExcerpt());
-        post.setFeaturedImage(dto.getFeaturedImage());
-        post.setStatus(dto.getStatus());
-        post.setMetaDescription(dto.getMetaDescription());
-        post.setMetaKeywords(dto.getMetaKeywords());
-
-        if (dto.getCategoryIds() != null) {
+        if (request.getCategoryIds() != null) {
             // Maps category IDs to a category set
-            Set<Category> categories = dto.getCategoryIds().stream()
-                    .map(categoryId -> categoryRepository.findById(categoryId)
-                            .orElseThrow(() -> new ResourceNotFoundException("Category not found")))
-                    .collect(Collectors.toSet());
+            Set<Category> categories = new HashSet<>(
+                    categoryRepository.findAllById(request.getCategoryIds())
+            );
             post.setCategories(categories);
         }
 
-        return postRepository.save(post);
+        return postMapper.toResponse(post);
     }
 
     /**
