@@ -1,11 +1,9 @@
 package com.joseguillard.my_blog.exception.handler;
 
 import com.joseguillard.my_blog.dto.response.ErrorResponse;
-import com.joseguillard.my_blog.exception.DuplicatedResourceException;
-import com.joseguillard.my_blog.exception.InvalidEmailException;
-import com.joseguillard.my_blog.exception.InvalidSlugException;
-import com.joseguillard.my_blog.exception.ResourceNotFoundException;
+import com.joseguillard.my_blog.exception.*;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,8 +12,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
+@Slf4j
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
@@ -26,7 +24,7 @@ public class ApiExceptionHandler {
         // Builds error response with request details
         ErrorResponse error = ErrorResponse.builder()
                 .status(HttpStatus.NOT_FOUND.value())
-                .error("Resource not found")
+                .error(ApiErrorType.RESOURCE_NOT_FOUND.name())
                 .message(ex.getMessage())
                 .path(request.getRequestURI())
                 .timestamp(LocalDateTime.now())
@@ -42,7 +40,7 @@ public class ApiExceptionHandler {
     ) {
         ErrorResponse error = ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error("Invalid email")
+                .error(ApiErrorType.INVALID_EMAIL.name())
                 .message(ex.getMessage())
                 .path(request.getRequestURI())
                 .timestamp(LocalDateTime.now())
@@ -58,7 +56,7 @@ public class ApiExceptionHandler {
     ) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error("Invalid slug")
+                .error(ApiErrorType.INVALID_SLUG.name())
                 .message(ex.getMessage())
                 .path(request.getRequestURI())
                 .timestamp(LocalDateTime.now())
@@ -73,7 +71,7 @@ public class ApiExceptionHandler {
             HttpServletRequest request) {
         ErrorResponse error = ErrorResponse.builder()
                 .status(HttpStatus.CONFLICT.value())
-                .error("Duplicated resource")
+                .error(ApiErrorType.DUPLICATED_RESOURCE.name())
                 .message(ex.getMessage())
                 .path(request.getRequestURI())
                 .timestamp(LocalDateTime.now())
@@ -99,7 +97,7 @@ public class ApiExceptionHandler {
         // Builds error response with validation failure details
         ErrorResponse error = ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error("Validation error")
+                .error(ApiErrorType.VALIDATION_ERROR.name())
                 .message("Validation errors found")
                 .path(request.getRequestURI())
                 .timestamp(LocalDateTime.now())
@@ -107,5 +105,22 @@ public class ApiExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGenericException(
+            Exception ex,
+            HttpServletRequest request) {
+        ErrorResponse error = ErrorResponse.builder()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error(ApiErrorType.INTERNAL_ERROR.name())
+                .message("An internal server error occurred")
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        log.error("Unexpected error occurred", ex);
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 }
