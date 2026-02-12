@@ -1,6 +1,7 @@
 package com.joseguillard.my_blog.dto.mapper;
 
 import com.joseguillard.my_blog.dto.request.post.PostCreateRequest;
+import com.joseguillard.my_blog.dto.request.post.PostUpdateRequest;
 import com.joseguillard.my_blog.dto.response.post.PostResponse;
 import com.joseguillard.my_blog.dto.response.post.PostSummaryResponse;
 import com.joseguillard.my_blog.entity.Author;
@@ -30,6 +31,7 @@ public class PostMapper {
     public Post toEntity(PostCreateRequest request, Author author, Set<Category> categories) {
         if (request == null) return null;
 
+        // Builds title and slug, normalizing blank slugs
         return Post.builder()
                 .title(request.getTitle())
                 .slug(request.getSlug() != null && !request.getSlug().isBlank()
@@ -73,6 +75,29 @@ public class PostMapper {
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .build();
+    }
+
+    /**
+     * Updates post-fields from request if present
+     */
+    public void toUpdate(Post post, PostUpdateRequest request) {
+        if (request.getTitle() != null)
+            post.setTitle(request.getTitle());
+        // Sets slug if present and not blank
+        if (request.getSlug() != null && !request.getSlug().isBlank())
+            post.setSlug(Slug.of(request.getSlug()));
+        if (request.getContent() != null)
+            post.setContent(request.getContent());
+        if (request.getExcerpt() != null)
+            post.setExcerpt(request.getExcerpt());
+        if (request.getFeaturedImage() != null)
+            post.setFeaturedImage(request.getFeaturedImage());
+        if (request.getStatus() != null)
+            post.setStatus(request.getStatus());
+        if (request.getMetaDescription() != null)
+            post.setMetaDescription(request.getMetaDescription());
+        if (request.getMetaKeywords() != null)
+            post.setMetaKeywords(request.getMetaKeywords());
     }
 
     public PostSummaryResponse toSummaryResponse(Post post) {
