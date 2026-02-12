@@ -2,6 +2,7 @@ package com.joseguillard.my_blog.exception.handler;
 
 import com.joseguillard.my_blog.dto.response.ErrorResponse;
 import com.joseguillard.my_blog.exception.DuplicatedResourceException;
+import com.joseguillard.my_blog.exception.InvalidEmailException;
 import com.joseguillard.my_blog.exception.InvalidSlugException;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,6 +30,22 @@ public class ApiExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(InvalidEmailException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidEmail(
+            InvalidEmailException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponse error = ErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Invalid email")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
     @ExceptionHandler(InvalidSlugException.class)
