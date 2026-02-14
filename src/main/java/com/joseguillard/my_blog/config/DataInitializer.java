@@ -25,7 +25,7 @@ public class DataInitializer implements CommandLineRunner {
 
         // Builds author with encoded password and metadata
         Author author = Author.builder()
-                .userName("joseguillard")
+                .userName("Jose Guillard")
                 .email(Email.of("junior11_junior@hotmail.com"))
                 .password(passwordEncoder.encode("joseguillard"))
                 .fullName("Jose Wellington Ribeiro")
