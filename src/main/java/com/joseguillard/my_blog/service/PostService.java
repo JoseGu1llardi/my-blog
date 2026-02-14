@@ -4,6 +4,7 @@ import com.joseguillard.my_blog.dto.mapper.PostMapper;
 import com.joseguillard.my_blog.dto.request.post.PostCreateRequest;
 import com.joseguillard.my_blog.dto.request.post.PostUpdateRequest;
 import com.joseguillard.my_blog.dto.response.post.PostResponse;
+import com.joseguillard.my_blog.dto.response.post.PostSummaryResponse;
 import com.joseguillard.my_blog.exception.BusinessException;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.entity.Author;
@@ -41,12 +42,14 @@ public class PostService {
     /**
      * Returns published Posts (paged)
      */
-    public Page<Post> getPublishedPosts(Pageable pageable) {
-        return postRepository.findByStatusAndPublishedAtBeforeOrderByPublishedAtDesc(
-                PostStatus.PUBLISHED,
-                LocalDateTime.now(),
-                pageable
-        );
+    public Page<PostSummaryResponse> getPublishedPosts(Pageable pageable) {
+        Page<Post> posts = postRepository
+                .findByStatusAndPublishedAtBeforeOrderByPublishedAtDesc(
+                        PostStatus.PUBLISHED,
+                        LocalDateTime.now(),
+                        pageable);
+
+        return posts.map(postMapper::toSummaryResponse);
     }
 
     /**
