@@ -1,20 +1,21 @@
 package com.joseguillard.my_blog.controller;
 
 import com.joseguillard.my_blog.dto.mapper.PostMapper;
+import com.joseguillard.my_blog.dto.request.post.PostCreateRequest;
 import com.joseguillard.my_blog.dto.response.ApiResponse;
 import com.joseguillard.my_blog.dto.response.PageResponse;
+import com.joseguillard.my_blog.dto.response.post.PostResponse;
 import com.joseguillard.my_blog.dto.response.post.PostSummaryResponse;
 import com.joseguillard.my_blog.entity.Post;
 import com.joseguillard.my_blog.service.PostService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/posts")
@@ -36,5 +37,17 @@ public class PostController {
         return ResponseEntity.ok(
                 ApiResponse.success(PageResponse.of(responsePage))
         );
+    }
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<PostResponse>> createPost(
+            @Valid @RequestBody PostCreateRequest request,
+            @RequestParam Long authorId
+            ) {
+        PostResponse post = postService.createPost(request, authorId);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Post created successfully", post));
     }
 }
