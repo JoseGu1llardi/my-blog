@@ -31,8 +31,7 @@ public class PostController {
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Post> posts = postService.getPublishedPosts(pageable);
-        Page<PostSummaryResponse> responsePage = posts.map(postMapper::toSummaryResponse);
+        Page<PostSummaryResponse> responsePage = postService.getPublishedPosts(pageable);
 
         return ResponseEntity.ok(
                 ApiResponse.success(PageResponse.of(responsePage))
