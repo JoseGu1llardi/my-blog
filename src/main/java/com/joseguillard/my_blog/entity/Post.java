@@ -61,7 +61,7 @@ public class Post {
     private Set<Category> categories = new HashSet<>();
 
     @Column(nullable = false)
-    private Integer viewsCount = 0;
+    private Integer viewsCount;
 
     private String metaDescription;
     private String metaKeywords;
@@ -77,6 +77,7 @@ public class Post {
      */
     @PrePersist
     protected void onCreate() {
+        viewsCount = 0;
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
         if (slug == null && title != null) {
