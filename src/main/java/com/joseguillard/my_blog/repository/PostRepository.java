@@ -6,6 +6,7 @@ import com.joseguillard.my_blog.entity.enums.PostStatus;
 import com.joseguillard.my_blog.entity.vo.Slug;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,6 +23,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     Page<Post> findByStatusOrderByPublishedAtDesc(PostStatus status, Pageable pageable);
 
+    @EntityGraph(attributePaths = "author")
     Page<Post> findByStatusAndPublishedAtBeforeOrderByPublishedAtDesc(
             PostStatus status,
             LocalDateTime publishedAt,
@@ -52,6 +54,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "WHERE p.status = 'PUBLISHED' " +
             "ORDER BY YEAR(p.publishedAt) DESC")
     List<Integer> findDistinctYearsWithPublishedPosts();
+
+    boolean existsBySlug(Slug slug);
 
     long countByAuthorAndStatus(Author author, PostStatus status);
 }
