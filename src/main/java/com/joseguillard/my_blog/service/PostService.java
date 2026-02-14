@@ -4,6 +4,7 @@ import com.joseguillard.my_blog.dto.mapper.PostMapper;
 import com.joseguillard.my_blog.dto.request.post.PostCreateRequest;
 import com.joseguillard.my_blog.dto.request.post.PostUpdateRequest;
 import com.joseguillard.my_blog.dto.response.post.PostResponse;
+import com.joseguillard.my_blog.exception.BusinessException;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.entity.Author;
 import com.joseguillard.my_blog.entity.Category;
@@ -135,7 +136,19 @@ public class PostService {
             categories = new HashSet<>(categoryList);
         }
 
+        // Generate slug from title if not provided
+        String slugValue = (request.getSlug() != null && !request.getSlug().isBlank())
+                ? request.getSlug()
+                : request.getTitle();
+
+        Slug slug = Slug.of(slugValue);
+
+        if (postRepository.existsBySlug(slug)) {
+            throw new BusinessException("Slug already exists");
+        }
+
         Post post = postMapper.toEntity(request, author, categories);
+        post.setSlug(slug); // Ensure the generated slug is set
         Post createdPost = postRepository.save(post);
 
         return postMapper.toResponse(createdPost);
