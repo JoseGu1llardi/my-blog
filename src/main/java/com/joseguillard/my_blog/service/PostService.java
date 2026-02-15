@@ -56,7 +56,7 @@ public class PostService {
      * Search Post by Slug (increments view count)
      */
     @Transactional
-    public Post findBySlugAndIncrementViews(String slug) {
+    public PostResponse findBySlugAndIncrementViews(String slug) {
         Post post = postRepository.findBySlug(Slug.of(slug))
                 .orElseThrow(() -> ResourceNotFoundException.postNotFound(slug));
 
@@ -65,7 +65,8 @@ public class PostService {
             post.incrementViewCount();
             postRepository.save(post);
         }
-        return post;
+
+        return postMapper.toResponse(post);
     }
 
     /**
