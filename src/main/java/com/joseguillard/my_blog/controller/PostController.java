@@ -6,7 +6,6 @@ import com.joseguillard.my_blog.dto.response.ApiResponse;
 import com.joseguillard.my_blog.dto.response.PageResponse;
 import com.joseguillard.my_blog.dto.response.post.PostResponse;
 import com.joseguillard.my_blog.dto.response.post.PostSummaryResponse;
-import com.joseguillard.my_blog.entity.Post;
 import com.joseguillard.my_blog.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,10 +30,20 @@ public class PostController {
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<PostSummaryResponse> responsePage = postService.getPublishedPosts(pageable);
+        Page<PostSummaryResponse> pageResponse = postService.getPublishedPosts(pageable);
 
         return ResponseEntity.ok(
-                ApiResponse.success(PageResponse.of(responsePage))
+                ApiResponse.success(PageResponse.of(pageResponse))
+        );
+    }
+
+    @GetMapping("/{slug}")
+    public ResponseEntity<ApiResponse<PostResponse>> getPostBySlug(
+            @PathVariable String slug) {
+        PostResponse response = postService.findBySlugAndIncrementViews(slug);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(response)
         );
     }
 
