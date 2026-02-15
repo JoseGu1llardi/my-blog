@@ -79,8 +79,12 @@ public class PostService {
     /**
      * Returns Posts from a specific year
      */
-    public List<Post> getPostByYear(int year) {
-        return postRepository.findPublishedPostByYear(year);
+    public List<PostSummaryResponse> getPostByYear(int year) {
+        List<Post> posts = postRepository.findPublishedPostByYear(year);
+
+        return posts.stream()
+                .map(postMapper::toSummaryResponse)
+                .collect(Collectors.toList());
     }
 
     /**
