@@ -16,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/posts")
 @RequiredArgsConstructor
@@ -45,6 +47,14 @@ public class PostController {
         return ResponseEntity.ok(
                 ApiResponse.success(response)
         );
+    }
+
+    @GetMapping("/year/{year}")
+    public ResponseEntity<ApiResponse<List<PostSummaryResponse>>> getPostByYear(
+            @PathVariable int year) {
+        List<PostSummaryResponse> responseList = postService.getPostByYear(year);
+
+        return ResponseEntity.ok(ApiResponse.success(responseList));
     }
 
     @PostMapping
