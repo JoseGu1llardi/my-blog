@@ -63,7 +63,6 @@ public class PostService {
         // Increment view count for published
         if (post.isPublished()) {
             post.incrementViewCount();
-            postRepository.save(post);
         }
 
         return postMapper.toResponse(post);
