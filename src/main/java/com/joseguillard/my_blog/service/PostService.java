@@ -90,8 +90,9 @@ public class PostService {
     /**
      * Returns Posts from a Category
      */
-    public Page<Post> getPostByCategory(String categorySlug, Pageable pageable) {
-        return postRepository.findPublishedPostByCategorySlug(Slug.of(categorySlug), pageable);
+    public Page<PostSummaryResponse> getPostsByCategory(String categorySlug, Pageable pageable) {
+        Page<Post> posts = postRepository.findPublishedPostByCategorySlug(Slug.of(categorySlug), pageable);
+        return posts.map(postMapper::toSummaryResponse);
     }
 
     /**
