@@ -57,6 +57,18 @@ public class PostController {
         return ResponseEntity.ok(ApiResponse.success(responseList));
     }
 
+    @GetMapping("/category/{slug}")
+    public ResponseEntity<ApiResponse<PageResponse<PostSummaryResponse>>> getPostByCategory(
+            @PathVariable String slug,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PostSummaryResponse> response = postService.getPostsByCategory(slug, pageable);
+
+        return ResponseEntity.ok(ApiResponse.success(PageResponse.of(response)));
+    }
+
     @PostMapping
     public ResponseEntity<ApiResponse<PostResponse>> createPost(
             @Valid @RequestBody PostCreateRequest request,
