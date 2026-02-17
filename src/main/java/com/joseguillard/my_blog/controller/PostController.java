@@ -64,9 +64,9 @@ public class PostController {
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<PostSummaryResponse> response = postService.getPostsByCategory(slug, pageable);
+        Page<PostSummaryResponse> responses = postService.getPostsByCategory(slug, pageable);
 
-        return ResponseEntity.ok(ApiResponse.success(PageResponse.of(response)));
+        return ResponseEntity.ok(ApiResponse.success(PageResponse.of(responses)));
     }
 
     @GetMapping("/author/{slug}")
@@ -76,9 +76,20 @@ public class PostController {
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<PostSummaryResponse> response = postService.getPostByAuthor(slug, pageable);
+        Page<PostSummaryResponse> responses = postService.getPostByAuthor(slug, pageable);
 
-        return ResponseEntity.ok(ApiResponse.success(PageResponse.of(response)));
+        return ResponseEntity.ok(ApiResponse.success(PageResponse.of(responses)));
+    }
+
+    public ResponseEntity<ApiResponse<PageResponse<PostSummaryResponse>>> searchPosts(
+            @RequestParam String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PostSummaryResponse> responses = postService.searchPosts(query, pageable);
+
+        return ResponseEntity.ok(ApiResponse.success(PageResponse.of(responses)));
     }
 
     @PostMapping
