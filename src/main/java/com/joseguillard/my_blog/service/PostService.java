@@ -98,15 +98,17 @@ public class PostService {
     /**
      * Returns Posts from an Author
      */
-    public Page<Post> getPostByAuthor(String authorSlug, Pageable pageable) {
+    public Page<PostSummaryResponse> getPostByAuthor(String authorSlug, Pageable pageable) {
         Author author = authorRepository.findBySlug(Slug.of(authorSlug))
                 .orElseThrow(() -> ResourceNotFoundException.authorNotFound(authorSlug));
 
-        return postRepository.findByAuthorAndStatus(
+        Page<Post> posts =  postRepository.findByAuthorAndStatus(
                 author,
                 PostStatus.PUBLISHED,
                 pageable
         );
+
+        return posts.map(postMapper::toSummaryResponse);
     }
 
     /**
