@@ -114,8 +114,10 @@ public class PostService {
     /**
      * Search Posts (simple full text search)
      */
-    public Page<Post> searchPosts(String query, Pageable pageable) {
-        return postRepository.searchPublishedPosts(query, pageable);
+    public Page<PostSummaryResponse> searchPosts(String query, Pageable pageable) {
+        Page<Post> posts =  postRepository.searchPublishedPosts(query, pageable);
+
+        return posts.map(postMapper::toSummaryResponse);
     }
 
     /**
