@@ -93,6 +93,13 @@ public class PostController {
         return ResponseEntity.ok(ApiResponse.success(PageResponse.of(responses)));
     }
 
+    @GetMapping("/years")
+    public ResponseEntity<ApiResponse<List<Integer>>> getYearsWithPosts() {
+        List<Integer> years = postService.getYearsWithPosts();
+
+        return ResponseEntity.ok(ApiResponse.success(years));
+    }
+
     @PostMapping
     public ResponseEntity<ApiResponse<PostResponse>> createPost(
             @Valid @RequestBody PostCreateRequest request,
