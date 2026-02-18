@@ -2,6 +2,7 @@ package com.joseguillard.my_blog.controller;
 
 import com.joseguillard.my_blog.dto.mapper.PostMapper;
 import com.joseguillard.my_blog.dto.request.post.PostCreateRequest;
+import com.joseguillard.my_blog.dto.request.post.PostUpdateRequest;
 import com.joseguillard.my_blog.dto.response.ApiResponse;
 import com.joseguillard.my_blog.dto.response.PageResponse;
 import com.joseguillard.my_blog.dto.response.post.PostResponse;
@@ -98,6 +99,16 @@ public class PostController {
         List<Integer> years = postService.getYearsWithPosts();
 
         return ResponseEntity.ok(ApiResponse.success(years));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<PostResponse>> updatePost(
+            @PathVariable Long id,
+            @Valid @RequestBody PostUpdateRequest request
+            ) {
+        PostResponse response = postService.updatePost(id, request);
+
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @PostMapping
