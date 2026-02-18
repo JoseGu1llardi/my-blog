@@ -7,9 +7,11 @@ import com.joseguillard.my_blog.dto.response.post.PostSummaryResponse;
 import com.joseguillard.my_blog.entity.Author;
 import com.joseguillard.my_blog.entity.Category;
 import com.joseguillard.my_blog.entity.Post;
+import com.joseguillard.my_blog.entity.enums.PostStatus;
 import com.joseguillard.my_blog.entity.vo.Slug;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -92,8 +94,13 @@ public class PostMapper {
             post.setExcerpt(request.getExcerpt());
         if (request.getFeaturedImage() != null)
             post.setFeaturedImage(request.getFeaturedImage());
-        if (request.getStatus() != null)
+        if (request.getStatus() != null) {
             post.setStatus(request.getStatus());
+            // Sets publication timestamp upon status transition
+            if (request.getStatus() == PostStatus.PUBLISHED && post.getPublishedAt() == null) {
+                post.setPublishedAt(LocalDateTime.now());
+            }
+        }
         if (request.getMetaDescription() != null)
             post.setMetaDescription(request.getMetaDescription());
         if (request.getMetaKeywords() != null)
