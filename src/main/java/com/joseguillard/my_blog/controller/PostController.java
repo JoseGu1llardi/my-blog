@@ -81,6 +81,7 @@ public class PostController {
         return ResponseEntity.ok(ApiResponse.success(PageResponse.of(responses)));
     }
 
+    @GetMapping("/search")
     public ResponseEntity<ApiResponse<PageResponse<PostSummaryResponse>>> searchPosts(
             @RequestParam String query,
             @RequestParam(defaultValue = "0") int page,
