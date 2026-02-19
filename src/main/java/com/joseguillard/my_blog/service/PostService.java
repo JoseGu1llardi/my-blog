@@ -194,6 +194,11 @@ public class PostService {
     public void publishPost(Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
+
+        if (post.isPublished()) {
+            throw new BusinessException("Post is already published");
+        }
+
         post.publish();
         postRepository.save(post);
     }
@@ -205,6 +210,7 @@ public class PostService {
     public void unpublishPost(Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
+
         post.unpublish();
         postRepository.save(post);
     }
