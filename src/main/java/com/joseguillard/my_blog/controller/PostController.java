@@ -101,16 +101,6 @@ public class PostController {
         return ResponseEntity.ok(ApiResponse.success(years));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<PostResponse>> updatePost(
-            @PathVariable Long id,
-            @Valid @RequestBody PostUpdateRequest request
-            ) {
-        PostResponse response = postService.updatePost(id, request);
-
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
     @PostMapping
     public ResponseEntity<ApiResponse<PostResponse>> createPost(
             @Valid @RequestBody PostCreateRequest request,
@@ -121,5 +111,35 @@ public class PostController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Post created successfully", post));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<PostResponse>> updatePost(
+            @PathVariable Long id,
+            @Valid @RequestBody PostUpdateRequest request
+    ) {
+        PostResponse response = postService.updatePost(id, request);
+
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PatchMapping("/{id}/publish")
+    public ResponseEntity<ApiResponse<Void>> publishPost(
+            @PathVariable Long id
+    ) {
+        postService.publishPost(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Post published successfully", null));
+    }
+
+    @PatchMapping("/{id}/unpublish")
+    public ResponseEntity<ApiResponse<Void>> unpublishPost(
+            @PathVariable Long id
+    ) {
+        postService.unpublishPost(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Post unpublished successfully", null));
     }
 }
