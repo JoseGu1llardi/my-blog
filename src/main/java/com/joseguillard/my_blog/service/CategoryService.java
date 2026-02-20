@@ -3,6 +3,7 @@ package com.joseguillard.my_blog.service;
 import com.joseguillard.my_blog.dto.mapper.CategoryMapper;
 import com.joseguillard.my_blog.dto.request.CategoryCreateRequest;
 import com.joseguillard.my_blog.dto.response.category.CategoryResponse;
+import com.joseguillard.my_blog.exception.BusinessException;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.entity.Category;
 import com.joseguillard.my_blog.entity.vo.Slug;
@@ -26,8 +27,10 @@ public class CategoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
     }
 
-    public List<Category> findAll() {
-        return categoryRepository.findAllByOrderByNameAsc();
+    public List<CategoryResponse> findAll() {
+        List<Category> categories =  categoryRepository.findAllByOrderByNameAsc();
+
+        return categories.stream().map(categoryMapper::toResponse).toList();
     }
 
     public List<Category> findCategoryWithPosts() {
@@ -45,6 +48,10 @@ public class CategoryService {
 
     @Transactional
     public CategoryResponse createCategory(CategoryCreateRequest request) {
+        if (categoryRepository.existsByName(request.getName())) {
+            throw new BusinessException("Category with name " + request.getName() + " already exists");
+        }
+
         Category category = categoryMapper.toEntity(request);
         Category categorySaved = categoryRepository.save(category);
 
