@@ -27,6 +27,9 @@ public class CategoryController {
         return ResponseEntity.ok(ApiResponse.success(responses));
     }
 
+    /**
+     * Creates category; returns location and created category
+     */
     @PostMapping
     public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(
             @Valid @RequestBody CategoryCreateRequest request

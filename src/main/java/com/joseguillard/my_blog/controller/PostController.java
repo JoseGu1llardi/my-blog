@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -100,6 +101,9 @@ public class PostController {
         return ResponseEntity.ok(ApiResponse.success(years));
     }
 
+    /**
+     * Creates post; returns location and success status
+     */
     @PostMapping
     public ResponseEntity<ApiResponse<PostResponse>> createPost(
             @Valid @RequestBody PostCreateRequest request,
@@ -107,8 +111,10 @@ public class PostController {
             ) {
         PostResponse post = postService.createPost(request, authorId);
 
+        URI location = URI.create("/api/v1/posts/" + post.getId());
+
         return ResponseEntity
-                .status(HttpStatus.CREATED)
+                .created(location)
                 .body(ApiResponse.success("Post created successfully", post));
     }
 
