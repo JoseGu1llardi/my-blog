@@ -124,8 +124,7 @@ public class PostController {
     }
 
     @PatchMapping("/{id}/publish")
-    public ResponseEntity<ApiResponse<Void>> publishPost(
-            @PathVariable Long id
+    public ResponseEntity<ApiResponse<Void>> publishPost(@PathVariable Long id
     ) {
         postService.publishPost(id);
 
@@ -134,12 +133,19 @@ public class PostController {
     }
 
     @PatchMapping("/{id}/unpublish")
-    public ResponseEntity<ApiResponse<Void>> unpublishPost(
-            @PathVariable Long id
+    public ResponseEntity<ApiResponse<Void>> unpublishPost(@PathVariable Long id
     ) {
         postService.unpublishPost(id);
 
         return ResponseEntity.ok(
                 ApiResponse.success("Post unpublished successfully", null));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deletePost(@PathVariable Long id) {
+        postService.deletePost(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Post deleted successfully", null));
     }
 }
