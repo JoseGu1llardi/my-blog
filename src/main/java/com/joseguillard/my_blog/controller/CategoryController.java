@@ -5,6 +5,7 @@ import com.joseguillard.my_blog.dto.request.CategoryCreateRequest;
 import com.joseguillard.my_blog.dto.response.ApiResponse;
 import com.joseguillard.my_blog.dto.response.category.CategoryResponse;
 import com.joseguillard.my_blog.service.CategoryService;
+import com.joseguillard.my_blog.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +22,17 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<CategoryResponse>>> findAllCategories() {
-        List<CategoryResponse> responses = categoryService.findAll();
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories() {
+        List<CategoryResponse> categories = categoryService.findAll();
 
-        return ResponseEntity.ok(ApiResponse.success(responses));
+        return ResponseEntity.ok(ApiResponse.success(categories));
+    }
+
+    @GetMapping("/with-posts")
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getCategoriesWithPosts() {
+        List<CategoryResponse> categories = categoryService.findCategoryWithPosts();
+
+        return ResponseEntity.ok(ApiResponse.success(categories));
     }
 
     /**
