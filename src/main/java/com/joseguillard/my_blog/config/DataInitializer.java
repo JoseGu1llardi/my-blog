@@ -67,6 +67,12 @@ public class DataInitializer implements CommandLineRunner {
                 .icon("\uD83D\uDC18")
                 .build();
 
+        Category category3 = Category.builder()
+                .name("Quarkus")
+                .description("The Quarkus's world!")
+                .icon("⚡")
+                .build();
+
         categoryRepository.saveAll(List.of(category1, category2));
 
         // Builds post with metadata and content
