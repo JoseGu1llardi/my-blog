@@ -33,8 +33,10 @@ public class CategoryService {
         return categories.stream().map(categoryMapper::toResponse).toList();
     }
 
-    public List<Category> findCategoryWithPosts() {
-        return categoryRepository.findCategoriesWithPosts();
+    public List<CategoryResponse> findCategoryWithPosts() {
+        List<Category> categories = categoryRepository.findCategoriesWithPosts();
+
+        return categories.stream().map(categoryMapper::toResponse).toList();
     }
 
     public Category findCategoryBySlug(String slug) {
