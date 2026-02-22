@@ -1,11 +1,9 @@
 package com.joseguillard.my_blog.controller;
 
-import com.joseguillard.my_blog.dto.mapper.CategoryMapper;
 import com.joseguillard.my_blog.dto.request.CategoryCreateRequest;
 import com.joseguillard.my_blog.dto.response.ApiResponse;
 import com.joseguillard.my_blog.dto.response.category.CategoryResponse;
 import com.joseguillard.my_blog.service.CategoryService;
-import com.joseguillard.my_blog.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
