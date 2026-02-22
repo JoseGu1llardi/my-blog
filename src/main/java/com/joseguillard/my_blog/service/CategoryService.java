@@ -39,9 +39,11 @@ public class CategoryService {
         return categories.stream().map(categoryMapper::toResponse).toList();
     }
 
-    public Category findCategoryBySlug(String slug) {
-        return categoryRepository.findBySlug(Slug.of(slug))
+    public CategoryResponse findCategoryBySlug(String slug) {
+        Category response = categoryRepository.findBySlug(Slug.of(slug))
                 .orElseThrow(() -> ResourceNotFoundException.categoryNotFound(slug));
+
+        return categoryMapper.toResponse(response);
     }
 
     public boolean isCategoryExistsByName(String name) {
