@@ -57,6 +57,8 @@ public class CategoryController {
 
         return ResponseEntity
                 .created(location)
-                .body(ApiResponse.success(newCategory));
+                .body(ApiResponse.success(
+                        "Category successfully created",
+                        newCategory));
     }
 }

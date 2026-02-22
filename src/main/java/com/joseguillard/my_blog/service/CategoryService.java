@@ -52,7 +52,7 @@ public class CategoryService {
 
     @Transactional
     public CategoryResponse createCategory(CategoryCreateRequest request) {
-        if (categoryRepository.existsByName(request.getName())) {
+        if (isCategoryExistsByName(request.getName())) {
             throw new BusinessException("Category with name " + request.getName() + " already exists");
         }
 
