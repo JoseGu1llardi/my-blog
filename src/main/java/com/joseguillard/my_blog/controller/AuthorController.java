@@ -2,6 +2,7 @@ package com.joseguillard.my_blog.controller;
 
 import com.joseguillard.my_blog.dto.response.ApiResponse;
 import com.joseguillard.my_blog.dto.response.author.AuthorResponse;
+import com.joseguillard.my_blog.dto.response.author.AuthorSummaryResponse;
 import com.joseguillard.my_blog.service.AuthorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,15 +20,15 @@ public class AuthorController {
     private final AuthorService authorService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<AuthorResponse>>> getAllAuthors() {
-        List<AuthorResponse> authors = authorService.findAllActive();
+    public ResponseEntity<ApiResponse<List<AuthorSummaryResponse>>> getAllAuthors() {
+        List<AuthorSummaryResponse> authors = authorService.findAllActive();
 
         return ResponseEntity.ok(ApiResponse.success(authors));
     }
 
     @GetMapping("/with-posts")
-    public ResponseEntity<ApiResponse<List<AuthorResponse>>> getAuthorsWithPosts() {
-        List<AuthorResponse> authors = authorService.findAuthorWithPosts();
+    public ResponseEntity<ApiResponse<List<AuthorSummaryResponse>>> getAuthorsWithPosts() {
+        List<AuthorSummaryResponse> authors = authorService.findAuthorWithPosts();
 
         return ResponseEntity.ok(ApiResponse.success(authors));
     }

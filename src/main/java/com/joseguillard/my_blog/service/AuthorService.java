@@ -2,6 +2,7 @@ package com.joseguillard.my_blog.service;
 
 import com.joseguillard.my_blog.dto.mapper.AuthorMapper;
 import com.joseguillard.my_blog.dto.response.author.AuthorResponse;
+import com.joseguillard.my_blog.dto.response.author.AuthorSummaryResponse;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.entity.Author;
 import com.joseguillard.my_blog.entity.vo.Email;
@@ -21,21 +22,23 @@ public class AuthorService {
     private final AuthorRepository authorRepository;
     private final AuthorMapper authorMapper;
 
-    public Author findBySlug(String slug) {
-        return authorRepository.findBySlug(Slug.of(slug))
+    public AuthorResponse findBySlug(String slug) {
+        Author author = authorRepository.findBySlug(Slug.of(slug))
                 .orElseThrow(() -> ResourceNotFoundException.authorNotFound(slug));
+
+        return authorMapper.toResponse(author);
     }
 
-    public List<AuthorResponse> findAllActive() {
+    public List<AuthorSummaryResponse> findAllActive() {
         List<Author> authors = authorRepository.findByActiveTrue();
 
-        return authors.stream().map(authorMapper::toResponse).toList();
+        return authors.stream().map(authorMapper::toSummaryResponse).toList();
     }
 
-    public List<AuthorResponse> findAuthorWithPosts() {
+    public List<AuthorSummaryResponse> findAuthorWithPosts() {
         List<Author> authors =  authorRepository.findAuthorsWithPublishedPosts();
 
-        return authors.stream().map(authorMapper::toResponse).toList();
+        return authors.stream().map(authorMapper::toSummaryResponse).toList();
     }
 
     public Author findAuthorByUsername(String username) {
