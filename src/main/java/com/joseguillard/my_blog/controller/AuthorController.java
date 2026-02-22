@@ -24,4 +24,11 @@ public class AuthorController {
 
         return ResponseEntity.ok(ApiResponse.success(authors));
     }
+
+    @GetMapping("/with-posts")
+    public ResponseEntity<ApiResponse<List<AuthorResponse>>> getAuthorsWithPosts() {
+        List<AuthorResponse> authors = authorService.findAuthorWithPosts();
+
+        return ResponseEntity.ok(ApiResponse.success(authors));
+    }
 }

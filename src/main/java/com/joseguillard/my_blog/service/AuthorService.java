@@ -32,8 +32,10 @@ public class AuthorService {
         return authors.stream().map(authorMapper::toResponse).toList();
     }
 
-    public List<Author> findAuthorWithPosts() {
-        return authorRepository.findAuthorsWithPublishedPosts();
+    public List<AuthorResponse> findAuthorWithPosts() {
+        List<Author> authors =  authorRepository.findAuthorsWithPublishedPosts();
+
+        return authors.stream().map(authorMapper::toResponse).toList();
     }
 
     public Author findAuthorByUsername(String username) {
