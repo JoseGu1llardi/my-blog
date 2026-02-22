@@ -41,14 +41,18 @@ public class AuthorService {
         return authors.stream().map(authorMapper::toSummaryResponse).toList();
     }
 
-    public Author findAuthorByUsername(String username) {
-        return authorRepository.findByUserName(username)
+    public AuthorResponse findAuthorByUsername(String username) {
+        Author author = authorRepository.findByUserName(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
+
+        return authorMapper.toResponse(author);
     }
 
-    public Author findAuthorByEmail(String email) {
-        return authorRepository.findByEmail(Email.of(email))
+    public AuthorResponse findAuthorByEmail(String email) {
+        Author author = authorRepository.findByEmail(Email.of(email))
                 .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
+
+        return authorMapper.toResponse(author);
     }
 
     public boolean isUsernameExists(String username) {
