@@ -35,6 +35,15 @@ public class CategoryController {
         return ResponseEntity.ok(ApiResponse.success(categories));
     }
 
+    @GetMapping("/{slug}")
+    public ResponseEntity<ApiResponse<CategoryResponse>> getCategoryBySlug(
+            @PathVariable String slug
+    ) {
+        CategoryResponse  category = categoryService.findCategoryBySlug(slug);
+
+        return ResponseEntity.ok(ApiResponse.success(category));
+    }
+
     /**
      * Creates category; returns location and created category
      */
