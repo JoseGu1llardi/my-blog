@@ -1,5 +1,7 @@
 package com.joseguillard.my_blog.service;
 
+import com.joseguillard.my_blog.dto.mapper.AuthorMapper;
+import com.joseguillard.my_blog.dto.response.author.AuthorResponse;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.entity.Author;
 import com.joseguillard.my_blog.entity.vo.Email;
@@ -17,14 +19,17 @@ import java.util.List;
 public class AuthorService {
 
     private final AuthorRepository authorRepository;
+    private final AuthorMapper authorMapper;
 
     public Author findBySlug(String slug) {
         return authorRepository.findBySlug(Slug.of(slug))
                 .orElseThrow(() -> ResourceNotFoundException.authorNotFound(slug));
     }
 
-    public List<Author> findAllActive() {
-        return authorRepository.findByActiveTrue();
+    public List<AuthorResponse> findAllActive() {
+        List<Author> authors = authorRepository.findByActiveTrue();
+
+        return authors.stream().map(authorMapper::toResponse).toList();
     }
 
     public List<Author> findAuthorWithPosts() {
