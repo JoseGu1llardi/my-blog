@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -71,5 +73,32 @@ public class PostRepositoryTest {
         assertThat(savedPost.getSlug()).isNotNull();
         assertThat(savedPost.getSlug().getValue()).isEqualTo("my-first-post");
         assertThat(savedPost.getCreatedAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Should find a post by Slug")
+    void shouldFindPostBySlug() {
+        // Arrange
+        Post post = createAndSavePost("Test Post");
+
+        // Act
+        Optional<Post> found =  postRepository.findBySlug(post.getSlug());
+
+        // Assert
+        assertThat(found.isPresent()).isTrue();
+        assertThat(found.get().getTitle()).isEqualTo("Test Post");
+    }
+
+    // Auxiliary method
+    private Post createAndSavePost(String title) {
+        Post post = Post.builder()
+                .title(title)
+                .content("This is a test post")
+                .excerpt("This is a test excerpt")
+                .author(author)
+                .status(PostStatus.PUBLISHED)
+                .build();
+
+        return postRepository.save(post);
     }
 }
