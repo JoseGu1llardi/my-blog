@@ -12,8 +12,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -80,7 +83,7 @@ public class PostRepositoryTest {
     @DisplayName("Should find a post by Slug")
     void shouldFindPostBySlug() {
         // Arrange
-        Post post = createAndSavePost("Test Post");
+        Post post = createAndSavePost("Test Post", PostStatus.PUBLISHED);
 
         // Act
         Optional<Post> found =  postRepository.findBySlug(post.getSlug());
@@ -100,14 +103,35 @@ public class PostRepositoryTest {
         assertThat(post.isPresent()).isFalse();
     }
 
+    @Test
+    @DisplayName("Should list published post by sorted date")
+    void shouldFindPublishedPostByOrderedByDate() {
+        // Arrange
+        Post post1 = createAndSavePost("Old Post", PostStatus.PUBLISHED);
+        Post post2 = createAndSavePost("New Post", PostStatus.PUBLISHED);
+        Post post3 = createAndSavePost("Post Draft", PostStatus.DRAFT);
+
+        // Act
+        Page<Post> posts = postRepository.findByStatusAndPublishedAtBeforeOrderByPublishedAtDesc(
+                PostStatus.PUBLISHED,
+                LocalDateTime.now(),
+                PageRequest.of(0, 10)
+        );
+
+        // Assert
+        assertThat(posts.getContent()).hasSize(2);
+        assertThat(posts.getContent().get(0).getTitle()).isEqualTo("New Post");
+        assertThat(posts.getContent().get(1).getTitle()).isEqualTo("Old Post");
+    }
+
     // Auxiliary method
-    private Post createAndSavePost(String title) {
+    private Post createAndSavePost(String title, PostStatus status) {
         Post post = Post.builder()
                 .title(title)
                 .content("This is a test post")
                 .excerpt("This is a test excerpt")
                 .author(author)
-                .status(PostStatus.PUBLISHED)
+                .status(status)
                 .build();
 
         return postRepository.save(post);
