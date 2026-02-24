@@ -6,6 +6,7 @@ import com.joseguillard.my_blog.entity.Post;
 import com.joseguillard.my_blog.entity.enums.PostStatus;
 import com.joseguillard.my_blog.entity.enums.UserRole;
 import com.joseguillard.my_blog.entity.vo.Email;
+import com.joseguillard.my_blog.entity.vo.Slug;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,7 +55,7 @@ public class PostRepositoryTest {
     }
 
     @Test
-    @DisplayName("Should successfully save a post")
+    @DisplayName("Should successfully save a Post")
     void shouldSavePost() {
         // Arrange
         Post post = Post.builder()
@@ -87,6 +88,16 @@ public class PostRepositoryTest {
         // Assert
         assertThat(found.isPresent()).isTrue();
         assertThat(found.get().getTitle()).isEqualTo("Test Post");
+    }
+
+    @Test
+    @DisplayName("Should return empty when Slug does not exists")
+    void shouldReturnEmptyWhenSlugDoesNotExist() {
+        // Act
+        Optional<Post> post = postRepository.findBySlug(Slug.of("The Slug does not exist"));
+
+        // Assert
+        assertThat(post.isPresent()).isFalse();
     }
 
     // Auxiliary method
