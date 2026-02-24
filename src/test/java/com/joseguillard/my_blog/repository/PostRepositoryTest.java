@@ -17,9 +17,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -84,6 +87,7 @@ public class PostRepositoryTest {
     void shouldFindPostBySlug() {
         // Arrange
         Post post = createAndSavePost("Test Post", PostStatus.PUBLISHED);
+        postRepository.save(post);
 
         // Act
         Optional<Post> found =  postRepository.findBySlug(post.getSlug());
@@ -111,6 +115,8 @@ public class PostRepositoryTest {
         Post post2 = createAndSavePost("New Post", PostStatus.PUBLISHED);
         Post post3 = createAndSavePost("Post Draft", PostStatus.DRAFT);
 
+        postRepository.saveAll(List.of(post1, post2, post3));
+
         // Act
         Page<Post> posts = postRepository.findByStatusAndPublishedAtBeforeOrderByPublishedAtDesc(
                 PostStatus.PUBLISHED,
@@ -126,14 +132,12 @@ public class PostRepositoryTest {
 
     // Auxiliary method
     private Post createAndSavePost(String title, PostStatus status) {
-        Post post = Post.builder()
+        return Post.builder()
                 .title(title)
                 .content("This is a test post")
                 .excerpt("This is a test excerpt")
                 .author(author)
                 .status(status)
                 .build();
-
-        return postRepository.save(post);
     }
 }
