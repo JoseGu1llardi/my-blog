@@ -18,11 +18,9 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -61,7 +59,7 @@ public class PostRepositoryTest {
     }
 
     @Test
-    @DisplayName("Should successfully save a Post")
+    @DisplayName("Should successfully save a post")
     void shouldSavePost() {
         // Arrange
         Post post = Post.builder()
@@ -83,10 +81,10 @@ public class PostRepositoryTest {
     }
 
     @Test
-    @DisplayName("Should find a post by Slug")
+    @DisplayName("Should find a post by slug")
     void shouldFindPostBySlug() {
         // Arrange
-        Post post = createAndSavePost("Test Post", PostStatus.PUBLISHED);
+        Post post = createPost("Test Post", PostStatus.PUBLISHED);
         postRepository.save(post);
 
         // Act
@@ -98,7 +96,7 @@ public class PostRepositoryTest {
     }
 
     @Test
-    @DisplayName("Should return empty when Slug does not exists")
+    @DisplayName("Should return empty when slug does not exists")
     void shouldReturnEmptyWhenSlugDoesNotExist() {
         // Act
         Optional<Post> post = postRepository.findBySlug(Slug.of("The Slug does not exist"));
@@ -111,9 +109,9 @@ public class PostRepositoryTest {
     @DisplayName("Should list published post by sorted date")
     void shouldFindPublishedPostByOrderedByDate() {
         // Arrange
-        Post post1 = createAndSavePost("Old Post", PostStatus.PUBLISHED);
-        Post post2 = createAndSavePost("New Post", PostStatus.PUBLISHED);
-        Post post3 = createAndSavePost("Post Draft", PostStatus.DRAFT);
+        Post post1 = createPost("Old Post", PostStatus.PUBLISHED);
+        Post post2 = createPost("New Post", PostStatus.PUBLISHED);
+        Post post3 = createPost("Post Draft", PostStatus.DRAFT);
 
         postRepository.saveAll(List.of(post1, post2, post3));
 
@@ -130,8 +128,28 @@ public class PostRepositoryTest {
         assertThat(posts.getContent().get(1).getTitle()).isEqualTo("Old Post");
     }
 
+    @Test
+    @DisplayName("Should find a post by year")
+    void shouldFindPostByYear() {
+        // Arrange
+        Post post2025 = createPost("2025 Post", PostStatus.PUBLISHED);
+        post2025.setPublishedAt(LocalDateTime.of(2025, 10, 5, 0, 0));
+
+        Post post2026 = createPost("2026 Post", PostStatus.PUBLISHED);
+        post2026.setPublishedAt(LocalDateTime.of(2026, 5, 5, 0, 0));
+
+        postRepository.saveAll(List.of(post2025, post2026));
+
+        // Act
+        List<Post> posts2025 = postRepository.findPublishedPostByYear(2025);
+
+        // Assert
+        assertThat(posts2025).hasSize(1);
+        assertThat(posts2025.get(0).getTitle()).isEqualTo("2025 Post");
+    }
+
     // Auxiliary method
-    private Post createAndSavePost(String title, PostStatus status) {
+    private Post createPost(String title, PostStatus status) {
         return Post.builder()
                 .title(title)
                 .content("This is a test post")
