@@ -19,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -146,6 +147,24 @@ public class PostRepositoryTest {
         // Assert
         assertThat(posts2025).hasSize(1);
         assertThat(posts2025.get(0).getTitle()).isEqualTo("2025 Post");
+    }
+
+    @Test
+    @DisplayName("Should find a post by category")
+    void shouldFindPostByCategory() {
+        // Arrange
+        Post post = createPost("Test Post", PostStatus.PUBLISHED);
+        post.setCategories(Set.of(category));
+        postRepository.save(post);
+
+        // Act
+        Page<Post> posts = postRepository.findPublishedPostByCategorySlug(
+                category.getSlug(),
+                PageRequest.of(0, 10));
+
+        // Assert
+        assertThat(posts.getContent()).hasSize(1);
+        assertThat(posts.getContent().get(0).getCategories()).contains(category);
     }
 
     // Auxiliary method
