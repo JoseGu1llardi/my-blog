@@ -167,6 +167,24 @@ public class PostRepositoryTest {
         assertThat(posts.getContent().get(0).getCategories()).contains(category);
     }
 
+    @Test
+    @DisplayName("Should generate slug automatically")
+    void shouldGenerateSlugAutomatically() {
+        // Arrange
+        Post post = Post.builder()
+                .title("My blog will open many doors for me")
+                .content("Just do It!")
+                .author(author)
+                .status(PostStatus.DRAFT)
+                .build();
+
+        // Act
+        Post saved = postRepository.save(post);
+
+        assertThat(saved.getSlug()).isNotNull();
+        assertThat(saved.getSlug().getValue()).isEqualTo("my-blog-will-open-many-doors-for-me");
+    }
+
     // Auxiliary method
     private Post createPost(String title, PostStatus status) {
         return Post.builder()
