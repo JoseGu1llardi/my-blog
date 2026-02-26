@@ -117,7 +117,8 @@ public class PostServiceTest {
     @Test
     @DisplayName("Should find post by slug and increment views")
     void shouldFindBySlugAndIncrementViews() {
-        // Arrange
+
+        // Simulates tha the post exists
         when(postRepository.findBySlug(Slug.of("Post title")))
                 .thenReturn(Optional.of(post));
 
@@ -125,14 +126,16 @@ public class PostServiceTest {
                 .title("Post title")
                 .build();
 
+        // Simulates the mapper
         when(postMapper.toResponse(any(Post.class))).thenReturn(postResponse);
 
-        // Act
+        // Here the real rule is executed
         PostResponse result = postService.findBySlugAndIncrementViews("Post title");
 
         // Assert
-        assertThat(result).isNotNull();
+        assertThat(result).isEqualTo(postResponse);
 
+        // Capturing the object sent to the mapper
         ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
         verify(postMapper, times(1)).toResponse(captor.capture());
         assertThat(captor.getValue().getViewsCount()).isEqualTo(1);
