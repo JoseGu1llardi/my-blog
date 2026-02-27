@@ -18,6 +18,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -145,19 +146,19 @@ public class PostServiceTest {
     @Test
     @DisplayName("Should not increment views when post is not published")
     void shouldNotIncrementViewsWhenPostIsNotPublished() {
+        // Arrange
         post.setStatus(PostStatus.DRAFT);
+        post.setViewsCount(0);
 
-        when(postRepository.findBySlug(Slug.of("Post title")))
-                .thenReturn(Optional.of(post));
-
+        when(postRepository.findBySlug(any())).thenReturn(Optional.of(post));
         when(postMapper.toResponse(any(Post.class))).thenReturn(new PostResponse());
 
-        postService.findBySlugAndIncrementViews("Post title");
+        // Act
+        postService.findBySlugAndIncrementViews("post-title");
 
-        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
-        verify(postMapper, times(1)).toResponse(captor.capture());
-        assertThat(captor.getValue().getViewsCount()).isEqualTo(0);
-
-        verify(postRepository, times(1)).findBySlug(Slug.of("Post title"));
+        // Assert
+        assertThat(post.getViewsCount()).isEqualTo(0);
+        verify(postRepository).findBySlug(Slug.of("post-title"));
+        verify(postMapper).toResponse(post);
     }
 }
