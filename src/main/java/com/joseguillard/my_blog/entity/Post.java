@@ -135,13 +135,14 @@ public class Post {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) return true;
+        if (!(o instanceof Post)) return false;
         Post post = (Post) o;
-        return Objects.equals(id, post.id);
+        return id != null && id.equals(post.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return getClass().hashCode();
     }
 }
