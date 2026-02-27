@@ -117,7 +117,6 @@ public class PostServiceTest {
     @Test
     @DisplayName("Should find post by slug and increment views")
     void shouldFindBySlugAndIncrementViews() {
-
         // Simulates tha the post exists
         when(postRepository.findBySlug(Slug.of("Post title")))
                 .thenReturn(Optional.of(post));
@@ -139,6 +138,25 @@ public class PostServiceTest {
         ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
         verify(postMapper, times(1)).toResponse(captor.capture());
         assertThat(captor.getValue().getViewsCount()).isEqualTo(1);
+
+        verify(postRepository, times(1)).findBySlug(Slug.of("Post title"));
+    }
+
+    @Test
+    @DisplayName("Should not increment views when post is not published")
+    void shouldNotIncrementViewsWhenPostIsNotPublished() {
+        post.setStatus(PostStatus.DRAFT);
+
+        when(postRepository.findBySlug(Slug.of("Post title")))
+                .thenReturn(Optional.of(post));
+
+        when(postMapper.toResponse(any(Post.class))).thenReturn(new PostResponse());
+
+        postService.findBySlugAndIncrementViews("Post title");
+
+        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
+        verify(postMapper, times(1)).toResponse(captor.capture());
+        assertThat(captor.getValue().getViewsCount()).isEqualTo(0);
 
         verify(postRepository, times(1)).findBySlug(Slug.of("Post title"));
     }
