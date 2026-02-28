@@ -10,6 +10,7 @@ import com.joseguillard.my_blog.entity.enums.PostStatus;
 import com.joseguillard.my_blog.entity.enums.UserRole;
 import com.joseguillard.my_blog.entity.vo.Email;
 import com.joseguillard.my_blog.entity.vo.Slug;
+import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.repository.AuthorRepository;
 import com.joseguillard.my_blog.repository.CategoryRepository;
 import com.joseguillard.my_blog.repository.PostRepository;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -160,5 +162,21 @@ public class PostServiceTest {
         assertThat(post.getViewsCount()).isEqualTo(0);
         verify(postRepository).findBySlug(Slug.of("post-title"));
         verify(postMapper).toResponse(post);
+    }
+
+    @Test
+    @DisplayName("Should throw an exception when post does not exists")
+    void shouldThrowExceptionWhenPostDoesNotExists() {
+        // Arrange
+        when(postRepository.findBySlug(Slug.of("does-not-exist")))
+                .thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> postService.findBySlug("does-not-exist"))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Post with slug 'does-not-exist' not found");
+
+        verify(postRepository).findBySlug(Slug.of("does-not-exist"));
+        verify(postRepository, never()).save(any(Post.class));
     }
 }
