@@ -273,4 +273,25 @@ public class PostServiceTest {
         verify(postRepository, never()).save(any(Post.class));
     }
 
+    @Test
+    @DisplayName("Should delete a post")
+    void shouldDeletePost() {
+        when(postRepository.existsById(1L)).thenReturn(true);
+
+        // Act
+        postService.deletePost(1L);
+
+        verify(postRepository).existsById(1L);
+        verify(postRepository).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("Should throw an exception when deleting non-existing post")
+    void shouldThrowExceptionWhenDeleteNonExistingPost() {
+        when(postRepository.existsById(1L)).thenReturn(false);
+
+        assertThatThrownBy(() -> postService.deletePost(1L))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Post does not exists");
+    }
 }
