@@ -200,7 +200,6 @@ public class PostService {
         }
 
         post.publish();
-        postRepository.save(post);
     }
 
     /**
@@ -212,7 +211,6 @@ public class PostService {
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
 
         post.unpublish();
-        postRepository.save(post);
     }
 
     /**
