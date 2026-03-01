@@ -13,6 +13,7 @@ import com.joseguillard.my_blog.entity.enums.PostStatus;
 import com.joseguillard.my_blog.entity.enums.UserRole;
 import com.joseguillard.my_blog.entity.vo.Email;
 import com.joseguillard.my_blog.entity.vo.Slug;
+import com.joseguillard.my_blog.exception.BusinessException;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.repository.AuthorRepository;
 import com.joseguillard.my_blog.repository.CategoryRepository;
@@ -247,7 +248,6 @@ public class PostServiceTest {
         // Arrange
         post.setStatus(PostStatus.DRAFT);
         post.setPublishedAt(null);
-        post.setViewsCount(0);
 
         when(postRepository.findById(1L)).thenReturn(Optional.of(post));
 
@@ -259,6 +259,18 @@ public class PostServiceTest {
         assertThat(post.getPublishedAt()).isNotNull();
 
         verify(postRepository).findById(1L);
+    }
+
+    @Test
+    @DisplayName("Should throw an exception when publishing already published post")
+    void shouldThrowExceptionWhenPostAlreadyPublished() {
+        when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+
+        assertThatThrownBy(() -> postService.publishPost(1L))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("Post is already published");
+
+        verify(postRepository, never()).save(any(Post.class));
     }
 
 }
