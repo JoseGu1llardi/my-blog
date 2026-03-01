@@ -210,6 +210,10 @@ public class PostService {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
 
+        if (!post.isPublished()) {
+            throw new BusinessException("Post is not published");
+        }
+
         post.unpublish();
     }
 
