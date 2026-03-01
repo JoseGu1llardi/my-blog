@@ -231,13 +231,6 @@ public class PostServiceTest {
         // Return is exactly what the mapper returned
         assertThat(result).isSameAs(expectedResponse);
 
-        // Verifies that the dependencies were called correctly
-        verify(authorRepository).findById(1L);
-        verify(categoryRepository).findAllById(Set.of(1L));
-        verify(postMapper).toEntity(request, author, Set.of(category));
-        verify(postRepository).save(mappedPost);
-        verify(postMapper).toResponse(mappedPost);
-
         // Ensures logical order of orchestration
         InOrder inOrder = inOrder(authorRepository, categoryRepository, postMapper, postRepository);
 
