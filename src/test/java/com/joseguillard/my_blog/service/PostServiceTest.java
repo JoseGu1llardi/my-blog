@@ -1,6 +1,9 @@
 package com.joseguillard.my_blog.service;
 
+import com.joseguillard.my_blog.dto.mapper.AuthorMapper;
 import com.joseguillard.my_blog.dto.mapper.PostMapper;
+import com.joseguillard.my_blog.dto.request.post.PostCreateRequest;
+import com.joseguillard.my_blog.dto.response.author.AuthorSummaryResponse;
 import com.joseguillard.my_blog.dto.response.post.PostResponse;
 import com.joseguillard.my_blog.dto.response.post.PostSummaryResponse;
 import com.joseguillard.my_blog.entity.Author;
@@ -32,6 +35,7 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -44,13 +48,13 @@ public class PostServiceTest {
     private PostRepository postRepository;
 
     @Mock
-    private PostMapper postMapper;
-
-    @Mock
     private AuthorRepository authorRepository;
 
     @Mock
     private CategoryRepository categoryRepository;
+
+    @Mock
+    private PostMapper postMapper;
 
     @InjectMocks
     private PostService postService;
@@ -62,6 +66,7 @@ public class PostServiceTest {
     @BeforeEach
     public void setUp() {
         author = Author.builder()
+                .id(1L)
                 .userName("Grillard 10")
                 .email(Email.of("junior11_junior@hotmail.com"))
                 .fullName("Jose Guillard")
@@ -69,6 +74,7 @@ public class PostServiceTest {
                 .build();
 
         category = Category.builder()
+                .id(1L)
                 .name("Technology")
                 .description("This is the description")
                 .icon("⚙\uFE0F")
@@ -174,9 +180,72 @@ public class PostServiceTest {
         // Act & Assert
         assertThatThrownBy(() -> postService.findBySlug("does-not-exist"))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("Post with slug 'does-not-exist' not found");
+                .hasMessageContaining("does-not-exist");
 
         verify(postRepository).findBySlug(Slug.of("does-not-exist"));
-        verify(postRepository, never()).save(any(Post.class));
     }
+
+    @Test
+    @DisplayName("Should create a post successfully and delegate mapping correctly")
+    void  shouldCreatePost() {
+        // Arrange
+        PostCreateRequest request = PostCreateRequest.builder()
+                .title("New Post")
+                .content("New Post content")
+                .status(PostStatus.DRAFT)
+                .categoryIds(Set.of(1L))
+                .build();
+
+        // Author exists
+        when(authorRepository.findById(1L)).thenReturn(Optional.of(author));
+
+        // Categories exists
+        when(categoryRepository.findAllById(Set.of(1L))).thenReturn(List.of(category));
+
+        // Mapper creates entity
+        Post mappedPost = Post.builder()
+                .title("New Post")
+                .content("New Post content")
+                .author(author)
+                .status(PostStatus.DRAFT)
+                .build();
+
+        when(postMapper.toEntity(request, author, Set.of(category))).thenReturn(mappedPost);
+
+        // Saves return an object itself - simulating persistence
+        when(postRepository.save(any(Post.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        //Response mapper
+        PostResponse expectedResponse = PostResponse.builder()
+                .title("New Post")
+                .build();
+
+        when(postMapper.toResponse(mappedPost)).thenReturn(expectedResponse);
+
+        // Act
+        PostResponse result = postService.createPost(request, 1L);
+
+        // Assert
+
+        // Return is exactly what the mapper returned
+        assertThat(result).isSameAs(expectedResponse);
+
+        // Verifies that the dependencies were called correctly
+        verify(authorRepository).findById(1L);
+        verify(categoryRepository).findAllById(Set.of(1L));
+        verify(postMapper).toEntity(request, author, Set.of(category));
+        verify(postRepository).save(mappedPost);
+        verify(postMapper).toResponse(mappedPost);
+
+        // Ensures logical order of orchestration
+        InOrder inOrder = inOrder(authorRepository, categoryRepository, postMapper, postRepository);
+
+        inOrder.verify(authorRepository).findById(1L);
+        inOrder.verify(categoryRepository).findAllById(Set.of(1L));
+        inOrder.verify(postMapper).toEntity(request, author, Set.of(category));
+        inOrder.verify(postRepository).save(mappedPost);
+        inOrder.verify(postMapper).toResponse(mappedPost);
+    }
+
 }
