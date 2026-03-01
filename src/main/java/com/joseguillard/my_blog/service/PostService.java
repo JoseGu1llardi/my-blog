@@ -223,7 +223,7 @@ public class PostService {
     @Transactional
     public void deletePost(Long id) {
         if (!postRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Post does not exists");
+            throw new ResourceNotFoundException("Post does not exist");
         }
         postRepository.deleteById(id);
     }

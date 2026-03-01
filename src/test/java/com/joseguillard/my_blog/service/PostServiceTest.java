@@ -292,7 +292,7 @@ public class PostServiceTest {
 
         assertThatThrownBy(() -> postService.deletePost(1L))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("Post does not exists");
+                .hasMessageContaining("Post does not exist");
 
         verify(postRepository).existsById(1L);
         verify(postRepository, never()).deleteById(1L);
