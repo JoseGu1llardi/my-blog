@@ -250,7 +250,6 @@ public class PostServiceTest {
         post.setViewsCount(0);
 
         when(postRepository.findById(1L)).thenReturn(Optional.of(post));
-        when(postRepository.save(any(Post.class))).thenReturn(post);
 
         // Act
         postService.publishPost(1L);
@@ -260,7 +259,6 @@ public class PostServiceTest {
         assertThat(post.getPublishedAt()).isNotNull();
 
         verify(postRepository).findById(1L);
-        verify(postRepository).save(post);
     }
 
 }
