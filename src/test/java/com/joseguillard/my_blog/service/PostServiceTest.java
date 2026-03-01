@@ -248,4 +248,26 @@ public class PostServiceTest {
         inOrder.verify(postMapper).toResponse(mappedPost);
     }
 
+    @Test
+    @DisplayName("Should publish a post")
+    void shouldPublishPost() {
+        // Arrange
+        post.setStatus(PostStatus.DRAFT);
+        post.setPublishedAt(null);
+        post.setViewsCount(0);
+
+        when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+        when(postRepository.save(any(Post.class))).thenReturn(post);
+
+        // Act
+        postService.publishPost(1L);
+
+        // Assert
+        assertThat(post.getStatus()).isEqualTo(PostStatus.PUBLISHED);
+        assertThat(post.getPublishedAt()).isNotNull();
+
+        verify(postRepository).findById(1L);
+        verify(postRepository).save(post);
+    }
+
 }
