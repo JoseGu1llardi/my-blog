@@ -63,6 +63,7 @@ public class PostControllerTest {
                 .title("Post Title")
                 .content("Content")
                 .author(author)
+                .slug("post-title")
                 .status(PostStatus.PUBLISHED)
                 .publishedAt(FIXED_DATE)
                 .build();
@@ -93,5 +94,20 @@ public class PostControllerTest {
                         .value("Post Title"));
 
         verify(postService).getPublishedPosts(any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/posts/{slug} should return a post")
+    void shouldReturnPostBySlug() throws Exception {
+        when(postService.findBySlugAndIncrementViews("post-title"))
+                .thenReturn(postResponse);
+
+        mockMvc.perform(get("/api/v1/posts/{slug}", "post-title"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.slug").value("post-title"))
+                .andExpect(jsonPath("$.data.title").value("Post Title"));
+
+        verify(postService).findBySlugAndIncrementViews("post-title");
     }
 }
