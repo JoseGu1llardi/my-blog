@@ -10,8 +10,8 @@ import com.joseguillard.my_blog.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,10 +27,8 @@ public class PostController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<PostSummaryResponse>>> getAllPosts(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @PageableDefault(size = 10) Pageable pageable
     ) {
-        Pageable pageable = PageRequest.of(page, size);
         Page<PostSummaryResponse> pageResponse = postService.getPublishedPosts(pageable);
 
         return ResponseEntity.ok(
@@ -59,10 +57,8 @@ public class PostController {
     @GetMapping("/category/{slug}")
     public ResponseEntity<ApiResponse<PageResponse<PostSummaryResponse>>> getPostsByCategory(
             @PathVariable String slug,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @PageableDefault(size = 10) Pageable pageable
     ) {
-        Pageable pageable = PageRequest.of(page, size);
         Page<PostSummaryResponse> responses = postService.getPostsByCategory(slug, pageable);
 
         return ResponseEntity.ok(ApiResponse.success(PageResponse.of(responses)));
@@ -71,10 +67,8 @@ public class PostController {
     @GetMapping("/author/{slug}")
     public ResponseEntity<ApiResponse<PageResponse<PostSummaryResponse>>> getPostsByAuthor(
             @PathVariable String slug,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @PageableDefault(size = 10, sort = "publishedAt") Pageable pageable
     ) {
-        Pageable pageable = PageRequest.of(page, size);
         Page<PostSummaryResponse> responses = postService.getPostByAuthor(slug, pageable);
 
         return ResponseEntity.ok(ApiResponse.success(PageResponse.of(responses)));
@@ -83,10 +77,8 @@ public class PostController {
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<PageResponse<PostSummaryResponse>>> searchPosts(
             @RequestParam String query,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @PageableDefault(size = 10) Pageable pageable
     ) {
-        Pageable pageable = PageRequest.of(page, size);
         Page<PostSummaryResponse> responses = postService.searchPosts(query, pageable);
 
         return ResponseEntity.ok(ApiResponse.success(PageResponse.of(responses)));
@@ -109,7 +101,7 @@ public class PostController {
             ) {
         PostResponse post = postService.createPost(request, authorId);
 
-        URI location = URI.create("/api/v1/posts/" + post.getId());
+        URI location = URI.create("/api/v1/posts/" + post.getSlug());
 
         return ResponseEntity
                 .created(location)
