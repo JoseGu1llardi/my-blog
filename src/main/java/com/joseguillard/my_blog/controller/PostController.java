@@ -1,6 +1,5 @@
 package com.joseguillard.my_blog.controller;
 
-import com.joseguillard.my_blog.dto.mapper.PostMapper;
 import com.joseguillard.my_blog.dto.request.post.PostCreateRequest;
 import com.joseguillard.my_blog.dto.request.post.PostUpdateRequest;
 import com.joseguillard.my_blog.dto.response.ApiResponse;
@@ -13,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

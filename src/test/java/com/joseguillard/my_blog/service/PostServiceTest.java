@@ -1,9 +1,7 @@
 package com.joseguillard.my_blog.service;
 
-import com.joseguillard.my_blog.dto.mapper.AuthorMapper;
 import com.joseguillard.my_blog.dto.mapper.PostMapper;
 import com.joseguillard.my_blog.dto.request.post.PostCreateRequest;
-import com.joseguillard.my_blog.dto.response.author.AuthorSummaryResponse;
 import com.joseguillard.my_blog.dto.response.post.PostResponse;
 import com.joseguillard.my_blog.dto.response.post.PostSummaryResponse;
 import com.joseguillard.my_blog.entity.Author;
