@@ -4,9 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.joseguillard.my_blog.dto.response.author.AuthorSummaryResponse;
 import com.joseguillard.my_blog.dto.response.post.PostResponse;
 import com.joseguillard.my_blog.dto.response.post.PostSummaryResponse;
-import com.joseguillard.my_blog.entity.Author;
 import com.joseguillard.my_blog.entity.enums.PostStatus;
-import com.joseguillard.my_blog.entity.vo.Slug;
+import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.service.PostService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -109,5 +108,18 @@ public class PostControllerTest {
                 .andExpect(jsonPath("$.data.title").value("Post Title"));
 
         verify(postService).findBySlugAndIncrementViews("post-title");
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/posts/{slug} should return 404 when post not found")
+    void shouldReturn404WhenPostNotFound() throws Exception {
+        when(postService.findBySlugAndIncrementViews("post-does-not-exist"))
+                .thenThrow(ResourceNotFoundException.postNotFound("post-does-not-exist"));
+
+        mockMvc.perform(get("/api/v1/posts/{slug}",  "post-does-not-exist"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("RESOURCE_NOT_FOUND"));
+
+        verify(postService).findBySlugAndIncrementViews("post-does-not-exist");
     }
 }
