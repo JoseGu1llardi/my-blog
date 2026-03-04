@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -135,7 +136,8 @@ public class PostControllerTest {
                 .status(PostStatus.DRAFT)
                 .build();
 
-        when(postService.createPost(request, 1L)).thenReturn(postResponse);
+        when(postService.createPost(any(PostCreateRequest.class), eq(1L)))
+                .thenReturn(postResponse);
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/posts")
@@ -144,6 +146,7 @@ public class PostControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.title").value("Post Title"))
                 .andExpect(jsonPath("$.message").value("Post created successfully"));
     }
 }
