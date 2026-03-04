@@ -1,6 +1,7 @@
 package com.joseguillard.my_blog.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.joseguillard.my_blog.dto.request.post.PostCreateRequest;
 import com.joseguillard.my_blog.dto.response.author.AuthorSummaryResponse;
 import com.joseguillard.my_blog.dto.response.post.PostResponse;
 import com.joseguillard.my_blog.dto.response.post.PostSummaryResponse;
@@ -17,6 +18,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -121,5 +123,27 @@ public class PostControllerTest {
                 .andExpect(jsonPath("$.error").value("RESOURCE_NOT_FOUND"));
 
         verify(postService).findBySlugAndIncrementViews("post-does-not-exist");
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/posts?authorId= should create a post")
+    void  shouldCreatePost() throws Exception {
+        // Arrange
+        PostCreateRequest request = PostCreateRequest.builder()
+                .title("Post Title")
+                .content("Content")
+                .status(PostStatus.DRAFT)
+                .build();
+
+        when(postService.createPost(request, 1L)).thenReturn(postResponse);
+
+        // Act & Assert
+        mockMvc.perform(post("/api/v1/posts")
+                .param("authorId", "1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Post created successfully"));
     }
 }
