@@ -127,7 +127,7 @@ public class PostControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/v1/posts?authorId= should create a post")
+    @DisplayName("POST /api/v1/posts should create a post")
     void  shouldCreatePost() throws Exception {
         // Arrange
         PostCreateRequest request = PostCreateRequest.builder()
@@ -148,5 +148,26 @@ public class PostControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.title").value("Post Title"))
                 .andExpect(jsonPath("$.message").value("Post created successfully"));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/posts should return 400 with invalid validation")
+    void shouldReturn400WithInvalidData() throws Exception {
+        // Arrange - request without title (required field)
+        PostCreateRequest request = PostCreateRequest.builder()
+                .content("Content")
+                .build();
+
+        // Act & Assert
+        mockMvc.perform(post("/api/v1/posts")
+                .param("authorId", "1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.errors").isArray())
+                .andExpect(jsonPath("$.errors").isNotEmpty())
+                .andExpect(jsonPath("$.errors", org.hamcrest.Matchers.hasSize(1)))
+                .andExpect(jsonPath("$.errors[0].field").value("title"));
     }
 }
