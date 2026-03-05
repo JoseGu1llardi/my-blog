@@ -83,13 +83,25 @@ public class PostApiIntegrationTest {
 
         // Search created post
         given()
-            .when()
-                .get("/posts/" + slug)
-            .then()
-                .statusCode(200)
-                .body("success", equalTo(true))
-                .body("data.title", equalTo("Integration Test Post"))
-                .body("data.content", equalTo("This is an Integration Test Post"))
-                .body("data.viewCount", equalTo(1));
+        .when()
+            .get("/posts/" + slug)
+        .then()
+            .statusCode(200)
+            .body("success", equalTo(true))
+            .body("data.title", equalTo("Integration Test Post"))
+            .body("data.content", equalTo("This is an Integration Test Post"))
+            .body("data.viewCount", equalTo(1));
+
+        // List posts
+        given()
+            .queryParam("page", 0)
+            .queryParam("size", 10)
+        .when()
+            .get("/posts")
+        .then()
+            .statusCode(200)
+            .body("success", equalTo(true))
+            .body("data.content", hasSize(1))
+            .body("data.totalElements", equalTo(1));
     }
 }
