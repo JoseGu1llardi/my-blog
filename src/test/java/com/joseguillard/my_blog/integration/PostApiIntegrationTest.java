@@ -81,15 +81,15 @@ public class PostApiIntegrationTest {
                 .extract()
                     .path("data.slug");
 
-                // Search created post
-                given()
-                .when()
-                    .get("/posts/" + slug)
-                .then()
-                    .statusCode(200)
-                        .body("success", equalTo(true))
-                        .body("data.title", equalTo("Integration Test Post"))
-                        .body("data.content", equalTo("This is an Integration Test Post"))
-                        .body("data.viewCount", equalTo(1));
+        // Search created post
+        given()
+            .when()
+                .get("/posts/" + slug)
+            .then()
+                .statusCode(200)
+                .body("success", equalTo(true))
+                .body("data.title", equalTo("Integration Test Post"))
+                .body("data.content", equalTo("This is an Integration Test Post"))
+                .body("data.viewCount", equalTo(1));
     }
 }
