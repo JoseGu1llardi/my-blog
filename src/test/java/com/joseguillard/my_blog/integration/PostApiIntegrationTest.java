@@ -66,19 +66,30 @@ public class PostApiIntegrationTest {
                 .build();
 
         String slug = given()
-                .contentType(ContentType.JSON)
-                .queryParam("authorId", author.getId())
-                .body(createRequest)
+                    .contentType(ContentType.JSON)
+                    .queryParam("authorId", author.getId())
+                    .body(createRequest)
                 .when()
-                .post("/posts")
+                    .post("/posts")
                 .then()
-                .statusCode(201)
-                .body("success", equalTo(true))
-                .body("message", containsString("created"))
-                .body("data.slug", containsString("integration-test-post"))
-                .body("data.title", containsString("Integration Test Post"))
-                .body("data.status", equalTo("PUBLISHED"))
+                    .statusCode(201)
+                    .body("success", equalTo(true))
+                    .body("message", containsString("created"))
+                    .body("data.slug", containsString("integration-test-post"))
+                    .body("data.title", containsString("Integration Test Post"))
+                    .body("data.status", equalTo("PUBLISHED"))
                 .extract()
-                .path("data.slug");
+                    .path("data.slug");
+
+                // Search created post
+                given()
+                .when()
+                    .get("/posts/" + slug)
+                .then()
+                    .statusCode(200)
+                        .body("success", equalTo(true))
+                        .body("data.title", equalTo("Integration Test Post"))
+                        .body("data.content", equalTo("This is an Integration Test Post"))
+                        .body("data.viewCount", equalTo(1));
     }
 }
