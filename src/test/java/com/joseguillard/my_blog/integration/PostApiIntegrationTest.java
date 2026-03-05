@@ -73,11 +73,11 @@ public class PostApiIntegrationTest {
                     .post("/posts")
                 .then()
                     .statusCode(201)
-                    .body("success", equalTo(true))
-                    .body("message", containsString("created"))
-                    .body("data.slug", containsString("integration-test-post"))
-                    .body("data.title", containsString("Integration Test Post"))
-                    .body("data.status", equalTo("PUBLISHED"))
+                        .body("success", equalTo(true))
+                        .body("message", containsString("created"))
+                        .body("data.slug", containsString("integration-test-post"))
+                        .body("data.title", containsString("Integration Test Post"))
+                        .body("data.status", equalTo("PUBLISHED"))
                 .extract()
                     .path("data.slug");
 
@@ -87,10 +87,10 @@ public class PostApiIntegrationTest {
             .get("/posts/" + slug)
         .then()
             .statusCode(200)
-            .body("success", equalTo(true))
-            .body("data.title", equalTo("Integration Test Post"))
-            .body("data.content", equalTo("This is an Integration Test Post"))
-            .body("data.viewCount", equalTo(1));
+                .body("success", equalTo(true))
+                .body("data.title", equalTo("Integration Test Post"))
+                .body("data.content", equalTo("This is an Integration Test Post"))
+                .body("data.viewCount", equalTo(1));
 
         // List posts
         given()
@@ -100,8 +100,17 @@ public class PostApiIntegrationTest {
             .get("/posts")
         .then()
             .statusCode(200)
-            .body("success", equalTo(true))
-            .body("data.content", hasSize(1))
-            .body("data.totalElements", equalTo(1));
+                .body("success", equalTo(true))
+                .body("data.content", hasSize(1))
+                .body("data.totalElements", equalTo(1));
+
+        // Search again should increase views
+        given()
+        .when()
+            .get("/posts/" + slug)
+        .then()
+            .statusCode(200)
+                .body("success", equalTo(true))
+                .body("data.viewCount", equalTo(2));
     }
 }
