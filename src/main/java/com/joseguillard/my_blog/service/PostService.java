@@ -71,9 +71,11 @@ public class PostService {
     /**
      * Search Post by Slug without increment views (for admin)
      */
-    public Post findBySlug(String slug) {
-        return postRepository.findBySlug(Slug.of(slug))
+    public PostResponse findBySlug(String slug) {
+        Post response =  postRepository.findBySlug(Slug.of(slug))
                 .orElseThrow(() -> ResourceNotFoundException.postNotFound(slug));
+
+        return postMapper.toResponse(response);
     }
 
     /**
