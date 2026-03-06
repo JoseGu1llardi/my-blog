@@ -6,6 +6,7 @@ import com.joseguillard.my_blog.entity.Author;
 import com.joseguillard.my_blog.entity.enums.PostStatus;
 import com.joseguillard.my_blog.entity.enums.UserRole;
 import com.joseguillard.my_blog.entity.vo.Email;
+import com.joseguillard.my_blog.exception.ApiErrorType;
 import com.joseguillard.my_blog.repository.AuthorRepository;
 import com.joseguillard.my_blog.repository.PostRepository;
 import io.restassured.RestAssured;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 
 import static io.restassured.RestAssured.given;
@@ -135,5 +137,20 @@ public class PostApiIntegrationTest {
                 .body("data.title", equalTo("Integration Test Post"))
                 .body("data.content", equalTo("This is an updating Integration Test Post"))
                 .body("data.slug", equalTo("new-slug-update"));
+
+        // Delete a post
+        given()
+        .when()
+            .delete("/posts/" + id)
+        .then()
+            .statusCode(200);
+
+        // Verify if it´s gone
+        given()
+        .when()
+            .get("/posts/" + slug)
+        .then()
+            .statusCode(404)
+            .body("error", equalTo(ApiErrorType.RESOURCE_NOT_FOUND.name()));
     }
 }
