@@ -1,6 +1,7 @@
 package com.joseguillard.my_blog.integration;
 
 import com.joseguillard.my_blog.dto.request.post.PostCreateRequest;
+import com.joseguillard.my_blog.dto.request.post.PostUpdateRequest;
 import com.joseguillard.my_blog.entity.Author;
 import com.joseguillard.my_blog.entity.enums.PostStatus;
 import com.joseguillard.my_blog.entity.enums.UserRole;
@@ -82,7 +83,7 @@ public class PostApiIntegrationTest {
                     .path("data.slug");
 
         // Search created post
-        given()
+        int id = given()
         .when()
             .get("/posts/" + slug)
         .then()
@@ -90,7 +91,9 @@ public class PostApiIntegrationTest {
                 .body("success", equalTo(true))
                 .body("data.title", equalTo("Integration Test Post"))
                 .body("data.content", equalTo("This is an Integration Test Post"))
-                .body("data.viewCount", equalTo(1));
+                .body("data.viewCount", equalTo(1))
+        .extract()
+               .path("data.id");
 
         // List posts
         given()
@@ -112,5 +115,25 @@ public class PostApiIntegrationTest {
             .statusCode(200)
                 .body("success", equalTo(true))
                 .body("data.viewCount", equalTo(2));
+
+        // Update post
+        PostUpdateRequest updateRequest = PostUpdateRequest.builder()
+                .title("Integration Test Post")
+                .slug("new-slug-update")
+                .content("This is an updating Integration Test Post")
+                .excerpt("Updating the excerpt")
+                .build();
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(updateRequest)
+        .when()
+            .put("/posts/" + id)
+                .then()
+                .statusCode(200)
+                .body("success", equalTo(true))
+                .body("data.title", equalTo("Integration Test Post"))
+                .body("data.content", equalTo("This is an updating Integration Test Post"))
+                .body("data.slug", equalTo("new-slug-update"));
     }
 }
