@@ -22,7 +22,8 @@ public class ApiExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(
             ResourceNotFoundException ex,
-            HttpServletRequest request) {
+            HttpServletRequest request
+    ) {
         // Builds error response with request details
         ErrorResponse error = ErrorResponse.builder()
                 .status(HttpStatus.NOT_FOUND.value())
@@ -76,10 +77,27 @@ public class ApiExceptionHandler {
     @ExceptionHandler(DuplicatedResourceException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateResource(
             DuplicatedResourceException ex,
-            HttpServletRequest request) {
+            HttpServletRequest request
+    ) {
         ErrorResponse error = ErrorResponse.builder()
                 .status(HttpStatus.CONFLICT.value())
                 .error(ApiErrorType.DUPLICATED_RESOURCE.name())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(PostStateConflictException.class)
+    public ResponseEntity<ErrorResponse> handlePostStateConflictException(
+            PostStateConflictException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponse error = ErrorResponse.builder()
+                .status(HttpStatus.CONFLICT.value())
+                .error(ApiErrorType.STATE_CONFLICT.name())
                 .message(ex.getMessage())
                 .path(request.getRequestURI())
                 .timestamp(LocalDateTime.now())
@@ -118,7 +136,8 @@ public class ApiExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessGenericException(
             BusinessException ex,
-            HttpServletRequest request) {
+            HttpServletRequest request
+    ) {
         // Builds error response with an exception message and request path
         ErrorResponse error = ErrorResponse.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())

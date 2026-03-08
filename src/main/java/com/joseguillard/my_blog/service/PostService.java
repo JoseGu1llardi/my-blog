@@ -6,6 +6,8 @@ import com.joseguillard.my_blog.dto.request.post.PostUpdateRequest;
 import com.joseguillard.my_blog.dto.response.post.PostResponse;
 import com.joseguillard.my_blog.dto.response.post.PostSummaryResponse;
 import com.joseguillard.my_blog.exception.BusinessException;
+import com.joseguillard.my_blog.exception.DuplicatedResourceException;
+import com.joseguillard.my_blog.exception.PostStateConflictException;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.entity.Author;
 import com.joseguillard.my_blog.entity.Category;
@@ -158,7 +160,7 @@ public class PostService {
         Slug slug = Slug.of(slugValue);
 
         if (postRepository.existsBySlug(slug)) {
-            throw new BusinessException("Slug already exists");
+            throw new DuplicatedResourceException("Slug already exists");
         }
 
         Post post = postMapper.toEntity(request, author, categories);
@@ -198,7 +200,7 @@ public class PostService {
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
 
         if (post.isPublished()) {
-            throw new BusinessException("Post is already published");
+            throw new PostStateConflictException("Post is already published");
         }
 
         post.publish();
@@ -213,7 +215,7 @@ public class PostService {
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
 
         if (!post.isPublished()) {
-            throw new BusinessException("Post is not published");
+            throw new PostStateConflictException("Post is not published");
         }
 
         post.unpublish();
