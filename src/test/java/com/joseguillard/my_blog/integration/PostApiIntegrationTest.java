@@ -153,4 +153,17 @@ public class PostApiIntegrationTest {
             .statusCode(404)
             .body("error", equalTo(ApiErrorType.RESOURCE_NOT_FOUND.name()));
     }
+
+    @Test
+    @DisplayName("Should return 404 when searching for missing post")
+    void shouldReturn404ForNonExistingPost() {
+        given()
+        .when()
+                .get("/posts/post-does-not-exist")
+                .then()
+                .statusCode(404)
+                .body("status", equalTo(404))
+                .body("error", equalTo(ApiErrorType.RESOURCE_NOT_FOUND.name()))
+                .body("message", containsString("not found"));
+    }
 }
