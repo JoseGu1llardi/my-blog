@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 
 import static io.restassured.RestAssured.given;
@@ -159,11 +158,30 @@ public class PostApiIntegrationTest {
     void shouldReturn404ForNonExistingPost() {
         given()
         .when()
-                .get("/posts/post-does-not-exist")
-                .then()
-                .statusCode(404)
-                .body("status", equalTo(404))
-                .body("error", equalTo(ApiErrorType.RESOURCE_NOT_FOUND.name()))
-                .body("message", containsString("not found"));
+            .get("/posts/post-does-not-exist")
+        .then()
+            .statusCode(404)
+            .body("status", equalTo(404))
+            .body("error", equalTo(ApiErrorType.RESOURCE_NOT_FOUND.name()))
+            .body("message", containsString("not found"));
+    }
+
+    @Test
+    @DisplayName("Should validate required fields to create post")
+    void shouldValidateRequiredFields() {
+        PostCreateRequest invalidRequest = PostCreateRequest.builder()
+                .content("This is an Integration Test Post")
+                .build();
+
+        given()
+            .contentType(ContentType.JSON)
+            .queryParam("authorId", author.getId())
+            .body(invalidRequest)
+        .when()
+            .post("/posts")
+        .then()
+            .statusCode(400)
+            .body("error", equalTo(ApiErrorType.VALIDATION_ERROR.name()))
+            .body("errors[0].field", equalTo("title"));
     }
 }
