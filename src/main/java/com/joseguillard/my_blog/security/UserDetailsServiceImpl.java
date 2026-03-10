@@ -1,6 +1,5 @@
 package com.joseguillard.my_blog.security;
 
-import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.repository.AuthorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
