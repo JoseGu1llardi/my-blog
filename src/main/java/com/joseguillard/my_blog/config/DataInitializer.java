@@ -11,6 +11,7 @@ import com.joseguillard.my_blog.repository.AuthorRepository;
 import com.joseguillard.my_blog.repository.CategoryRepository;
 import com.joseguillard.my_blog.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,6 +27,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
 
+    @Value("${app.init.password}")
+    private String authorPassword;
+
     private final AuthorRepository authorRepository;
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
@@ -37,13 +41,13 @@ public class DataInitializer implements CommandLineRunner {
      */
     @Override
     public void run(String... args) {
-        if (authorRepository.count() > 0 && postRepository.count() > 0) return;
+        if (authorRepository.count() > 0 || postRepository.count() > 0) return;
 
         // Builds author with encoded password and metadata
         Author author = Author.builder()
                 .userName("Jose Guillard")
                 .email(Email.of("junior11_junior@hotmail.com"))
-                .password(passwordEncoder.encode("joseguillard"))
+                .password(passwordEncoder.encode(authorPassword))
                 .fullName("Jose Wellington Ribeiro")
                 .bio("Software engineer documenting my learning journey.")
                 .avatarUrl("https://avatars.githubusercontent.com/u/63321040?v=4")
