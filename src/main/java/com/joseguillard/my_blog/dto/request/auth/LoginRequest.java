@@ -1,4 +1,4 @@
-package com.joseguillard.my_blog.dto.request;
+package com.joseguillard.my_blog.dto.request.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
