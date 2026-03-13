@@ -6,6 +6,7 @@ import com.joseguillard.my_blog.dto.response.ApiResponse;
 import com.joseguillard.my_blog.dto.response.PageResponse;
 import com.joseguillard.my_blog.dto.response.post.PostResponse;
 import com.joseguillard.my_blog.dto.response.post.PostSummaryResponse;
+import com.joseguillard.my_blog.entity.Author;
 import com.joseguillard.my_blog.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -97,9 +99,9 @@ public class PostController {
     @PostMapping
     public ResponseEntity<ApiResponse<PostResponse>> createPost(
             @Valid @RequestBody PostCreateRequest request,
-            @RequestParam Long authorId
+            @AuthenticationPrincipal Author author
             ) {
-        PostResponse post = postService.createPost(request, authorId);
+        PostResponse post = postService.createPost(request, author.getId());
 
         URI location = URI.create("/api/v1/posts/" + post.getSlug());
 

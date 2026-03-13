@@ -1,7 +1,7 @@
 package com.joseguillard.my_blog.service;
 
 import com.joseguillard.my_blog.dto.request.auth.LoginRequest;
-import com.joseguillard.my_blog.dto.response.AuthenticationResponse;
+import com.joseguillard.my_blog.dto.response.AuthResponse;
 import com.joseguillard.my_blog.entity.Author;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.repository.AuthorRepository;
@@ -19,7 +19,7 @@ public class AuthService {
     private final AuthorRepository authorRepository;
     private final JwtService jwtService;
 
-    public AuthenticationResponse login(LoginRequest request) {
+    public AuthResponse login(LoginRequest request) {
         // Authenticate - throws if credentials are wrong
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -37,7 +37,7 @@ public class AuthService {
         String token = jwtService.generateToken(request.getUsername());
 
         // Return token + basic user info
-        return AuthenticationResponse.builder()
+        return AuthResponse.builder()
                 .token(token)
                 .username(author.getUsername())
                 .fullName(author.getFullName())
