@@ -14,7 +14,7 @@ public class AuthorMapper {
         // Maps author ID, username, full name, and slug
         return AuthorResponse.builder()
                 .id(author.getId())
-                .username(author.getUserName())
+                .username(author.getUsername())
                 .fullName(author.getFullName())
                 .slug(author.getSlug().getValue())
                 .bio(author.getBio())
