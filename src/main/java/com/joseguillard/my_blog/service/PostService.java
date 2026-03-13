@@ -18,6 +18,7 @@ import com.joseguillard.my_blog.repository.AuthorRepository;
 import com.joseguillard.my_blog.repository.CategoryRepository;
 import com.joseguillard.my_blog.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -159,15 +160,15 @@ public class PostService {
 
         Slug slug = Slug.of(slugValue);
 
-        if (postRepository.existsBySlug(slug)) {
-            throw new DuplicatedResourceException("Slug already exists");
-        }
-
         Post post = postMapper.toEntity(request, author, categories);
         post.setSlug(slug); // Ensure the generated slug is set
-        Post createdPost = postRepository.save(post);
 
-        return postMapper.toResponse(createdPost);
+        try {
+            Post createdPost = postRepository.save(post);
+            return postMapper.toResponse(createdPost);
+        } catch (DataIntegrityViolationException e) {
+            throw new DuplicatedResourceException("Post already exists: " + slug.getValue());
+        }
     }
 
     /**
