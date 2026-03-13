@@ -21,5 +21,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     @Query("SELECT c FROM Category c WHERE SIZE(c.posts) > 0 ORDER BY c.name")
     List<Category> findCategoriesWithPosts();
 
+    @Query("SELECT COUNT(p) FROM Post p JOIN p.categories c WHERE c = :category")
+    int countPostsByCategory(Category category);
+
     List<Category> findAllByOrderByNameAsc();
 }

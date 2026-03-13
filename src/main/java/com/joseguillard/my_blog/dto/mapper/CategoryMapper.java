@@ -4,10 +4,14 @@ import com.joseguillard.my_blog.dto.request.CategoryCreateRequest;
 import com.joseguillard.my_blog.dto.response.category.CategoryResponse;
 import com.joseguillard.my_blog.entity.Category;
 import com.joseguillard.my_blog.entity.vo.Slug;
+import com.joseguillard.my_blog.repository.CategoryRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class CategoryMapper {
+    private final CategoryRepository categoryRepository;
 
     public CategoryResponse toResponse(Category category) {
         if (category == null) return null;
@@ -19,7 +23,7 @@ public class CategoryMapper {
                 .slug(category.getSlug().getValue())
                 .description(category.getDescription())
                 .icon(category.getIcon())
-                .postCount(category.getPostCount())
+                .postCount(categoryRepository.countPostsByCategory(category))
                 .build();
     }
 

@@ -48,10 +48,6 @@ public class Category {
         }
     }
 
-    public int getPostCount() {
-        return posts.size();
-    }
-
     /**
      * Compares category equality based on ID and name
      */
