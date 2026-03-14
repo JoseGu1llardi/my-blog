@@ -7,10 +7,12 @@ import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.repository.AuthorRepository;
 import com.joseguillard.my_blog.security.JwtService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -20,6 +22,8 @@ public class AuthService {
     private final JwtService jwtService;
 
     public AuthResponse login(LoginRequest request) {
+        log.info("Login attempt for username '{}'", request.getUsername());
+
         // Authenticate - throws if credentials are wrong
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -35,6 +39,8 @@ public class AuthService {
 
         // Generate token
         String token = jwtService.generateToken(request.getUsername());
+
+        log.info("Login successful for username '{}'", author.getUsername());
 
         // Return token + basic user info
         return AuthResponse.builder()

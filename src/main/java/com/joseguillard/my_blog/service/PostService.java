@@ -18,6 +18,7 @@ import com.joseguillard.my_blog.repository.AuthorRepository;
 import com.joseguillard.my_blog.repository.CategoryRepository;
 import com.joseguillard.my_blog.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -163,10 +165,14 @@ public class PostService {
         Post post = postMapper.toEntity(request, author, categories);
         post.setSlug(slug); // Ensure the generated slug is set
 
+        log.info("Creating post with slug '{}' for authorId {}", slug.getValue(), authorId);
+
         try {
             Post createdPost = postRepository.save(post);
+            log.info("Post created successfully with slug '{}'", slug.getValue());
             return postMapper.toResponse(createdPost);
         } catch (DataIntegrityViolationException e) {
+            log.warn("Slug conflict on post creation: {}", slug.getValue());
             throw new DuplicatedResourceException("Post already exists: " + slug.getValue());
         }
     }
@@ -179,6 +185,8 @@ public class PostService {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
 
+        log.info("Updating post id {}", id);
+
         postMapper.toUpdate(post, request);
 
         if (request.getCategoryIds() != null) {
@@ -189,6 +197,7 @@ public class PostService {
             post.setCategories(categories);
         }
 
+        log.info("Post id {} updated successfully", id);
         return postMapper.toResponse(post);
     }
 
@@ -200,11 +209,15 @@ public class PostService {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
 
+        log.info("Publishing post id {}", id);
+
         if (post.isPublished()) {
+            log.warn("Attempted to publish already published post id {}", id);
             throw new PostStateConflictException("Post is already published");
         }
 
         post.publish();
+        log.info("Post id {} published successfully", id);
     }
 
     /**
@@ -215,11 +228,15 @@ public class PostService {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
 
+        log.info("Unpublishing post id {}", id);
+
         if (!post.isPublished()) {
+            log.warn("Attempted to unpublish non-published post id {}", id);
             throw new PostStateConflictException("Post is not published");
         }
 
         post.unpublish();
+        log.info("Post id {} unpublished successfully", id);
     }
 
     /**
@@ -230,6 +247,10 @@ public class PostService {
         if (!postRepository.existsById(id)) {
             throw new ResourceNotFoundException("Post does not exist");
         }
+
+        log.info("Deleting post id {}", id);
+
         postRepository.deleteById(id);
+        log.info("Post id {} deleted successfully", id);
     }
 }
