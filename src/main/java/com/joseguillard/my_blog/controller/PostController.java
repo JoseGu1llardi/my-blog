@@ -8,6 +8,7 @@ import com.joseguillard.my_blog.dto.response.post.PostResponse;
 import com.joseguillard.my_blog.dto.response.post.PostSummaryResponse;
 import com.joseguillard.my_blog.entity.Author;
 import com.joseguillard.my_blog.service.PostService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -40,8 +41,10 @@ public class PostController {
 
     @GetMapping("/{slug}")
     public ResponseEntity<ApiResponse<PostResponse>> getPostBySlug(
-            @PathVariable String slug) {
-        PostResponse response = postService.findBySlugAndIncrementViews(slug);
+            @PathVariable String slug,
+            HttpServletRequest request) {
+        String ipAddress = request.getRemoteAddr();
+        PostResponse response = postService.findBySlugAndIncrementViews(slug,  ipAddress);
 
         return ResponseEntity.ok(
                 ApiResponse.success(response)

@@ -17,6 +17,7 @@ import com.joseguillard.my_blog.entity.vo.Slug;
 import com.joseguillard.my_blog.repository.AuthorRepository;
 import com.joseguillard.my_blog.repository.CategoryRepository;
 import com.joseguillard.my_blog.repository.PostRepository;
+import com.joseguillard.my_blog.security.ViewRateLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -39,6 +40,7 @@ import java.util.stream.Collectors;
 public class PostService {
 
     private final PostMapper postMapper;
+    private final ViewRateLimiter viewRateLimiter;
 
     private final PostRepository postRepository;
     private final AuthorRepository authorRepository;
@@ -61,13 +63,14 @@ public class PostService {
      * Search Post by Slug (increments view count)
      */
     @Transactional
-    public PostResponse findBySlugAndIncrementViews(String slug) {
+    public PostResponse findBySlugAndIncrementViews(String slug, String ipAddress) {
         Post post = postRepository.findBySlug(Slug.of(slug))
                 .orElseThrow(() -> ResourceNotFoundException.postNotFound(slug));
 
         // Increment view count for published
-        if (post.isPublished()) {
-            post.incrementViewCount();
+        if (post.isPublished() && viewRateLimiter.shouldIncrementView(ipAddress, slug)) {
+                post.incrementViewCount();
+                log.debug("View count incremented for slug '{}' from IP {}", slug, ipAddress);
         }
 
         return postMapper.toResponse(post);
