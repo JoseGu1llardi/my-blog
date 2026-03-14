@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class CategoryMapper {
+
     private final CategoryRepository categoryRepository;
 
     public CategoryResponse toResponse(Category category) {

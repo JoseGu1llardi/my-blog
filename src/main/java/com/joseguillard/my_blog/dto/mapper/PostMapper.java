@@ -119,9 +119,7 @@ public class PostMapper {
                 .featuredImage(post.getFeaturedImage())
                 .publishedAt(post.getPublishedAt())
                 .readingTimeMinutes(post.getReadingTimeMinutes())
-                .authorName(post.getAuthor().getFullName())
-                .authorSlug(post.getAuthor().getSlug().getValue())
-                .authorAvatar(post.getAuthor().getAvatarUrl())
+                .author(authorMapper.toSummaryResponse(post.getAuthor()))
                 .build();
     }
 }

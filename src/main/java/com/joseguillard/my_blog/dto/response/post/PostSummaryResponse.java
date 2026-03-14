@@ -1,5 +1,6 @@
 package com.joseguillard.my_blog.dto.response.post;
 
+import com.joseguillard.my_blog.dto.response.author.AuthorSummaryResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,9 +23,7 @@ public class PostSummaryResponse {
     private LocalDateTime publishedAt;
     private Integer readingTimeMinutes;
 
-    private String authorName;
-    private String authorSlug;
-    private String authorAvatar;
+    private AuthorSummaryResponse author;
 
     public String getFormattedPublishedDate() {
         if (publishedAt == null) return "";
