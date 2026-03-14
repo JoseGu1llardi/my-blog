@@ -137,7 +137,7 @@ public class PostServiceTest {
         when(postMapper.toResponse(any(Post.class))).thenReturn(postResponse);
 
         // Here the real rule is executed
-        PostResponse result = postService.findBySlugAndIncrementViews("post-title");
+        PostResponse result = postService.findBySlugAndIncrementViews("post-title", any(String.class));
 
         // Assert
         assertThat(result).isEqualTo(postResponse);
@@ -161,7 +161,7 @@ public class PostServiceTest {
         when(postMapper.toResponse(any(Post.class))).thenReturn(new PostResponse());
 
         // Act
-        postService.findBySlugAndIncrementViews("post-title");
+        postService.findBySlugAndIncrementViews("post-title", any(String.class));
 
         // Assert
         assertThat(post.getViewsCount()).isEqualTo(0);

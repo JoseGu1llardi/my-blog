@@ -5,13 +5,18 @@ import com.joseguillard.my_blog.dto.request.post.PostCreateRequest;
 import com.joseguillard.my_blog.dto.response.author.AuthorSummaryResponse;
 import com.joseguillard.my_blog.dto.response.post.PostResponse;
 import com.joseguillard.my_blog.dto.response.post.PostSummaryResponse;
+import com.joseguillard.my_blog.entity.Author;
 import com.joseguillard.my_blog.entity.enums.PostStatus;
+import com.joseguillard.my_blog.entity.enums.UserRole;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
+import com.joseguillard.my_blog.security.JwtService;
+import com.joseguillard.my_blog.security.UserDetailsServiceImpl;
 import com.joseguillard.my_blog.service.PostService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -19,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -33,7 +39,10 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(PostController.class)
+@WebMvcTest(
+        controllers = PostController.class,
+        excludeAutoConfiguration = SecurityAutoConfiguration.class
+)
 @AutoConfigureMockMvc(addFilters = false)
 public class PostControllerTest {
 
@@ -45,6 +54,12 @@ public class PostControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockBean
+    private JwtService jwtService;
+
+    @MockBean
+    private UserDetailsServiceImpl userDetailsService;
 
     @MockBean
     private PostService postService;
@@ -60,6 +75,13 @@ public class PostControllerTest {
                 .slug("joseguillard")
                 .build();
 
+        postSummaryResponse = PostSummaryResponse.builder()
+                .id(1L)
+                .title("Post Title")
+                .author(author)
+                .publishedAt(FIXED_DATE)
+                .build();
+
         postResponse = PostResponse.builder()
                 .id(1L)
                 .title("Post Title")
@@ -67,13 +89,6 @@ public class PostControllerTest {
                 .author(author)
                 .slug("post-title")
                 .status(PostStatus.PUBLISHED)
-                .publishedAt(FIXED_DATE)
-                .build();
-
-        postSummaryResponse = PostSummaryResponse.builder()
-                .id(1L)
-                .title("Post Title")
-                .authorName("Jose Guillard")
                 .publishedAt(FIXED_DATE)
                 .build();
     }
@@ -101,7 +116,7 @@ public class PostControllerTest {
     @Test
     @DisplayName("GET /api/v1/posts/{slug} should return a post")
     void shouldReturnPostBySlug() throws Exception {
-        when(postService.findBySlugAndIncrementViews("post-title"))
+        when(postService.findBySlugAndIncrementViews(eq("post-title"), any(String.class)))
                 .thenReturn(postResponse);
 
         mockMvc.perform(get("/api/v1/posts/{slug}", "post-title"))
@@ -110,20 +125,20 @@ public class PostControllerTest {
                 .andExpect(jsonPath("$.data.slug").value("post-title"))
                 .andExpect(jsonPath("$.data.title").value("Post Title"));
 
-        verify(postService).findBySlugAndIncrementViews("post-title");
+        verify(postService).findBySlugAndIncrementViews(eq("post-title"), any(String.class));
     }
 
     @Test
     @DisplayName("GET /api/v1/posts/{slug} should return 404 when post not found")
     void shouldReturn404WhenPostNotFound() throws Exception {
-        when(postService.findBySlugAndIncrementViews("post-does-not-exist"))
+        when(postService.findBySlugAndIncrementViews(eq("post-does-not-exist"), any(String.class)))
                 .thenThrow(ResourceNotFoundException.postNotFound("post-does-not-exist"));
 
         mockMvc.perform(get("/api/v1/posts/{slug}",  "post-does-not-exist"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("RESOURCE_NOT_FOUND"));
 
-        verify(postService).findBySlugAndIncrementViews("post-does-not-exist");
+        verify(postService).findBySlugAndIncrementViews(eq("post-does-not-exist"), any(String.class));
     }
 
     @Test
@@ -136,12 +151,20 @@ public class PostControllerTest {
                 .status(PostStatus.DRAFT)
                 .build();
 
-        when(postService.createPost(any(PostCreateRequest.class), eq(1L)))
+        when(postService.createPost(any(PostCreateRequest.class), any()))
                 .thenReturn(postResponse);
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/posts")
-                .param("authorId", "1")
+                .with(SecurityMockMvcRequestPostProcessors.user(
+                    Author.builder()
+                        .id(1L)
+                        .userName("guillard")
+                        .password("password")
+                        .role(UserRole.AUTHOR)
+                        .active(true)
+                        .build()
+                        ))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
