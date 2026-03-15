@@ -4,6 +4,7 @@ import com.joseguillard.my_blog.entity.enums.PostStatus;
 import com.joseguillard.my_blog.entity.vo.Slug;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -20,6 +21,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@SQLRestriction("deleted = false")
 public class Post {
 
     @Id
@@ -70,6 +72,9 @@ public class Post {
 
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    private boolean deleted = false;
+    private LocalDateTime deletedAt;
 
     /**
      * Sets timestamps; derives slug; sets publication timestamp

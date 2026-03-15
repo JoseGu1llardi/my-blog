@@ -27,10 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -247,13 +244,17 @@ public class PostService {
      */
     @Transactional
     public void deletePost(Long id) {
-        if (!postRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Post does not exist");
-        }
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
 
         log.info("Deleting post id {}", id);
 
-        postRepository.deleteById(id);
+        post.setDeleted(true);
+        post.setDeletedAt(LocalDateTime.now());
+        post.unpublish();
+
+        postRepository.save(post);
+
         log.info("Post id {} deleted successfully", id);
+        }
     }
-}
