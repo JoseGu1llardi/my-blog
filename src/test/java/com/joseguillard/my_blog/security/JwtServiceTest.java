@@ -20,7 +20,6 @@ public class JwtServiceTest {
 
     @BeforeEach
     public void setup() {
-
         // JwtService uses @Value to read secretKey and expiration from application.yml
         // In a unit test, Spring context doesn't run so @Value fields are never injected.
         // ReflectionTestUtils let us set private fields directly by name - bypassing
@@ -77,5 +76,23 @@ public class JwtServiceTest {
         boolean isValid = jwtService.isTokenValid(token, userDetails);
 
         assertThat(isValid).isTrue();
+    }
+
+    @Test
+    @DisplayName("Should return false when uername does not match token")
+    void shouldReturnFalseWhenUsernameDoesNotMatch() {
+        // Generate a token for "grillard" but validates against a different user
+        // isTokenValid() compares extracted username from token vs userDetails.getUsername()
+        // They will not match, so it should return false.
+        UserDetails userDetails = User.withUsername("different-username")
+                .password("password")
+                .authorities(Collections.emptySet())
+                .build();
+
+        String token = jwtService.generateToken("grillard");
+
+        boolean isValid = jwtService.isTokenValid(token, userDetails);
+
+        assertThat(isValid).isFalse();
     }
 }
