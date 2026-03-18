@@ -95,4 +95,24 @@ public class JwtServiceTest {
 
         assertThat(isValid).isFalse();
     }
+
+    @Test
+    @DisplayName("Should return false when token is expired")
+    void shouldReturnFalseWhenTokenIsExpired() {
+        // Setting expiration to -1000L means the token expires 1 minute BEFORE
+        // it was created - it is already expired at the moment of generation.
+        // This is the trick for testing expiry without waiting for real time to pass
+        ReflectionTestUtils.setField(jwtService, "expiration", -1000L);
+
+        UserDetails userDetails = User.withUsername("grillard")
+                .password("password")
+                .authorities(Collections.emptySet())
+                .build();
+
+        String token = jwtService.generateToken("grillard");
+
+        boolean isValid = jwtService.isTokenValid(token, userDetails);
+
+        assertThat(isValid).isFalse();
+    }
 }
