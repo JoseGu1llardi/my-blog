@@ -30,6 +30,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        // Configures a stateless security chain with public routes and JWT filter
         http
             .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers ->

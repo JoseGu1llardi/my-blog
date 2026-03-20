@@ -62,11 +62,15 @@ public class PostServiceTest {
     private Category category;
     private Post post;
 
+    /**
+     * Declares and initializes test fixtures for posts
+     */
     @BeforeEach
     public void setUp() {
+        // Builds author fixture with predefined identity and role
         author = Author.builder()
                 .id(1L)
-                .userName("Grillard 10")
+                .userName("Grillard")
                 .email(Email.of("junior11_junior@hotmail.com"))
                 .fullName("Jose Guillard")
                 .role(UserRole.AUTHOR)
@@ -79,6 +83,7 @@ public class PostServiceTest {
                 .icon("⚙\uFE0F")
                 .build();
 
+        // Builds published post-fixture with author reference
         post = Post.builder()
                 .title("Post title")
                 .content("Post content")
