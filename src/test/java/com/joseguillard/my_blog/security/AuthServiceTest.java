@@ -56,28 +56,53 @@ public class AuthServiceTest {
     @DisplayName("Should authenticate user and return JWT token when credentials are valid")
     void shouldReturnTokenWhenCredentialsAreValid() {
         // Arrange
+
+        // Simulates a valid login request coming from the client
+        // This represents the real input of the method under the test
         LoginRequest request = LoginRequest.builder()
                 .username("joseguillard")
                 .password("password")
                 .build();
 
+        // Mock Spring Security authentication
+        // We are NOT testing AuthenticationManager here
+        // only assuming authentication succeeds (no exception thrown)
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(new UsernamePasswordAuthenticationToken(author.getUsername(), author.getPassword()));
 
-        // Author exists
+        // Mock repository behavior: user exists in the database
+        // This allows the login flow to continue after authentication
         when(authorRepository.findByUserName("joseguillard")).thenReturn(Optional.of(author));
 
+        // Mock JWT generation
+        // We do not care about the real token implementation here,
+        // only that a token is generated and returned correctly
         when(jwtService.generateToken("joseguillard")).thenReturn("fake-token");
 
+        // Act
+
+        // Call the real method under the test
         AuthResponse result = authService.login(request);
 
+        // Assert
+
+        // Verify that the generated token matches the expected value
+        // This confirms that JWT was triggered correctly
         assertThat(result.getToken()).isEqualTo("fake-token");
+
+        // Varify that the correct user data is returned
         assertThat(result.getUsername()).isEqualTo("joseguillard");
 
+        // Ensure the login flow follows the expected order
         InOrder inOrder = inOrder(authenticationManager, authorRepository, jwtService);
 
+        // 1 - Authenticate credentials
         inOrder.verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+
+        // 2 - Fetch user from a repository
         inOrder.verify(authorRepository).findByUserName("joseguillard");
+
+        // 3 - Generate JWT token
         inOrder.verify(jwtService).generateToken(author.getUsername());
     }
 }
