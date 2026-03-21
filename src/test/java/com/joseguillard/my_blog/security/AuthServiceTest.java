@@ -16,10 +16,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -104,5 +106,22 @@ public class AuthServiceTest {
 
         // 3 - Generate JWT token
         inOrder.verify(jwtService).generateToken(author.getUsername());
+    }
+
+    @Test
+    @DisplayName("Should throw BadCredentialsException when credentials are invalid")
+    void shouldThrowBadCredentialsExceptionWhenCredentialsAreInvalid() {
+        LoginRequest request = LoginRequest.builder()
+                .username("joseguillard")
+                .password("password")
+                .build();
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenThrow(BadCredentialsException.class);
+
+        assertThatThrownBy(() -> authService.login(request)).isInstanceOf(BadCredentialsException.class);
+
+        verify(authorRepository, never()).findByUserName(anyString());
+        verify(jwtService, never()).generateToken(anyString());
     }
 }
