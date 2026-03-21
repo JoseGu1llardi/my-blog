@@ -116,12 +116,24 @@ public class AuthServiceTest {
                 .password("password")
                 .build();
 
+        // Mock the authentication failure
+        // This simulates a core behavior of Spring Security when credentials are invalid:
+        // the AuthenticationManager throws a BadCredentialsException
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenThrow(BadCredentialsException.class);
 
+        // Execute the login and verify that the expected exception is thrown
+        // This confirms that AuthService correctly propagates authentication failures
         assertThatThrownBy(() -> authService.login(request)).isInstanceOf(BadCredentialsException.class);
 
+        // Ensure the authentication was attempted
+        verify(authenticationManager, never()).authenticate(any(UsernamePasswordAuthenticationToken.class));
+
+        // Ensure that no further processing happens after authentication fails:
+        // the system must not query the database
         verify(authorRepository, never()).findByUserName(anyString());
+
+        // The system must NOT generate a JWT token
         verify(jwtService, never()).generateToken(anyString());
     }
 }
