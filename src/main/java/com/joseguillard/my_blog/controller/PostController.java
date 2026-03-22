@@ -44,7 +44,7 @@ public class PostController {
             @PathVariable String slug,
             HttpServletRequest request) {
         String ipAddress = request.getRemoteAddr();
-        PostResponse response = postService.findBySlugAndIncrementViews(slug,  ipAddress);
+        PostResponse response = postService.findBySlugAndIncrementViews(slug, ipAddress);
 
         return ResponseEntity.ok(
                 ApiResponse.success(response)
