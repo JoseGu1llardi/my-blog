@@ -12,10 +12,12 @@ import com.joseguillard.my_blog.entity.enums.UserRole;
 import com.joseguillard.my_blog.entity.vo.Email;
 import com.joseguillard.my_blog.entity.vo.Slug;
 import com.joseguillard.my_blog.exception.BusinessException;
+import com.joseguillard.my_blog.exception.PostStateConflictException;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.repository.AuthorRepository;
 import com.joseguillard.my_blog.repository.CategoryRepository;
 import com.joseguillard.my_blog.repository.PostRepository;
+import com.joseguillard.my_blog.security.ViewRateLimiter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -55,6 +57,9 @@ public class PostServiceTest {
     @Mock
     private PostMapper postMapper;
 
+    @Mock
+    private ViewRateLimiter viewRateLimiter;
+
     @InjectMocks
     private PostService postService;
 
@@ -80,7 +85,7 @@ public class PostServiceTest {
                 .id(1L)
                 .name("Technology")
                 .description("This is the description")
-                .icon("⚙\uFE0F")
+                .icon("⚙️")
                 .build();
 
         // Builds published post-fixture with author reference
@@ -92,6 +97,7 @@ public class PostServiceTest {
                 .viewsCount(0)
                 .publishedAt(LocalDateTime.of(
                         2026, Month.FEBRUARY, 2, 20, 10))
+                .deleted(false)
                 .build();
     }
 
@@ -142,7 +148,7 @@ public class PostServiceTest {
         when(postMapper.toResponse(any(Post.class))).thenReturn(postResponse);
 
         // Here the real rule is executed
-        PostResponse result = postService.findBySlugAndIncrementViews("post-title", any(String.class));
+        PostResponse result = postService.findBySlugAndIncrementViews("post-title", "192.168.1.1");
 
         // Assert
         assertThat(result).isEqualTo(postResponse);
@@ -264,40 +270,50 @@ public class PostServiceTest {
         verify(postRepository).findById(1L);
     }
 
+    /**
+     * Verifies exception thrown and no save for already-published post
+     */
     @Test
     @DisplayName("Should throw an exception when publishing already published post")
     void shouldThrowExceptionWhenPostAlreadyPublished() {
         when(postRepository.findById(1L)).thenReturn(Optional.of(post));
 
         assertThatThrownBy(() -> postService.publishPost(1L))
-                .isInstanceOf(BusinessException.class)
+                .isInstanceOf(PostStateConflictException.class)
                 .hasMessageContaining("Post is already published");
 
         verify(postRepository, never()).save(any(Post.class));
     }
 
+    /**
+     * Verifies post deletion updates state and persists; confirms repository save invocation
+     */
     @Test
     @DisplayName("Should delete a post")
     void shouldDeletePost() {
-        when(postRepository.existsById(1L)).thenReturn(true);
+        when(postRepository.findById(1L)).thenReturn(Optional.ofNullable(post));
 
         // Act
         postService.deletePost(1L);
 
-        verify(postRepository).existsById(1L);
-        verify(postRepository).deleteById(1L);
+        assertThat(post.isDeleted()).isTrue();
+        assertThat(post.getDeletedAt()).isNotNull();
+        assertThat(post.getStatus()).isEqualTo(PostStatus.DRAFT);
+
+        verify(postRepository).save(post);
     }
 
+    /**
+     * Verifies exception thrown for non-existing post-deletion; confirms no save occurs
+     */
     @Test
     @DisplayName("Should throw an exception when deleting non-existing post")
     void shouldThrowExceptionWhenDeleteNonExistingPost() {
-        when(postRepository.existsById(1L)).thenReturn(false);
+        when(postRepository.findById(2L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> postService.deletePost(1L))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("Post does not exist");
+        assertThatThrownBy(() -> postService.deletePost(2L))
+                .isInstanceOf(ResourceNotFoundException.class);
 
-        verify(postRepository).existsById(1L);
-        verify(postRepository, never()).deleteById(1L);
+        verify(postRepository, never()).save(post);
     }
 }
