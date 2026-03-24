@@ -147,6 +147,8 @@ public class PostServiceTest {
         // Simulates the mapper
         when(postMapper.toResponse(any(Post.class))).thenReturn(postResponse);
 
+        when(viewRateLimiter.shouldIncrementView("192.168.1.1", "post-title")).thenReturn(Boolean.TRUE);
+
         // Here the real rule is executed
         PostResponse result = postService.findBySlugAndIncrementViews("post-title", "192.168.1.1");
 
@@ -172,7 +174,7 @@ public class PostServiceTest {
         when(postMapper.toResponse(any(Post.class))).thenReturn(new PostResponse());
 
         // Act
-        postService.findBySlugAndIncrementViews("post-title", any(String.class));
+        postService.findBySlugAndIncrementViews("post-title", "192.168.1.1");
 
         // Assert
         assertThat(post.getViewsCount()).isEqualTo(0);
@@ -286,7 +288,7 @@ public class PostServiceTest {
     }
 
     /**
-     * Verifies post deletion updates state and persists; confirms repository save invocation
+     * Verifies post-deletion updates state and persists; confirms repository save invocation
      */
     @Test
     @DisplayName("Should delete a post")
