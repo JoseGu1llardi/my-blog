@@ -67,6 +67,9 @@ public class PostControllerTest {
     private PostResponse  postResponse;
     private PostSummaryResponse postSummaryResponse;
 
+    /**
+     * Initializes mock responses for author and posts
+     */
     @BeforeEach
     void setup() {
         AuthorSummaryResponse author = AuthorSummaryResponse.builder()
@@ -82,6 +85,7 @@ public class PostControllerTest {
                 .publishedAt(FIXED_DATE)
                 .build();
 
+        // Builds full post-response with content and metadata
         postResponse = PostResponse.builder()
                 .id(1L)
                 .title("Post Title")
@@ -113,12 +117,16 @@ public class PostControllerTest {
         verify(postService).getPublishedPosts(any(Pageable.class));
     }
 
+    /**
+     * Verifies endpoint returns post by slug with incremented views; audits service call
+     */
     @Test
     @DisplayName("GET /api/v1/posts/{slug} should return a post")
     void shouldReturnPostBySlug() throws Exception {
         when(postService.findBySlugAndIncrementViews(eq("post-title"), any(String.class)))
                 .thenReturn(postResponse);
 
+        // Performs GET request and asserts successful response status and fields
         mockMvc.perform(get("/api/v1/posts/{slug}", "post-title"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
@@ -128,12 +136,16 @@ public class PostControllerTest {
         verify(postService).findBySlugAndIncrementViews(eq("post-title"), any(String.class));
     }
 
+    /**
+     * Tests endpoint returns 404 when post not found; verifies service call
+     */
     @Test
     @DisplayName("GET /api/v1/posts/{slug} should return 404 when post not found")
     void shouldReturn404WhenPostNotFound() throws Exception {
         when(postService.findBySlugAndIncrementViews(eq("post-does-not-exist"), any(String.class)))
                 .thenThrow(ResourceNotFoundException.postNotFound("post-does-not-exist"));
 
+        // Verifies 404 status and error response for missing post
         mockMvc.perform(get("/api/v1/posts/{slug}",  "post-does-not-exist"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("RESOURCE_NOT_FOUND"));
@@ -156,6 +168,7 @@ public class PostControllerTest {
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/posts")
+                // Authenticates request as an active author user
                 .with(SecurityMockMvcRequestPostProcessors.user(
                     Author.builder()
                         .id(1L)
