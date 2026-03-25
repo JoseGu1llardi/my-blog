@@ -1,5 +1,6 @@
 package com.joseguillard.my_blog.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.joseguillard.my_blog.dto.request.auth.LoginRequest;
 import com.joseguillard.my_blog.dto.response.AuthResponse;
@@ -15,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -73,6 +75,26 @@ public class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.token").value("token"));
+                .andExpect(jsonPath("$.data.token").value("token"))
+                .andExpect(jsonPath("$.data.username").value("username"));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/auth/login should return 401 when credentials are invalid")
+    void shouldReturn401WhenCredentialsAreInvalid() throws Exception {
+        // Arrange
+        LoginRequest request = LoginRequest.builder()
+                .username("username")
+                .password("password")
+                .build();
+
+        when(authService.login(any(LoginRequest.class))).thenThrow(BadCredentialsException.class);
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.message").value("Bad credentials"));
     }
 }
