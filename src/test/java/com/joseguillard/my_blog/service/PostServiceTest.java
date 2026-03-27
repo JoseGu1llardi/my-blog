@@ -164,6 +164,18 @@ public class PostServiceTest {
     }
 
     @Test
+    @DisplayName("Should throw ResourceNotFoundException when post is not published")
+    void shouldThrowExceptionWhenPostIsNotPublished() {
+        when(postRepository.findBySlugAndStatus(Slug.of("post-draft"), PostStatus.PUBLISHED))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> postService.findBySlugAndIncrementViews("post-draft", "192.168.1.1"))
+                .isInstanceOf(ResourceNotFoundException.class);
+
+        verify(viewRateLimiter, never()).shouldIncrementView(any(), any());
+    }
+
+    @Test
     @DisplayName("Should not increment views when post is not published")
     void shouldNotIncrementViewsWhenPostIsNotPublished() {
         // Arrange

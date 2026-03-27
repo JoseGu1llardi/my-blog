@@ -23,6 +23,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     Page<Post> findByStatusOrderByPublishedAtDesc(PostStatus status, Pageable pageable);
 
+    Optional<Post> findBySlugAndStatus(Slug slug, PostStatus status);
+
     @EntityGraph(attributePaths = "author")
     Page<Post> findByStatusAndPublishedAtBeforeOrderByPublishedAtDesc(
             PostStatus status,
