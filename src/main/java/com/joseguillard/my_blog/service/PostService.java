@@ -61,7 +61,7 @@ public class PostService {
      */
     @Transactional
     public PostResponse findBySlugAndIncrementViews(String slug, String ipAddress) {
-        Post post = postRepository.findBySlug(Slug.of(slug))
+        Post post = postRepository.findBySlugAndStatus(Slug.of(slug), PostStatus.PUBLISHED)
                 .orElseThrow(() -> ResourceNotFoundException.postNotFound(slug));
 
         // Increment view count for published
