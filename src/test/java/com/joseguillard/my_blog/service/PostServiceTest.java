@@ -11,7 +11,6 @@ import com.joseguillard.my_blog.entity.enums.PostStatus;
 import com.joseguillard.my_blog.entity.enums.UserRole;
 import com.joseguillard.my_blog.entity.vo.Email;
 import com.joseguillard.my_blog.entity.vo.Slug;
-import com.joseguillard.my_blog.exception.BusinessException;
 import com.joseguillard.my_blog.exception.PostStateConflictException;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.repository.AuthorRepository;
@@ -22,10 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -137,7 +133,7 @@ public class PostServiceTest {
     @DisplayName("Should find post by slug and increment views")
     void shouldFindBySlugAndIncrementViews() {
         // Simulates tha the post exists
-        when(postRepository.findBySlug(Slug.of("post-title")))
+        when(postRepository.findBySlugAndStatus(Slug.of("post-title"), PostStatus.PUBLISHED))
                 .thenReturn(Optional.of(post));
 
         PostResponse postResponse = PostResponse.builder()
@@ -160,7 +156,7 @@ public class PostServiceTest {
         verify(postMapper).toResponse(captor.capture());
         assertThat(captor.getValue().getViewsCount()).isEqualTo(1);
 
-        verify(postRepository).findBySlug(Slug.of("post-title"));
+        verify(postRepository).findBySlugAndStatus(Slug.of("post-title"), PostStatus.PUBLISHED);
     }
 
     @Test
@@ -182,7 +178,8 @@ public class PostServiceTest {
         post.setStatus(PostStatus.DRAFT);
         post.setViewsCount(0);
 
-        when(postRepository.findBySlug(any())).thenReturn(Optional.of(post));
+        when(postRepository.findBySlugAndStatus(Slug.of("post-title"), PostStatus.PUBLISHED))
+                .thenReturn(Optional.of(post));
         when(postMapper.toResponse(any(Post.class))).thenReturn(new PostResponse());
 
         // Act
@@ -190,7 +187,7 @@ public class PostServiceTest {
 
         // Assert
         assertThat(post.getViewsCount()).isEqualTo(0);
-        verify(postRepository).findBySlug(Slug.of("post-title"));
+        verify(postRepository).findBySlugAndStatus(Slug.of("post-title"), PostStatus.PUBLISHED);
         verify(postMapper).toResponse(post);
     }
 
@@ -223,7 +220,7 @@ public class PostServiceTest {
         // Author exists
         when(authorRepository.findById(1L)).thenReturn(Optional.of(author));
 
-        // Categories exists
+        // Categories exist
         when(categoryRepository.findAllById(Set.of(1L))).thenReturn(List.of(category));
 
         // Mapper creates entity
