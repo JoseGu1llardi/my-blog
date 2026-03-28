@@ -11,6 +11,7 @@ import com.joseguillard.my_blog.entity.enums.PostStatus;
 import com.joseguillard.my_blog.entity.enums.UserRole;
 import com.joseguillard.my_blog.entity.vo.Email;
 import com.joseguillard.my_blog.entity.vo.Slug;
+import com.joseguillard.my_blog.exception.PostOwnershipException;
 import com.joseguillard.my_blog.exception.PostStateConflictException;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.repository.AuthorRepository;
@@ -272,7 +273,7 @@ public class PostServiceTest {
         when(postRepository.findById(1L)).thenReturn(Optional.of(post));
 
         // Act
-        postService.publishPost(1L);
+        postService.publishPost(1L, 1L);
 
         // Assert
         assertThat(post.getStatus()).isEqualTo(PostStatus.PUBLISHED);
@@ -289,7 +290,7 @@ public class PostServiceTest {
     void shouldThrowExceptionWhenPostAlreadyPublished() {
         when(postRepository.findById(1L)).thenReturn(Optional.of(post));
 
-        assertThatThrownBy(() -> postService.publishPost(1L))
+        assertThatThrownBy(() -> postService.publishPost(1L, 1L))
                 .isInstanceOf(PostStateConflictException.class)
                 .hasMessageContaining("Post is already published");
 
@@ -305,7 +306,7 @@ public class PostServiceTest {
         when(postRepository.findById(1L)).thenReturn(Optional.ofNullable(post));
 
         // Act
-        postService.deletePost(1L);
+        postService.deletePost(1L, 1L);
 
         assertThat(post.isDeleted()).isTrue();
         assertThat(post.getDeletedAt()).isNotNull();
@@ -322,9 +323,21 @@ public class PostServiceTest {
     void shouldThrowExceptionWhenDeleteNonExistingPost() {
         when(postRepository.findById(2L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> postService.deletePost(2L))
+        assertThatThrownBy(() -> postService.deletePost(2L, 1L))
                 .isInstanceOf(ResourceNotFoundException.class);
 
         verify(postRepository, never()).save(post);
+    }
+
+    @Test
+    @DisplayName("Should throw PostOwnershipException when author does not own the post")
+    void shouldThrowPostOwnershipExceptionWhenAuthorDoesNotOwnPost() {
+        when(postRepository.findById(1L)).thenReturn(Optional.ofNullable(post));
+
+        assertThatThrownBy(() -> postService.deletePost(1L, 3L))
+                .isInstanceOf(PostOwnershipException.class)
+                .hasMessageContaining("You do not have permission");
+
+        verifyNoInteractions(authorRepository);
     }
 }
