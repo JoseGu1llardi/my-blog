@@ -116,34 +116,42 @@ public class PostController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<PostResponse>> updatePost(
             @PathVariable Long id,
-            @Valid @RequestBody PostUpdateRequest request
+            @Valid @RequestBody PostUpdateRequest request,
+            @AuthenticationPrincipal Author author
     ) {
-        PostResponse response = postService.updatePost(id, request);
+        PostResponse response = postService.updatePost(id, request, author.getId());
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @PatchMapping("/{id}/publish")
-    public ResponseEntity<ApiResponse<Void>> publishPost(@PathVariable Long id
+    public ResponseEntity<ApiResponse<Void>> publishPost(
+            @PathVariable Long id,
+            @AuthenticationPrincipal Author author
     ) {
-        postService.publishPost(id);
+        postService.publishPost(id, author.getId());
 
         return ResponseEntity.ok(
                 ApiResponse.success("Post published successfully", null));
     }
 
     @PatchMapping("/{id}/unpublish")
-    public ResponseEntity<ApiResponse<Void>> unpublishPost(@PathVariable Long id
-    ) {
-        postService.unpublishPost(id);
+    public ResponseEntity<ApiResponse<Void>> unpublishPost(
+            @PathVariable Long id,
+            @AuthenticationPrincipal Author author
+            ) {
+        postService.unpublishPost(id, author.getId());
 
         return ResponseEntity.ok(
                 ApiResponse.success("Post unpublished successfully", null));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deletePost(@PathVariable Long id) {
-        postService.deletePost(id);
+    public ResponseEntity<ApiResponse<Void>> deletePost(
+            @PathVariable Long id,
+            @AuthenticationPrincipal Author author
+            ) {
+        postService.deletePost(id, author.getId());
 
         return ResponseEntity.ok(
                 ApiResponse.success("Post deleted successfully", null));

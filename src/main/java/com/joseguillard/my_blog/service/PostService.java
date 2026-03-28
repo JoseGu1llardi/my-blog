@@ -5,10 +5,7 @@ import com.joseguillard.my_blog.dto.request.post.PostCreateRequest;
 import com.joseguillard.my_blog.dto.request.post.PostUpdateRequest;
 import com.joseguillard.my_blog.dto.response.post.PostResponse;
 import com.joseguillard.my_blog.dto.response.post.PostSummaryResponse;
-import com.joseguillard.my_blog.exception.BusinessException;
-import com.joseguillard.my_blog.exception.DuplicatedResourceException;
-import com.joseguillard.my_blog.exception.PostStateConflictException;
-import com.joseguillard.my_blog.exception.ResourceNotFoundException;
+import com.joseguillard.my_blog.exception.*;
 import com.joseguillard.my_blog.entity.Author;
 import com.joseguillard.my_blog.entity.Category;
 import com.joseguillard.my_blog.entity.Post;
@@ -178,12 +175,14 @@ public class PostService {
     }
 
     /**
-     * Updates post content; persists changes transactionally
+     * Updates post-content; persists changes transactionally
      */
     @Transactional
-    public PostResponse updatePost(Long id, PostUpdateRequest request) {
+    public PostResponse updatePost(Long id, PostUpdateRequest request, Long requesterId) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
+
+        validateOwnership(post, requesterId);
 
         log.info("Updating post id {}", id);
 
@@ -205,9 +204,11 @@ public class PostService {
      * Publish a Post
      */
     @Transactional
-    public void publishPost(Long id) {
+    public void publishPost(Long id, Long requesterId) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
+
+        validateOwnership(post, requesterId);
 
         log.info("Publishing post id {}", id);
 
@@ -224,9 +225,11 @@ public class PostService {
      * Unpublish a Post
      */
     @Transactional
-    public void unpublishPost(Long id) {
+    public void unpublishPost(Long id, Long requesterId) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
+
+        validateOwnership(post, requesterId);
 
         log.info("Unpublishing post id {}", id);
 
@@ -243,9 +246,11 @@ public class PostService {
      * Delete a Post
      */
     @Transactional
-    public void deletePost(Long id) {
+    public void deletePost(Long id, Long requesterId) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
+
+        validateOwnership(post, requesterId);
 
         log.info("Deleting post id {}", id);
 
@@ -256,5 +261,13 @@ public class PostService {
         postRepository.save(post);
 
         log.info("Post id {} deleted successfully", id);
+    }
+
+    private void validateOwnership(Post post, Long requesterId) {
+        if (!post.getAuthor().getId().equals(requesterId)) {
+            log.warn("Ownership violation: author {} attempted to modify post owned by {}",
+                    requesterId, post.getAuthor().getId());
+            throw new PostOwnershipException();
         }
+    }
     }
