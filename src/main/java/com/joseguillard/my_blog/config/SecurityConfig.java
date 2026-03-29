@@ -3,6 +3,7 @@ package com.joseguillard.my_blog.config;
 import com.joseguillard.my_blog.security.JwtAuthenticationFilter;
 import com.joseguillard.my_blog.security.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -25,6 +26,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    @Value("${spring.profiles.active:prod}")
+    private String activeProfile;
+
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsServiceImpl userDetailsService;
 
@@ -33,18 +37,27 @@ public class SecurityConfig {
         // Configures a stateless security chain with public routes and JWT filter
         http
             .csrf(AbstractHttpConfigurer::disable)
-                .headers(headers ->
-                     headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
-                .authorizeHttpRequests(auth -> auth
-                    // Public routes
-                    .requestMatchers(HttpMethod.GET, "/api/v1/posts/**").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
-                    .requestMatchers("/api/v1/auth/**").permitAll()
-                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                    .requestMatchers("/h2-console/**").permitAll()
+                .headers(headers -> {
+                    if ("dev".equals(activeProfile)) {
+                        headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable);
+                    } else {
+                        headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin);
+                    }
+                })
+                .authorizeHttpRequests(auth -> {
+                    auth
+                         // Public routes
+                        .requestMatchers(HttpMethod.GET, "/api/v1/posts/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
+
+                    if ("dev".equals(activeProfile)) {
+                        auth.requestMatchers("/h2-console/**").permitAll();
+                    }
                     // Everything else requires authentication
-                    .anyRequest().authenticated()
-                )
+                    auth.anyRequest().authenticated();
+                })
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )

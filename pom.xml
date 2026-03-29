@@ -47,7 +47,7 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- H2 (Dev/Test) -->
+		<!-- H2 (Dev/Test only — not included in production build) -->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
