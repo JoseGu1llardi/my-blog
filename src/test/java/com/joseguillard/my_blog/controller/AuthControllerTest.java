@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.joseguillard.my_blog.dto.request.auth.LoginRequest;
 import com.joseguillard.my_blog.dto.response.AuthResponse;
 import com.joseguillard.my_blog.security.JwtService;
+import com.joseguillard.my_blog.security.LoginRateLimiter;
 import com.joseguillard.my_blog.security.UserDetailsServiceImpl;
 import com.joseguillard.my_blog.service.AuthService;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,6 +49,9 @@ public class AuthControllerTest {
     @MockBean
     private UserDetailsServiceImpl userDetailsService;
 
+    @MockBean
+    private LoginRateLimiter loginRateLimiter;
+
     private AuthResponse authResponse;
 
     @BeforeEach
@@ -67,6 +71,8 @@ public class AuthControllerTest {
                 .username("username")
                 .password("password")
                 .build();
+
+        when(loginRateLimiter.isAllowed(any())).thenReturn(true);
 
         when(authService.login(any(LoginRequest.class))).thenReturn(authResponse);
 
@@ -88,6 +94,8 @@ public class AuthControllerTest {
                 .password("password")
                 .build();
 
+        when(loginRateLimiter.isAllowed(any())).thenReturn(true);
+
         when(authService.login(any(LoginRequest.class))).thenThrow(BadCredentialsException.class);
 
         mockMvc.perform(post("/api/v1/auth/login")
@@ -96,5 +104,23 @@ public class AuthControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error").value("UNAUTHORIZED"))
                 .andExpect(jsonPath("$.message").value("Bad credentials"));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/auth/login should return 429 when rate limit exceed")
+    void shouldReturn429WhenRateLimitExceed() throws Exception {
+        // Arrange
+        LoginRequest request = LoginRequest.builder()
+                .username("username")
+                .password("password")
+                .build();
+
+        when(loginRateLimiter.isAllowed(any())).thenReturn(false);
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.error").value("RATE_LIMIT_EXCEEDED"));
     }
 }
