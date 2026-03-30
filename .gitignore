@@ -30,7 +30,7 @@ pom.xml.next
 application.properties
 application-dev.properties
 application-prod.properties
-**/application*.yml
+application-prod.yml
 
 ### Logs ###
 logs/
@@ -46,3 +46,6 @@ logs/
 ### Operational System ###
 .DS_Store
 Thumbs.db
+
+.env
+.env.staging
