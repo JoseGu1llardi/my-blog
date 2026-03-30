@@ -1,5 +1,6 @@
 package com.joseguillard.my_blog.security;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,7 +10,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -41,29 +41,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Extract the token (strip Bearer)
         final String token =  authHeader.substring(7);
-        final String username = jwtService.extractUsername(token);
+        final String username;
 
-        // If username extracted and not already authenticated
-        if (username != null &&
-                SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        try {
+            username = jwtService.extractUsername(token);
 
-            // Validate token against the user
-            if (jwtService.isTokenValid(token, userDetails)) {
-                // Tell Spring Security this user is authenticated
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            // If username extracted and not already authenticated
+            if (username != null &&
+                    SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+                // Validate token against the user
+                if (jwtService.isTokenValid(token, userDetails)) {
+                    // Tell Spring Security this user is authenticated
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+        } catch (JwtException e) {
+            // Token is malformed, tampered with, or has invalid signature
+            // Treat as unauthorized - let the Spring Security handle it
         }
-        // Continue the filter chain
         filterChain.doFilter(request, response);
     }
 }
