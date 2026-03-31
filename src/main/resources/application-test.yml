@@ -1,0 +1,31 @@
+spring:
+  sql:
+    init:
+      mode: never
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: guillard-test
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: false
+
+  h2:
+    console:
+      enabled: false
+
+logging:
+  level:
+    root: WARN
+    org.hibernate.SQL: OFF
+    org.hibernate.orm.jdbc.bind: OFF
+    com.joseguillard.my_blog: INFO
+    org.springframework.test: WARN
+    org.springframework.boot.devtools: WARN
