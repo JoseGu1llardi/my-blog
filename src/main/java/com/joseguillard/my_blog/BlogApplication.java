@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @SpringBootApplication
 @EnableConfigurationProperties(AppProperties.class)
 public class BlogApplication {
-
+	// Railway deploy fix
 	public static void main(String[] args) {
 		SpringApplication.run(BlogApplication.class, args);
 	}
