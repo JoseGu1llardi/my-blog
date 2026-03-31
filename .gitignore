@@ -49,3 +49,7 @@ Thumbs.db
 
 .env
 .env.staging
+
+.claude
+
+settings.local.json
