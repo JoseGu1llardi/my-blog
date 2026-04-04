@@ -36,6 +36,11 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     Page<Post> findByAuthorAndStatus(Author author, PostStatus status, Pageable pageable);
 
+    @Transactional
+    @Modifying
+    @Query("UPDATE Post p SET p.viewsCount = p.viewsCount + 1 WHERE p.id = :id")
+    void incrementViewCount(@Param("id") Long id);
+
     @Query("SELECT p FROM Post p WHERE p.status = 'PUBLISHED' " +
     "AND YEAR(p.publishedAt) = :year " +
     "ORDER BY p.publishedAt DESC")

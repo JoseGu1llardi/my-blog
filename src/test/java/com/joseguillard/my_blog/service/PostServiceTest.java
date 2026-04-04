@@ -152,10 +152,7 @@ public class PostServiceTest {
         // Assert
         assertThat(result).isEqualTo(postResponse);
 
-        // Capturing the object sent to the mapper
-        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
-        verify(postMapper).toResponse(captor.capture());
-        assertThat(captor.getValue().getViewsCount()).isEqualTo(1);
+        verify(postRepository).incrementViewCount(post.getId());
 
         verify(postRepository).findBySlugAndStatus(Slug.of("post-title"), PostStatus.PUBLISHED);
     }
