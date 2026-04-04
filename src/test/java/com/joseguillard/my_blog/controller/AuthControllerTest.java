@@ -8,6 +8,7 @@ import com.joseguillard.my_blog.security.JwtService;
 import com.joseguillard.my_blog.security.LoginRateLimiter;
 import com.joseguillard.my_blog.security.UserDetailsServiceImpl;
 import com.joseguillard.my_blog.service.AuthService;
+import com.joseguillard.my_blog.service.AuthorService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,6 +52,9 @@ public class AuthControllerTest {
 
     @MockBean
     private LoginRateLimiter loginRateLimiter;
+
+    @MockBean
+    private AuthorService authorService;
 
     private AuthResponse authResponse;
 
