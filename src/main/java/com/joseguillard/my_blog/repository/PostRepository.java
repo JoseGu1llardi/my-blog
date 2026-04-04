@@ -37,7 +37,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByAuthorAndStatus(Author author, PostStatus status, Pageable pageable);
 
     @Transactional
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE Post p SET p.viewsCount = p.viewsCount + 1 WHERE p.id = :id")
     void incrementViewCount(@Param("id") Long id);
 
