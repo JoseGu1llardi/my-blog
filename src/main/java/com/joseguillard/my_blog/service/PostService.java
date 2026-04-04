@@ -63,7 +63,7 @@ public class PostService {
 
         // Increment view count for published
         if (post.isPublished() && viewRateLimiter.shouldIncrementView(ipAddress, slug)) {
-                post.incrementViewCount();
+                postRepository.incrementViewCount(post.getId());
                 log.debug("View count incremented for slug '{}' from IP {}", slug, ipAddress);
         }
 
