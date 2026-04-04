@@ -65,6 +65,10 @@ public class PostService {
         if (post.isPublished() && viewRateLimiter.shouldIncrementView(ipAddress, slug)) {
                 postRepository.incrementViewCount(post.getId());
                 log.debug("View count incremented for slug '{}' from IP {}", slug, ipAddress);
+
+            // Reload to get updated viewsCount from DB
+            post = postRepository.findBySlugAndStatus(Slug.of(slug), PostStatus.PUBLISHED)
+                    .orElseThrow(() -> ResourceNotFoundException.postNotFound(slug));
         }
 
         return postMapper.toResponse(post);
