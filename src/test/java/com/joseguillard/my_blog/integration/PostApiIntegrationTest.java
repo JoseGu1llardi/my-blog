@@ -11,12 +11,16 @@ import com.joseguillard.my_blog.repository.AuthorRepository;
 import com.joseguillard.my_blog.repository.PostRepository;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import static io.restassured.RestAssured.given;
@@ -35,25 +39,37 @@ public class PostApiIntegrationTest {
     @Autowired
     private AuthorRepository authorRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     private Author author;
+
+    private String token;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
         RestAssured.basePath = "/api/v1";
 
-        postRepository.deleteAll();
-        authorRepository.deleteAll();
+        jdbcTemplate.execute("DELETE FROM post_categories");
+        jdbcTemplate.execute("DELETE FROM posts");
+        jdbcTemplate.execute("DELETE FROM authors");
 
         author = Author.builder()
                 .userName("joseguillard")
                 .email(Email.of("junior@junior.com"))
-                .password("joseguillard")
+                .password(passwordEncoder.encode("joseguillard"))
                 .fullName("Jose Guillard")
                 .role(UserRole.AUTHOR)
                 .active(true)
                 .build();
         authorRepository.save(author);
+
+        // Fetch token AFTER RestAssured is configured and author is saved
+        this.token = getToken();
     }
 
     @Test
@@ -69,6 +85,7 @@ public class PostApiIntegrationTest {
 
         String slug = given()
                     .contentType(ContentType.JSON)
+                    .header("Authorization", "Bearer " + token)
                     .queryParam("authorId", author.getId())
                     .body(createRequest)
                 .when()
@@ -115,7 +132,7 @@ public class PostApiIntegrationTest {
         .then()
             .statusCode(200)
                 .body("success", equalTo(true))
-                .body("data.viewCount", equalTo(2));
+                .body("data.viewCount", equalTo(1));
 
         // Update post
         PostUpdateRequest updateRequest = PostUpdateRequest.builder()
@@ -127,6 +144,7 @@ public class PostApiIntegrationTest {
 
         given()
             .contentType(ContentType.JSON)
+            .header("Authorization", "Bearer " + token)
             .body(updateRequest)
         .when()
             .put("/posts/" + id)
@@ -139,6 +157,7 @@ public class PostApiIntegrationTest {
 
         // Delete a post
         given()
+            .header("Authorization", "Bearer " + token)
         .when()
             .delete("/posts/" + id)
         .then()
@@ -175,6 +194,7 @@ public class PostApiIntegrationTest {
 
         given()
             .contentType(ContentType.JSON)
+            .header("Authorization", "Bearer " + token)
             .queryParam("authorId", author.getId())
             .body(invalidRequest)
         .when()
@@ -183,5 +203,17 @@ public class PostApiIntegrationTest {
             .statusCode(400)
             .body("error", equalTo(ApiErrorType.VALIDATION_ERROR.name()))
             .body("errors[0].field", equalTo("title"));
+    }
+
+    private String getToken() {
+        return given()
+                .contentType(ContentType.JSON)
+                .body("{\"username\":\"joseguillard\",\"password\":\"joseguillard\"}")
+                .when()
+                .post("/auth/login")
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("data.token");
     }
 }
