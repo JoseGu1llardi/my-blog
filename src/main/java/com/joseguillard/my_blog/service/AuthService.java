@@ -38,7 +38,7 @@ public class AuthService {
                         ResourceNotFoundException.authorNotFound(request.getUsername()));
 
         // Generate token
-        String token = jwtService.generateToken(request.getUsername());
+        String token = jwtService.generateToken(request.getUsername(), author.getTokenVersion());
 
         log.info("Login successful for username '{}'", author.getUsername());
 

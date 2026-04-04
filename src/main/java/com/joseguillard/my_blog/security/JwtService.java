@@ -27,9 +27,10 @@ public class JwtService {
     }
 
     // Generates a token from a username
-    public String generateToken(String username) {
+    public String generateToken(String username, Integer tokenVersion) {
         return Jwts.builder()
                 .subject(username)
+                .claim("tokenVersion", tokenVersion)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignInKey())
@@ -44,6 +45,15 @@ public class JwtService {
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
+    }
+
+    public Integer extractTokenVersion(String token) {
+        return Jwts.parser()
+                .verifyWith(getSignInKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("tokenVersion", Integer.class);
     }
 
     // Validates the token - genuine signature and not expired
