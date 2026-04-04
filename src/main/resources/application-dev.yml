@@ -26,5 +26,7 @@ logging:
     org.hibernate.SQL: DEBUG
 
 app:
+  cors:
+    allowed-origins: http://localhost:3000,http://localhost:8080
   init:
     password: ${DEV_AUTHOR_PASSWORD:sa}
