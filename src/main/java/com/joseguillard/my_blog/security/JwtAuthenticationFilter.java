@@ -1,5 +1,6 @@
 package com.joseguillard.my_blog.security;
 
+import com.joseguillard.my_blog.entity.Author;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -53,6 +54,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 // Validate token against the user
                 if (jwtService.isTokenValid(token, userDetails)) {
+
+                    // Verify tokenVersion matches - rejects revoked tokens
+                    Author author = (Author) userDetails;
+                    Integer tokenVersion = jwtService.extractTokenVersion(token);
+
+                    if (tokenVersion == null || !tokenVersion.equals(author.getTokenVersion())) {
+                        // Token was revoked - treat as unauthenticated
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
+
                     // Tell Spring Security this user is authenticated
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(

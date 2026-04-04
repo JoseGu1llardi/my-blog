@@ -46,6 +46,10 @@ public class Author implements UserDetails {
     @Column(columnDefinition = "TEXT")
     private String bio;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer tokenVersion = 1;
+
     private String avatarUrl;
     private String website;
     private String github;

@@ -79,7 +79,7 @@ public class AuthServiceTest {
         // Mock JWT generation
         // We do not care about the real token implementation here,
         // only that a token is generated and returned correctly
-        when(jwtService.generateToken("joseguillard")).thenReturn("fake-token");
+        when(jwtService.generateToken("joseguillard", 1)).thenReturn("fake-token");
 
         // Act
 
@@ -105,7 +105,7 @@ public class AuthServiceTest {
         inOrder.verify(authorRepository).findByUserName("joseguillard");
 
         // 3 - Generate JWT token
-        inOrder.verify(jwtService).generateToken(author.getUsername());
+        inOrder.verify(jwtService).generateToken(author.getUsername(), 1);
     }
 
     @Test
@@ -127,13 +127,13 @@ public class AuthServiceTest {
         assertThatThrownBy(() -> authService.login(request)).isInstanceOf(BadCredentialsException.class);
 
         // Ensure the authentication was attempted
-        verify(authenticationManager, never()).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
 
         // Ensure that no further processing happens after authentication fails:
         // the system must not query the database
         verify(authorRepository, never()).findByUserName(anyString());
 
         // The system must NOT generate a JWT token
-        verify(jwtService, never()).generateToken(anyString());
+        verify(jwtService, never()).generateToken(anyString(), anyInt());
     }
 }

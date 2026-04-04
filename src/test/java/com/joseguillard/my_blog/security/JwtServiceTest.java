@@ -38,7 +38,7 @@ public class JwtServiceTest {
         // We verify it returns something non-null and non-blank
         // the internal format (header.payload.signature) is jjwt's responsibility,
         // not ours to test.
-        String token = jwtService.generateToken("grillard");
+        String token = jwtService.generateToken("grillard", 1);
 
         assertThat(token).isNotNull();
         assertThat(token).isNotBlank();
@@ -52,7 +52,7 @@ public class JwtServiceTest {
     void shouldExtractUsernameFromToken() {
         // Generate a real token first, then verify if we can read the subject back.
         // This tests the round-trip: generate -> extract -> same username
-        String token = jwtService.generateToken("grillard");
+        String token = jwtService.generateToken("grillard", 1);
 
         String extractedUsername = jwtService.extractUsername(token);
 
@@ -71,7 +71,7 @@ public class JwtServiceTest {
                 .authorities(Collections.emptySet())
                 .build();
 
-        String token = jwtService.generateToken("grillard");
+        String token = jwtService.generateToken("grillard", 1);
 
         boolean isValid = jwtService.isTokenValid(token, userDetails);
 
@@ -89,7 +89,7 @@ public class JwtServiceTest {
                 .authorities(Collections.emptySet())
                 .build();
 
-        String token = jwtService.generateToken("grillard");
+        String token = jwtService.generateToken("grillard", 1);
 
         boolean isValid = jwtService.isTokenValid(token, userDetails);
 
@@ -109,7 +109,7 @@ public class JwtServiceTest {
                 .authorities(Collections.emptySet())
                 .build();
 
-        String token = jwtService.generateToken("grillard");
+        String token = jwtService.generateToken("grillard", 1);
 
         boolean isValid = jwtService.isTokenValid(token, userDetails);
 
