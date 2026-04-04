@@ -206,6 +206,22 @@ public class PostServiceTest {
     }
 
     @Test
+    @DisplayName("Should create a draft post with null publishedAt")
+    void shouldCreateDraftPostWithNullPublishedAt() {
+        Post draftPost = Post.builder()
+                .title("Draft Post")
+                .content("Draft content")
+                .author(author)
+                .status(PostStatus.DRAFT)
+                .viewsCount(0)
+                .deleted(false)
+                .build();
+
+        assertThat(draftPost.getPublishedAt()).isNull();
+        assertThat(draftPost.isPublished()).isFalse();
+    }
+
+    @Test
     @DisplayName("Should create a post successfully and delegate mapping correctly")
     void  shouldCreatePost() {
         // Arrange

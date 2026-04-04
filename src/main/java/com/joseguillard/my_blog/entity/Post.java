@@ -46,7 +46,7 @@ public class Post {
     @Column(nullable = false)
     private PostStatus status = PostStatus.DRAFT;
 
-    private LocalDateTime publishedAt = LocalDateTime.now();
+    private LocalDateTime publishedAt;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "author_id",  nullable = false)
