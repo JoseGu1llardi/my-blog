@@ -13,7 +13,6 @@ public class AuthorMapper {
 
         // Maps author ID, username, full name, and slug
         return AuthorResponse.builder()
-                .id(author.getId())
                 .username(author.getUsername())
                 .fullName(author.getFullName())
                 .slug(author.getSlug().getValue())
@@ -23,8 +22,6 @@ public class AuthorMapper {
                 .github(author.getGithub())
                 .x(author.getX())
                 .linkedin(author.getLinkedin())
-                .role(author.getRole())
-                .active(author.isActive())
                 .postCount(author.getPosts().size())
                 .build();
     }
