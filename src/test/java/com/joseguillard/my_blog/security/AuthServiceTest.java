@@ -70,11 +70,11 @@ public class AuthServiceTest {
         // We are NOT testing AuthenticationManager here
         // only assuming authentication succeeds (no exception thrown)
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-                .thenReturn(new UsernamePasswordAuthenticationToken(author.getUsername(), author.getPassword()));
-
-        // Mock repository behavior: user exists in the database
-        // This allows the login flow to continue after authentication
-        when(authorRepository.findByUserName("joseguillard")).thenReturn(Optional.of(author));
+                .thenReturn(new UsernamePasswordAuthenticationToken(
+                        author,
+                        author.getPassword(),
+                        author.getAuthorities()
+                ));
 
         // Mock JWT generation
         // We do not care about the real token implementation here,
@@ -96,15 +96,12 @@ public class AuthServiceTest {
         assertThat(result.getUsername()).isEqualTo("joseguillard");
 
         // Ensure the login flow follows the expected order
-        InOrder inOrder = inOrder(authenticationManager, authorRepository, jwtService);
+        InOrder inOrder = inOrder(authenticationManager, jwtService);
 
         // 1 - Authenticate credentials
         inOrder.verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
 
-        // 2 - Fetch user from a repository
-        inOrder.verify(authorRepository).findByUserName("joseguillard");
-
-        // 3 - Generate JWT token
+        // 2 - Generate JWT token
         inOrder.verify(jwtService).generateToken(author.getUsername(), 1);
     }
 
