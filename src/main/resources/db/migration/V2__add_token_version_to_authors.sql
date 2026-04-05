@@ -1,0 +1,1 @@
+ALTER TABLE authors ADD COLUMN token_version INTEGER NOT NULL DEFAULT 1;
