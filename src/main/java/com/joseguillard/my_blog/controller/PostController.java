@@ -125,35 +125,32 @@ public class PostController {
     }
 
     @PatchMapping("/{id}/publish")
-    public ResponseEntity<ApiResponse<Void>> publishPost(
+    public ResponseEntity<Void> publishPost(
             @PathVariable Long id,
             @AuthenticationPrincipal Author author
     ) {
         postService.publishPost(id, author.getId());
 
-        return ResponseEntity.ok(
-                ApiResponse.success("Post published successfully", null));
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/unpublish")
-    public ResponseEntity<ApiResponse<Void>> unpublishPost(
+    public ResponseEntity<Void> unpublishPost(
             @PathVariable Long id,
             @AuthenticationPrincipal Author author
             ) {
         postService.unpublishPost(id, author.getId());
 
-        return ResponseEntity.ok(
-                ApiResponse.success("Post unpublished successfully", null));
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deletePost(
+    public ResponseEntity<Void> deletePost(
             @PathVariable Long id,
             @AuthenticationPrincipal Author author
             ) {
         postService.deletePost(id, author.getId());
 
-        return ResponseEntity.ok(
-                ApiResponse.success("Post deleted successfully", null));
+        return ResponseEntity.noContent().build();
     }
 }

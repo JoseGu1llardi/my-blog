@@ -161,7 +161,7 @@ public class PostApiIntegrationTest {
         .when()
             .delete("/posts/" + id)
         .then()
-            .statusCode(200);
+            .statusCode(204);
 
         // Verify if it´s gone
         given()
