@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AuthorResponse {
 
-    private Long id;
     private String username;
     private String fullName;
     private String slug;
@@ -22,7 +21,5 @@ public class AuthorResponse {
     private String github;
     private String x;
     private String linkedin;
-    private UserRole role;
-    private boolean active;
     private long postCount;
 }
