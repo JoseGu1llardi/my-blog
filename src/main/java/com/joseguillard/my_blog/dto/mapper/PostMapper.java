@@ -94,13 +94,6 @@ public class PostMapper {
             post.setExcerpt(request.getExcerpt());
         if (request.getFeaturedImage() != null)
             post.setFeaturedImage(request.getFeaturedImage());
-        if (request.getStatus() != null) {
-            post.setStatus(request.getStatus());
-            // Sets publication timestamp upon status transition
-            if (request.getStatus() == PostStatus.PUBLISHED && post.getPublishedAt() == null) {
-                post.setPublishedAt(LocalDateTime.now());
-            }
-        }
         if (request.getMetaDescription() != null)
             post.setMetaDescription(request.getMetaDescription());
         if (request.getMetaKeywords() != null)
