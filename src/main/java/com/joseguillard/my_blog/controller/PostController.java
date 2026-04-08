@@ -8,6 +8,7 @@ import com.joseguillard.my_blog.dto.response.post.PostResponse;
 import com.joseguillard.my_blog.dto.response.post.PostSummaryResponse;
 import com.joseguillard.my_blog.entity.Author;
 import com.joseguillard.my_blog.service.PostService;
+import com.joseguillard.my_blog.utils.IpExtractor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +44,7 @@ public class PostController {
     public ResponseEntity<ApiResponse<PostResponse>> getPostBySlug(
             @PathVariable String slug,
             HttpServletRequest request) {
-        String ipAddress = request.getRemoteAddr();
+        String ipAddress = IpExtractor.extractClientIp(request);
         PostResponse response = postService.findBySlugAndIncrementViews(slug, ipAddress);
 
         return ResponseEntity.ok(
