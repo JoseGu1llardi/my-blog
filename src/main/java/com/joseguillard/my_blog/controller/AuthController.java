@@ -8,6 +8,7 @@ import com.joseguillard.my_blog.exception.RateLimitExceededException;
 import com.joseguillard.my_blog.security.LoginRateLimiter;
 import com.joseguillard.my_blog.service.AuthService;
 import com.joseguillard.my_blog.service.AuthorService;
+import com.joseguillard.my_blog.utils.IpExtractor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ public class AuthController {
             @Valid @RequestBody LoginRequest loginRequest,
             HttpServletRequest request
     ) {
-        String ipAddress = request.getRemoteAddr();
+        String ipAddress = IpExtractor.extractClientIp(request);
 
         if (!rateLimiter.isAllowed(ipAddress)) {
             throw new RateLimitExceededException("Rate limit exceeded");
