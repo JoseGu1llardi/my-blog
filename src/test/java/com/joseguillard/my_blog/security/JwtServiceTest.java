@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -25,10 +26,9 @@ public class JwtServiceTest {
         // ReflectionTestUtils let us set private fields directly by name - bypassing
         // the need for Spring to inject them. This is the standard pattern for testing
         // Spring services in isolation
-        jwtService = new JwtService();
-        ReflectionTestUtils.setField(jwtService, "secretKey",
-                "bXktYmxvZy1kZXYtc2VjcmV0LWtleS1mb3ItbG9jYWwtZGV2LW9ubHktY2hhbmdlLW1l");
-        ReflectionTestUtils.setField(jwtService, "expiration", 3600000L);
+        jwtService = new JwtService(
+                "bXktYmxvZy1kZXYtc2VjcmV0LWtleS1mb3ItbG9jYWwtZGV2LW9ubHktY2hhbmdlLW1l",
+                3600000L);
     }
 
     @Test
