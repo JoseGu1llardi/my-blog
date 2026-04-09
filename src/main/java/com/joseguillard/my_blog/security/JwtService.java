@@ -14,16 +14,19 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    @Value("${app.jwt.secret}")
-    private String secretKey;
+    private final SecretKey signingKey;
+    private final Long expiration;
 
-    @Value("${app.jwt.expiration}")
-    private long expiration;
+    public JwtService(
+            @Value("${app.jwt.secret}") String secret,
+            @Value("${app.jwt.expiration}") Long expiration
+    ) {
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        if (keyBytes.length < 32)
+            throw new IllegalArgumentException("JWT secret must be at least 256 bits (32 bytes)");
 
-    // Converts the raw string secret into a cryptographic key
-    private SecretKey getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
+        this.signingKey = Keys.hmacShaKeyFor(keyBytes);
+        this.expiration = expiration;
     }
 
     // Generates a token from a username
@@ -33,14 +36,14 @@ public class JwtService {
                 .claim("tokenVersion", tokenVersion)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSignInKey())
+                .signWith(signingKey)
                 .compact();
     }
 
     // Extracts the username from a token
     public String extractUsername(String token) {
         return Jwts.parser()
-                .verifyWith(getSignInKey())
+                .verifyWith(signingKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
@@ -49,7 +52,7 @@ public class JwtService {
 
     public Integer extractTokenVersion(String token) {
         return Jwts.parser()
-                .verifyWith(getSignInKey())
+                .verifyWith(signingKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
@@ -69,7 +72,7 @@ public class JwtService {
 
     private boolean isTokenExpired(String token) {
         return Jwts.parser()
-                .verifyWith(getSignInKey())
+                .verifyWith(signingKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
