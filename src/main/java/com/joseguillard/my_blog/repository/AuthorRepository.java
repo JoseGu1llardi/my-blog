@@ -25,6 +25,7 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
 
     List<Author> findByActiveTrue();
 
-    @Query("SELECT a FROM Author a WHERE SIZE(a.posts) > 0 AND a.active = true")
+    @Query("SELECT DISTINCT a FROM Author a JOIN a.posts p " +
+    "WHERE p.status = 'PUBLISHED' AND a.active = true")
     List<Author> findAuthorsWithPublishedPosts();
 }
