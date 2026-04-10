@@ -11,12 +11,14 @@ import com.joseguillard.my_blog.service.PostService;
 import com.joseguillard.my_blog.utils.IpExtractor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -25,6 +27,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/posts")
 @RequiredArgsConstructor
+@Validated
 public class PostController {
 
     private final PostService postService;
@@ -82,7 +85,8 @@ public class PostController {
 
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<PageResponse<PostSummaryResponse>>> searchPosts(
-            @RequestParam String query,
+            @RequestParam @Size(min = 1, max = 200,
+                    message = "Query must be between 1 and 200 characters") String query,
             @PageableDefault(size = 10) Pageable pageable
     ) {
         Page<PostSummaryResponse> responses = postService.searchPosts(query, pageable);
