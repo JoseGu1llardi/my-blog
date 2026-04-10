@@ -4,6 +4,7 @@ import com.joseguillard.my_blog.dto.mapper.CategoryMapper;
 import com.joseguillard.my_blog.dto.request.CategoryCreateRequest;
 import com.joseguillard.my_blog.dto.response.category.CategoryResponse;
 import com.joseguillard.my_blog.exception.BusinessException;
+import com.joseguillard.my_blog.exception.DuplicatedResourceException;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.entity.Category;
 import com.joseguillard.my_blog.entity.vo.Slug;
@@ -53,7 +54,9 @@ public class CategoryService {
     @Transactional
     public CategoryResponse createCategory(CategoryCreateRequest request) {
         if (isCategoryExistsByName(request.getName())) {
-            throw new BusinessException("Category with name " + request.getName() + " already exists");
+            throw new DuplicatedResourceException(
+                    "Category with name " + request.getName() + " already exists"
+            );
         }
 
         Category category = categoryMapper.toEntity(request);
