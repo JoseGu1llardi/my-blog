@@ -5,6 +5,7 @@ import com.joseguillard.my_blog.entity.vo.Email;
 import com.joseguillard.my_blog.entity.vo.Slug;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -28,4 +29,7 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
     @Query("SELECT DISTINCT a FROM Author a JOIN a.posts p " +
     "WHERE p.status = 'PUBLISHED' AND a.active = true")
     List<Author> findAuthorsWithPublishedPosts();
+
+    @Query("SELECT COUNT(p) FROM Post p WHERE p.author.id = :id AND p.status = 'PUBLISHED'")
+    long countPublishedByAuthorId(@Param("id")  Long id);
 }

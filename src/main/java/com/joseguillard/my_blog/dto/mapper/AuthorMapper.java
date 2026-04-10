@@ -3,13 +3,20 @@ package com.joseguillard.my_blog.dto.mapper;
 import com.joseguillard.my_blog.dto.response.author.AuthorResponse;
 import com.joseguillard.my_blog.dto.response.author.AuthorSummaryResponse;
 import com.joseguillard.my_blog.entity.Author;
+import com.joseguillard.my_blog.repository.AuthorRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class AuthorMapper {
+
+    private final AuthorRepository authorRepository;
 
     public AuthorResponse toResponse(Author author) {
         if (author == null) return null;
+
+        long postCount = authorRepository.countPublishedByAuthorId(author.getId());
 
         // Maps author ID, username, full name, and slug
         return AuthorResponse.builder()
@@ -22,7 +29,7 @@ public class AuthorMapper {
                 .github(author.getGithub())
                 .x(author.getX())
                 .linkedin(author.getLinkedin())
-                .postCount(author.getPosts().size())
+                .postCount(postCount)
                 .build();
     }
 
