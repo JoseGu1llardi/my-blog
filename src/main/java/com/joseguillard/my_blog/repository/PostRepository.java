@@ -21,10 +21,12 @@ import java.util.Optional;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
 
+    @EntityGraph(attributePaths = {"author", "categories"})
     Optional<Post> findBySlug(Slug slug);
 
     Page<Post> findByStatusOrderByPublishedAtDesc(PostStatus status, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"author", "categories"})
     Optional<Post> findBySlugAndStatus(Slug slug, PostStatus status);
 
     @EntityGraph(attributePaths = "author")
