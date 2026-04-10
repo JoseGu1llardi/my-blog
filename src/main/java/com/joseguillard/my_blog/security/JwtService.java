@@ -1,6 +1,7 @@
 package com.joseguillard.my_blog.security;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -65,7 +66,7 @@ public class JwtService {
             final String username = extractUsername(token);
             return username.equals(userDetails.getUsername())
                     && !isTokenExpired(token);
-        } catch (ExpiredJwtException e) {
+        } catch (JwtException e) {
             return false;
         }
     }
