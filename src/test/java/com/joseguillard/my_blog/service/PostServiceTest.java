@@ -154,8 +154,7 @@ public class PostServiceTest {
 
         verify(postRepository).incrementViewCount(post.getId());
 
-        verify(postRepository, times(2))
-                .findBySlugAndStatus(Slug.of("post-title"), PostStatus.PUBLISHED);
+        verify(postRepository).findBySlugAndStatus(Slug.of("post-title"), PostStatus.PUBLISHED);
     }
 
     @Test
