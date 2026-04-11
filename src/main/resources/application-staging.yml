@@ -30,6 +30,10 @@ logging:
 app:
   init:
     password: ${STAGING_AUTHOR_PASSWORD}
+  cors:
+    allowed-origins:
+      - https://my-blog-frontend.vercel.app
+      - http://localhost:3000
   jwt:
     secret: ${APP_JWT_SECRET}
     expiration: ${APP_JWT_EXPIRATION:3600000}
