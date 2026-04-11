@@ -22,7 +22,7 @@ app:
   cors:
     allowed-origins: http://localhost:3000,http://localhost:8080
   init:
-    password: ${DEV_AUTHOR_PASSWORD:sa}
+    password: ${DEV_AUTHOR_PASSWORD:changeme-local-only-123!}
     email: ${DEV_AUTHOR_EMAIL:dev@example.com}
     github: ${DEV_AUTHOR_GITHUB:https://github.com}
     linkedin: ${DEV_AUTHOR_LINKEDIN:https://linkedin.com}
