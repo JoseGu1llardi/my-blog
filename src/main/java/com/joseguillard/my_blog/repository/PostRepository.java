@@ -43,28 +43,32 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("UPDATE Post p SET p.viewsCount = p.viewsCount + 1 WHERE p.id = :id")
     void incrementViewCount(@Param("id") Long id);
 
-    @Query("SELECT p FROM Post p WHERE p.status = 'PUBLISHED' " +
+    @Query("SELECT p FROM Post p WHERE p.status = :status " +
     "AND YEAR(p.publishedAt) = :year " +
     "ORDER BY p.publishedAt DESC")
-    List<Post> findPublishedPostByYear(@Param("year") int year);
+    List<Post> findPublishedPostByYear(@Param("year") int year, @Param("status")  PostStatus status);
 
     @Query("SELECT p from Post p JOIN p.categories c " +
-    "WHERE c.slug = :categorySlug AND p.status = 'PUBLISHED' " +
+    "WHERE c.slug = :categorySlug AND p.status = :status " +
     "ORDER BY p.publishedAt DESC")
     Page<Post> findPublishedPostByCategorySlug(
-            @Param("categorySlug") Slug categorySlug, Pageable pageable
+            @Param("categorySlug") Slug categorySlug, Pageable pageable,
+            @Param("status")  PostStatus status
     );
 
-    @Query("SELECT p FROM Post p WHERE p.status = 'PUBLISHED' " +
+    @Query("SELECT p FROM Post p WHERE p.status = :status " +
             "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
             "OR LOWER(p.content) LIKE LOWER(CONCAT('%', :query, '%'))) " +
             "ORDER BY p.publishedAt DESC")
-    Page<Post> searchPublishedPosts(@Param("query") String query, Pageable pageable);
+    Page<Post> searchPublishedPosts(
+            @Param("query") String query, Pageable pageable,
+            @Param("status") PostStatus status
+            );
 
     @Query("SELECT DISTINCT YEAR(p.publishedAt) FROM Post p " +
-            "WHERE p.status = 'PUBLISHED' " +
+            "WHERE p.status = :status " +
             "ORDER BY YEAR(p.publishedAt) DESC")
-    List<Integer> findDistinctYearsWithPublishedPosts();
+    List<Integer> findDistinctYearsWithPublishedPosts(@Param("status")  PostStatus status);
 
     boolean existsBySlug(Slug slug);
 
