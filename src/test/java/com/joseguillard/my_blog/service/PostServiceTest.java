@@ -193,15 +193,15 @@ public class PostServiceTest {
     @DisplayName("Should throw an exception when post does not exists")
     void shouldThrowExceptionWhenPostDoesNotExists() {
         // Arrange
-        when(postRepository.findBySlug(Slug.of("does-not-exist")))
+        when(postRepository.findBySlugAndStatus(Slug.of("does-not-exist"), PostStatus.PUBLISHED))
                 .thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThatThrownBy(() -> postService.findBySlug("does-not-exist"))
+        assertThatThrownBy(() -> postService.findBySlugAndIncrementViews("does-not-exist", "192.168.1.1"))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("does-not-exist");
 
-        verify(postRepository).findBySlug(Slug.of("does-not-exist"));
+        verify(postRepository).findBySlugAndStatus(Slug.of("does-not-exist"), PostStatus.PUBLISHED);
     }
 
     @Test
