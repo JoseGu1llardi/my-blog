@@ -142,7 +142,7 @@ public class PostRepositoryTest {
         postRepository.saveAll(List.of(post2025, post2026));
 
         // Act
-        List<Post> posts2025 = postRepository.findPublishedPostByYear(2025);
+        List<Post> posts2025 = postRepository.findPublishedPostByYear(2025, PostStatus.PUBLISHED);
 
         // Assert
         assertThat(posts2025).hasSize(1);
@@ -160,7 +160,9 @@ public class PostRepositoryTest {
         // Act
         Page<Post> posts = postRepository.findPublishedPostByCategorySlug(
                 category.getSlug(),
-                PageRequest.of(0, 10));
+                PageRequest.of(0, 10),
+                PostStatus.PUBLISHED
+                );
 
         // Assert
         assertThat(posts.getContent()).hasSize(1);

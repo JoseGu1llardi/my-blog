@@ -84,7 +84,7 @@ public class PostService {
      * Returns Posts from a specific year
      */
     public List<PostSummaryResponse> getPostByYear(int year) {
-        List<Post> posts = postRepository.findPublishedPostByYear(year);
+        List<Post> posts = postRepository.findPublishedPostByYear(year, PostStatus.PUBLISHED);
 
         return posts.stream()
                 .map(postMapper::toSummaryResponse)
@@ -95,7 +95,11 @@ public class PostService {
      * Returns Posts from a Category
      */
     public Page<PostSummaryResponse> getPostsByCategory(String categorySlug, Pageable pageable) {
-        Page<Post> posts = postRepository.findPublishedPostByCategorySlug(Slug.of(categorySlug), pageable);
+        Page<Post> posts = postRepository.findPublishedPostByCategorySlug(
+                Slug.of(categorySlug),
+                pageable,
+                PostStatus.PUBLISHED
+        );
         return posts.map(postMapper::toSummaryResponse);
     }
 
@@ -116,10 +120,10 @@ public class PostService {
     }
 
     /**
-     * Search Posts (simple full text search)
+     * Search Posts (simple full-text search)
      */
     public Page<PostSummaryResponse> searchPosts(String query, Pageable pageable) {
-        Page<Post> posts =  postRepository.searchPublishedPosts(query, pageable);
+        Page<Post> posts =  postRepository.searchPublishedPosts(query, pageable, PostStatus.PUBLISHED);
 
         return posts.map(postMapper::toSummaryResponse);
     }
@@ -128,7 +132,7 @@ public class PostService {
      * Return years with published Posts
      */
     public List<Integer> getYearsWithPosts() {
-        return postRepository.findDistinctYearsWithPublishedPosts();
+        return postRepository.findDistinctYearsWithPublishedPosts(PostStatus.PUBLISHED);
     }
 
     /**
