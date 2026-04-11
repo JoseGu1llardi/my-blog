@@ -30,6 +30,18 @@ public class DataInitializer implements CommandLineRunner {
     @Value("${app.init.password}")
     private String authorPassword;
 
+    @Value("${app.init.email}")
+    private String authorEmail;
+
+    @Value("${app.init.github}")
+    private String authorGithub;
+
+    @Value("${app.init.linkedin}")
+    private String authorLinkedin;
+
+    @Value("${app.init.avatar-url}")
+    private String authorAvatarUrl;
+
     private final AuthorRepository authorRepository;
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
@@ -46,13 +58,13 @@ public class DataInitializer implements CommandLineRunner {
         // Builds author with encoded password and metadata
         Author author = Author.builder()
                 .userName("grillard")
-                .email(Email.of("junior11_junior@hotmail.com"))
+                .email(Email.of(authorEmail))
                 .password(passwordEncoder.encode(authorPassword))
-                .fullName("Jose Wellington Ribeiro")
+                .fullName("Jose Guillard")
                 .bio("Software engineer documenting my learning journey.")
-                .avatarUrl("https://avatars.githubusercontent.com/u/63321040?v=4")
-                .github("https://github.com/JoseGu1llardi")
-                .linkedin("https://www.linkedin.com/in/joseguillard")
+                .avatarUrl(authorAvatarUrl)
+                .github(authorGithub)
+                .linkedin(authorLinkedin)
                 .role(UserRole.AUTHOR)
                 .active(true)
                 .build();

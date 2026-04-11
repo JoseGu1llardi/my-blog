@@ -23,3 +23,7 @@ app:
     allowed-origins: http://localhost:3000,http://localhost:8080
   init:
     password: ${DEV_AUTHOR_PASSWORD:sa}
+    email: ${DEV_AUTHOR_EMAIL:dev@example.com}
+    github: ${DEV_AUTHOR_GITHUB:https://github.com}
+    linkedin: ${DEV_AUTHOR_LINKEDIN:https://linkedin.com}
+    avatar-url: ${DEV_AUTHOR_AVATAR:https://recreio.com.br/noticias/entretenimento/one-piece-afinal-qual-idade-de-luffy.phtml}
