@@ -16,7 +16,11 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "authors")
+@Table(name = "authors",
+    indexes = {
+        @Index(name = "idx_author_username", columnList = "user_name"),
+        @Index(name = "idx_author_token_version", columnList = "token_version")
+    })
 @Getter
 @Setter
 @NoArgsConstructor

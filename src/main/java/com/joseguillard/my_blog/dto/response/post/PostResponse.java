@@ -1,5 +1,6 @@
 package com.joseguillard.my_blog.dto.response.post;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.joseguillard.my_blog.dto.response.author.AuthorSummaryResponse;
 import com.joseguillard.my_blog.dto.response.category.CategoryResponse;
 import com.joseguillard.my_blog.entity.enums.PostStatus;
@@ -38,11 +39,13 @@ public class PostResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    @JsonIgnore
     public String getFormattedPublishedDate() {
         if (publishedAt == null) return "";
         return publishedAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
 
+    @JsonIgnore
     public int getPublishedYear() {
         return publishedAt != null ? publishedAt.getYear() : 0;
     }
