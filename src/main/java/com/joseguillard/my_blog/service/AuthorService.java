@@ -53,26 +53,4 @@ public class AuthorService {
 
         return authors.stream().map(authorMapper::toSummaryResponse).toList();
     }
-
-    public AuthorResponse findAuthorByUsername(String username) {
-        Author author = authorRepository.findByUserName(username)
-                .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
-
-        return authorMapper.toResponse(author);
-    }
-
-    public AuthorResponse findAuthorByEmail(String email) {
-        Author author = authorRepository.findByEmail(Email.of(email))
-                .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
-
-        return authorMapper.toResponse(author);
-    }
-
-    public boolean isUsernameExists(String username) {
-        return authorRepository.existsByUserName(username);
-    }
-
-    public boolean isEmailExists(String email) {
-        return authorRepository.existsByEmail(Email.of(email));
-    }
 }
