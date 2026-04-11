@@ -53,11 +53,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/posts/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/authors/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll();
 
                     if ("dev".equals(activeProfile)) {
                         auth.requestMatchers("/h2-console/**").permitAll();
+                        auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
                     }
                     // Everything else requires authentication
                     auth.anyRequest().authenticated();
