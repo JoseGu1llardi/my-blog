@@ -48,6 +48,6 @@ public class AuthController {
             @AuthenticationPrincipal Author author
             ) {
         authorService.incrementTokenVersion(author.getId());
-        return ResponseEntity.ok(ApiResponse.success("Logged out successfully", null));
+        return ResponseEntity.noContent().build();
     }
 }
