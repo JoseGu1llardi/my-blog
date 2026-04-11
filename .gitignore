@@ -30,7 +30,6 @@ pom.xml.next
 application.properties
 application-dev.properties
 application-prod.properties
-application-prod.yml
 
 ### Logs ###
 logs/
