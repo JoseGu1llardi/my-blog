@@ -35,11 +35,11 @@ public class AuthController {
     ) {
         String ipAddress = IpExtractor.extractClientIp(request);
 
-        if (!rateLimiter.isAllowed(ipAddress)) {
+        if (rateLimiter.isBlocked(ipAddress)) {
             throw new RateLimitExceededException("Rate limit exceeded");
         }
 
-        AuthResponse login = authService.login(loginRequest);
+        AuthResponse login = authService.login(loginRequest, ipAddress);
         return ResponseEntity.ok(ApiResponse.success(login));
     }
 

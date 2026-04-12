@@ -22,6 +22,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -76,9 +77,9 @@ public class AuthControllerTest {
                 .password("password")
                 .build();
 
-        when(loginRateLimiter.isAllowed(any())).thenReturn(true);
+        when(loginRateLimiter.isBlocked(any())).thenReturn(false);
 
-        when(authService.login(any(LoginRequest.class))).thenReturn(authResponse);
+        when(authService.login(any(LoginRequest.class), anyString())).thenReturn(authResponse);
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/auth/login")
@@ -98,9 +99,9 @@ public class AuthControllerTest {
                 .password("password")
                 .build();
 
-        when(loginRateLimiter.isAllowed(any())).thenReturn(true);
+        when(loginRateLimiter.isBlocked(any())).thenReturn(false);
 
-        when(authService.login(any(LoginRequest.class))).thenThrow(BadCredentialsException.class);
+        when(authService.login(any(LoginRequest.class), anyString())).thenThrow(BadCredentialsException.class);
 
         mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -119,7 +120,7 @@ public class AuthControllerTest {
                 .password("password")
                 .build();
 
-        when(loginRateLimiter.isAllowed(any())).thenReturn(false);
+        when(loginRateLimiter.isBlocked(any())).thenReturn(true);
 
         mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)

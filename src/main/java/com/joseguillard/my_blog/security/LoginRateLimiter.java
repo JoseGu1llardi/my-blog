@@ -24,22 +24,17 @@ public class LoginRateLimiter {
                 .build();
     }
 
-    public boolean isAllowed(String ipAddress) {
-        // getIfPresent returns null if expired or never seen - Caffeine handles TTL
+    public void recordFailure(String ipAddress) {
         Integer attempts = loginAttempts.getIfPresent(ipAddress);
+        loginAttempts.put(ipAddress, attempts == null ? 1 : attempts + 1);
+    }
 
-        if (attempts == null) {
-            // First attempt in this window
-            loginAttempts.put(ipAddress, 1);
-            return true;
-        }
+    public void recordSuccess(String ipAddress) {
+        loginAttempts.invalidate(ipAddress); // reset counter on successful login
+    }
 
-        if (attempts < MAX_ATTEMPTS) {
-            loginAttempts.put(ipAddress, attempts + 1);
-            return true;
-        }
-
-        // Limit exceeded
-        return false;
+    public boolean isBlocked(String ipAddress) {
+        Integer attempts = loginAttempts.getIfPresent(ipAddress);
+        return attempts != null && attempts >= MAX_ATTEMPTS;
     }
 }
