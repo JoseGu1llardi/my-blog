@@ -37,6 +37,9 @@ public class AuthServiceTest {
     @Mock
     private JwtService jwtService;
 
+    @Mock
+    private LoginRateLimiter loginRateLimiter;
+
     @InjectMocks
     private AuthService authService;
 
@@ -84,7 +87,7 @@ public class AuthServiceTest {
         // Act
 
         // Call the real method under the test
-        AuthResponse result = authService.login(request);
+        AuthResponse result = authService.login(request, "192.168.1.1");
 
         // Assert
 
@@ -121,7 +124,8 @@ public class AuthServiceTest {
 
         // Execute the login and verify that the expected exception is thrown
         // This confirms that AuthService correctly propagates authentication failures
-        assertThatThrownBy(() -> authService.login(request)).isInstanceOf(BadCredentialsException.class);
+        assertThatThrownBy(() -> authService.login(request, "192.168.1.1"))
+                .isInstanceOf(BadCredentialsException.class);
 
         // Ensure the authentication was attempted
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
