@@ -19,6 +19,9 @@ public class DataInitializerStaging implements CommandLineRunner {
     @Value("${app.init.password}")
     private String authorPassword;
 
+    @Value("${app.init.email}")
+    private String authorEmail;
+
     private final AuthorRepository authorRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -28,7 +31,7 @@ public class DataInitializerStaging implements CommandLineRunner {
 
         Author author = Author.builder()
                 .userName("gr1llard")
-                .email(Email.of("jwribeiro.dev@gmail.com"))
+                .email(Email.of(authorEmail))
                 .password(passwordEncoder.encode(authorPassword))
                 .fullName("Jose Wellington")
                 .role(UserRole.ADMIN)

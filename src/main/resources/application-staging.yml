@@ -30,6 +30,7 @@ logging:
 app:
   init:
     password: ${STAGING_AUTHOR_PASSWORD}
+    email: ${AUTHOR_EMAIL}
   cors:
     allowed-origins: http://localhost:3000
   jwt:
