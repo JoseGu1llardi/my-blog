@@ -39,6 +39,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // Configures a stateless security chain with public routes and JWT filter
         http
+            .cors(cors -> {})
             .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> {
                     if ("dev".equals(activeProfile)) {
