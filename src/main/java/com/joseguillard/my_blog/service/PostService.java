@@ -113,7 +113,13 @@ public class PostService {
      * Search Posts (simple full-text search)
      */
     public Page<PostSummaryResponse> searchPosts(String query, Pageable pageable) {
-        Page<Post> posts =  postRepository.searchPublishedPosts(query, pageable, PostStatus.PUBLISHED);
+        if (query == null || query.trim().isBlank())
+            throw new IllegalArgumentException("Invalid search query");
+
+        if (query.replace("%", "").replace("_", "").trim().isEmpty())
+            throw new IllegalArgumentException("Query cannot be only wildcards");
+
+        Page<Post> posts =  postRepository.searchPublishedPosts(escapeLike(query), pageable, PostStatus.PUBLISHED);
 
         return posts.map(postMapper::toSummaryResponse);
     }
@@ -264,4 +270,10 @@ public class PostService {
             throw new PostOwnershipException();
         }
     }
+
+    private String escapeLike(String query) {
+        return query.replace("\\", "\\\\")
+                    .replace("%", "\\%")
+                    .replace("_", "\\_");
     }
+}
