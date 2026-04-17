@@ -1,6 +1,7 @@
 package com.joseguillard.my_blog.repository;
 
 import com.joseguillard.my_blog.entity.Author;
+import com.joseguillard.my_blog.entity.enums.PostStatus;
 import com.joseguillard.my_blog.entity.vo.Slug;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,9 +21,9 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
     List<Author> findByActiveTrue();
 
     @Query("SELECT DISTINCT a FROM Author a JOIN a.posts p " +
-    "WHERE p.status = 'PUBLISHED' AND a.active = true")
-    List<Author> findAuthorsWithPublishedPosts();
+    "WHERE p.status = :status AND a.active = true")
+    List<Author> findAuthorsWithPublishedPosts(@Param("status") PostStatus status);
 
-    @Query("SELECT COUNT(p) FROM Post p WHERE p.author.id = :id AND p.status = 'PUBLISHED'")
-    long countPublishedByAuthorId(@Param("id")  Long id);
+    @Query("SELECT COUNT(p) FROM Post p WHERE p.author.id = :id AND p.status = :status")
+    long countPublishedByAuthorId(@Param("id")  Long id, @Param("status") PostStatus status);
 }

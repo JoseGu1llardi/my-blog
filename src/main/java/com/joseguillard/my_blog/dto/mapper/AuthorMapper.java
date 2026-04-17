@@ -3,6 +3,7 @@ package com.joseguillard.my_blog.dto.mapper;
 import com.joseguillard.my_blog.dto.response.author.AuthorResponse;
 import com.joseguillard.my_blog.dto.response.author.AuthorSummaryResponse;
 import com.joseguillard.my_blog.entity.Author;
+import com.joseguillard.my_blog.entity.enums.PostStatus;
 import com.joseguillard.my_blog.repository.AuthorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -16,7 +17,7 @@ public class AuthorMapper {
     public AuthorResponse toResponse(Author author) {
         if (author == null) return null;
 
-        long postCount = authorRepository.countPublishedByAuthorId(author.getId());
+        long postCount = authorRepository.countPublishedByAuthorId(author.getId(), PostStatus.PUBLISHED);
 
         // Maps author ID, username, full name, and slug
         return AuthorResponse.builder()
