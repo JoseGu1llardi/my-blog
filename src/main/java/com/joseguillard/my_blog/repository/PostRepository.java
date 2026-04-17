@@ -68,7 +68,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("SELECT DISTINCT YEAR(p.publishedAt) FROM Post p " +
             "WHERE p.status = :status " +
             "ORDER BY YEAR(p.publishedAt) DESC")
-    List<Integer> findDistinctYearsWithPublishedPosts(@Param("status")  PostStatus status);
+    List<Integer> findDistinctYearsWithPublishedPosts(@Param("status") PostStatus status);
 
     boolean existsBySlug(Slug slug);
 

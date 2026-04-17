@@ -3,6 +3,7 @@ package com.joseguillard.my_blog.service;
 import com.joseguillard.my_blog.dto.mapper.AuthorMapper;
 import com.joseguillard.my_blog.dto.response.author.AuthorResponse;
 import com.joseguillard.my_blog.dto.response.author.AuthorSummaryResponse;
+import com.joseguillard.my_blog.entity.enums.PostStatus;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.entity.Author;
 import com.joseguillard.my_blog.entity.vo.Email;
@@ -49,7 +50,7 @@ public class AuthorService {
     }
 
     public List<AuthorSummaryResponse> findAuthorWithPosts() {
-        List<Author> authors =  authorRepository.findAuthorsWithPublishedPosts();
+        List<Author> authors =  authorRepository.findAuthorsWithPublishedPosts(PostStatus.PUBLISHED);
 
         return authors.stream().map(authorMapper::toSummaryResponse).toList();
     }
