@@ -201,4 +201,21 @@ public class ApiExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(error);
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleApiUnexpectedException(
+            Exception ex,
+            HttpServletRequest request
+    ) {
+        log.error("Unhandled exception at {}: {}", request.getRequestURI(), ex.getMessage(), ex);
+        ErrorResponse error = ErrorResponse.builder()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error(ApiErrorType.INTERNAL_ERROR.name())
+                .message("An unexpected error occurred")
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
 }
