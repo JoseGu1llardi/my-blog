@@ -57,8 +57,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     );
 
     @Query("SELECT p FROM Post p WHERE p.status = :status " +
-            "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
-            "OR LOWER(p.content) LIKE LOWER(CONCAT('%', :query, '%'))) " +
+            "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :query, '%')) ESCAPE '\\' " +
+            "OR LOWER(p.content) LIKE LOWER(CONCAT('%', :query, '%')) ESCAPE '\\') " +
             "ORDER BY p.publishedAt DESC")
     Page<Post> searchPublishedPosts(
             @Param("query") String query, Pageable pageable,
