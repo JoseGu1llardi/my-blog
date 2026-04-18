@@ -4,9 +4,10 @@ import com.joseguillard.my_blog.security.JwtAuthenticationFilter;
 import com.joseguillard.my_blog.security.UserDetailsServiceImpl;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -29,8 +30,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Value("${spring.profiles.active:prod}")
-    private String activeProfile;
+    private final Environment env;
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsServiceImpl userDetailsService;
@@ -42,7 +42,8 @@ public class SecurityConfig {
             .cors(cors -> {})
             .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> {
-                    if ("dev".equals(activeProfile)) {
+                    boolean isDev = env.acceptsProfiles(Profiles.of("dev"));
+                    if (isDev) {
                         headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable);
                     } else {
                         headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin);
@@ -57,7 +58,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/authors/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll();
 
-                    if ("dev".equals(activeProfile)) {
+                    boolean isDev = env.acceptsProfiles(Profiles.of("dev"));
+                    if (isDev) {
                         auth.requestMatchers("/h2-console/**").permitAll();
                         auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
                     }

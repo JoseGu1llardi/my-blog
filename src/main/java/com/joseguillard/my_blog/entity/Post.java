@@ -84,7 +84,6 @@ public class Post {
         viewsCount = 0;
         // TODO: inject Clock bean via EntityListener for testable timestamps
         createdAt = LocalDateTime.now();
-        createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
         if (slug == null && title != null) {
             slug = Slug.fromTitle(this.title);
