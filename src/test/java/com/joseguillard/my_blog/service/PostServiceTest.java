@@ -227,7 +227,6 @@ public class PostServiceTest {
         PostCreateRequest request = PostCreateRequest.builder()
                 .title("New Post")
                 .content("New Post content")
-                .status(PostStatus.DRAFT)
                 .categoryIds(Set.of(1L))
                 .build();
 

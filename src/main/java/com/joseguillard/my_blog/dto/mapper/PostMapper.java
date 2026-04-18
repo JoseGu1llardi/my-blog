@@ -7,6 +7,7 @@ import com.joseguillard.my_blog.dto.response.post.PostSummaryResponse;
 import com.joseguillard.my_blog.entity.Author;
 import com.joseguillard.my_blog.entity.Category;
 import com.joseguillard.my_blog.entity.Post;
+import com.joseguillard.my_blog.entity.enums.PostStatus;
 import com.joseguillard.my_blog.entity.vo.Slug;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +40,7 @@ public class PostMapper {
                 .content(request.getContent())
                 .excerpt(request.getExcerpt())
                 .featuredImage(request.getFeaturedImage())
-                .status(request.getStatus())
+                .status(PostStatus.DRAFT)
                 .author(author)
                 .categories(categories)
                 .metaDescription(request.getMetaDescription())
