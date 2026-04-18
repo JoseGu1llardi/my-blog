@@ -23,6 +23,7 @@ public class PostCreateRequest {
     private String slug;
 
     @NotBlank(message = "Content is required")
+    @Size(max = 100_000, message = "Content must not exceed 100,000 characters")
     private String content;
 
     @Size(max = 1000, message = "Excerpt must have a maximum of 1000 characters")
