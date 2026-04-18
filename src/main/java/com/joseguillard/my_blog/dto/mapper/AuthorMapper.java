@@ -39,7 +39,6 @@ public class AuthorMapper {
 
         // Builds summary response from author's core attributes
         return AuthorSummaryResponse.builder()
-                .id(author.getId())
                 .fullName(author.getFullName())
                 .slug(author.getSlug().getValue())
                 .avatarUrl(author.getAvatarUrl())
