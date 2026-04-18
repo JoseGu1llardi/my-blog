@@ -18,6 +18,9 @@ public class JwtService {
     private final SecretKey signingKey;
     private final Long expiration;
 
+    private static final String ISSUER = "my-blog-api";
+    private static final String AUDIENCE = "my-blog-client";
+
     public JwtService(
             @Value("${app.jwt.secret}") String secret,
             @Value("${app.jwt.expiration}") Long expiration
@@ -33,6 +36,8 @@ public class JwtService {
     // Generates a token from a username
     public String generateToken(String username, Integer tokenVersion) {
         return Jwts.builder()
+                .issuer(ISSUER)
+                .audience().add(AUDIENCE).and()
                 .subject(username)
                 .claim("tokenVersion", tokenVersion)
                 .issuedAt(new Date())
@@ -44,6 +49,8 @@ public class JwtService {
     // Extracts the username from a token
     public String extractUsername(String token) {
         return Jwts.parser()
+                .requireIssuer(ISSUER)
+                .requireAudience(AUDIENCE)
                 .verifyWith(signingKey)
                 .build()
                 .parseSignedClaims(token)
@@ -53,6 +60,8 @@ public class JwtService {
 
     public Integer extractTokenVersion(String token) {
         return Jwts.parser()
+                .requireIssuer(ISSUER)
+                .requireAudience(AUDIENCE)
                 .verifyWith(signingKey)
                 .build()
                 .parseSignedClaims(token)
@@ -73,6 +82,8 @@ public class JwtService {
 
     private boolean isTokenExpired(String token) {
         return Jwts.parser()
+                .requireIssuer(ISSUER)
+                .requireAudience(AUDIENCE)
                 .verifyWith(signingKey)
                 .build()
                 .parseSignedClaims(token)
