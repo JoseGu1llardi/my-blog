@@ -11,6 +11,8 @@ import com.joseguillard.my_blog.repository.AuthorRepository;
 import com.joseguillard.my_blog.repository.PostRepository;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.response.ExtractableResponse;
+import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -80,37 +82,46 @@ public class PostApiIntegrationTest {
                 .title("Integration Test Post")
                 .content("This is an Integration Test Post")
                 .excerpt("Summary of Integration Test Post")
-                .status(PostStatus.PUBLISHED)
                 .build();
 
-        String slug = given()
-                    .contentType(ContentType.JSON)
-                    .header("Authorization", "Bearer " + token)
-                    .queryParam("authorId", author.getId())
-                    .body(createRequest)
+        ExtractableResponse<Response> createResponse = given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token)
+                .queryParam("authorId", author.getId())
+                .body(createRequest)
                 .when()
-                    .post("/posts")
+                .post("/posts")
                 .then()
-                    .statusCode(201)
-                        .body("success", equalTo(true))
-                        .body("message", containsString("created"))
-                        .body("data.slug", containsString("integration-test-post"))
-                        .body("data.title", containsString("Integration Test Post"))
-                        .body("data.status", equalTo("PUBLISHED"))
-                .extract()
-                    .path("data.slug");
+                .statusCode(201)
+                .body("success", equalTo(true))
+                .body("message", containsString("created"))
+                .body("data.slug", containsString("integration-test-post"))
+                .body("data.title", containsString("Integration Test Post"))
+                .body("data.status", equalTo("DRAFT"))
+                .extract();
+
+        String slug =  createResponse.path("data.slug").toString();
+        int id = createResponse.path("data.id");
+
+        // Publish post
+        given()
+            .header("Authorization", "Bearer " + token)
+                  .when()
+                      .patch("/posts/" + id + "/publish")
+                  .then()
+                      .statusCode(204);
 
         // Search created post
-        int id = given()
-        .when()
-            .get("/posts/" + slug)
-        .then()
-            .statusCode(200)
+        given()
+            .when()
+                .get("/posts/" + slug)
+            .then()
+                .statusCode(200)
                 .body("success", equalTo(true))
                 .body("data.title", equalTo("Integration Test Post"))
                 .body("data.content", equalTo("This is an Integration Test Post"))
                 .body("data.viewCount", equalTo(0))
-        .extract()
+            .extract()
                .path("data.id");
 
         // List posts

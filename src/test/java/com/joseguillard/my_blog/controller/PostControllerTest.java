@@ -160,7 +160,6 @@ public class PostControllerTest {
         PostCreateRequest request = PostCreateRequest.builder()
                 .title("Post Title")
                 .content("Content")
-                .status(PostStatus.DRAFT)
                 .build();
 
         when(postService.createPost(any(PostCreateRequest.class), any()))

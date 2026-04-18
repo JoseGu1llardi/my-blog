@@ -31,8 +31,6 @@ public class PostCreateRequest {
 
     private String featuredImage;
 
-    private PostStatus  status = PostStatus.DRAFT;
-
     private Set<Long> categoryIds;
 
     @Size(max = 500, message = "Meta description must have a maximum of 500 characters")
