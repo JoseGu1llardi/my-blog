@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AuthorSummaryResponse {
 
-    private Long id;
     private String fullName;
     private String slug;
     private String avatarUrl;

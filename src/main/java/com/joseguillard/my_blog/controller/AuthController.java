@@ -44,7 +44,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(
+    public ResponseEntity<Void> logout(
             @AuthenticationPrincipal Author author
             ) {
         authorService.incrementTokenVersion(author.getId());

@@ -73,7 +73,6 @@ public class PostControllerTest {
     @BeforeEach
     void setup() {
         AuthorSummaryResponse author = AuthorSummaryResponse.builder()
-                .id(1L)
                 .fullName("Jose Guillard")
                 .slug("joseguillard")
                 .build();
