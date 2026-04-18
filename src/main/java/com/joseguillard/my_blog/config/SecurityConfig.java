@@ -77,7 +77,18 @@ public class SecurityConfig {
                                     response.getWriter().write(
                                     "{\"status\":401,\"error\":\"UNAUTHORIZED\",\"message\":\"Authentication required\"}"
                             );
-                                } ))
+                                } )
+                        .accessDeniedHandler((
+                                request,
+                                response,
+                                accessDeniedException) -> {
+                            response.setContentType("application/json");
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.getWriter().write(
+                                    "{\"status\":403,\"error\":\"FORBIDDEN\",\"message\":\"Access denied\"}"
+                            );
+                        })
+                )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
