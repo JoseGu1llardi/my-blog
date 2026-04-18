@@ -33,7 +33,7 @@ app:
     email: ${STAGING_AUTHOR_EMAIL}
   cors:
     allowed-origins:
-      - http://localhost:3000
+      - ${STAGING_CORS_ORIGINS:http://localhost:3000}
   jwt:
     secret: ${APP_JWT_SECRET}
     expiration: ${APP_JWT_EXPIRATION:3600000}
