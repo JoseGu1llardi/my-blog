@@ -11,6 +11,8 @@ import com.joseguillard.my_blog.service.PostService;
 import com.joseguillard.my_blog.utils.IpExtractor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -57,7 +59,7 @@ public class PostController {
 
     @GetMapping("/year/{year}")
     public ResponseEntity<ApiResponse<List<PostSummaryResponse>>> getPostByYear(
-            @PathVariable int year) {
+            @PathVariable @Min(2026) @Max(2100) int year) {
         List<PostSummaryResponse> responseList = postService.getPostByYear(year);
 
         return ResponseEntity.ok(ApiResponse.success(responseList));
