@@ -237,6 +237,8 @@ Tests run against H2 in-memory using the `test` profile. No database or environm
 | `DEV_AUTHOR_PASSWORD` | Optional (default: `changeme-local-only-123!`) | Seed author password for local dev | `changeme-local-only-123!` |
 | `SERVER_PORT` | Optional (default: `8080`) | HTTP port | `8080` |
 
+> ⚠️ **Local Development**: The `docker-compose.dev.yml` requires an `APP_JWT_SECRET` environment variable set to a valid Base64 string (minimum 32 bytes). The value in this file is for local development only and must never be used in production.
+
 ---
 
 ## Deployment
