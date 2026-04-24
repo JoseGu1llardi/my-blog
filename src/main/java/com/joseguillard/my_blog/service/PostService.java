@@ -54,6 +54,18 @@ public class PostService {
     }
 
     /**
+     * Return all posts from the authenticated author (any status)
+     */
+    public Page<PostResponse> findMyPosts(Long authorId, Pageable pageable) {
+        Author author = authorRepository.findById(authorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Author not found"));
+
+        Page<Post> posts = postRepository.findByAuthor(author, pageable);
+
+        return posts.map(postMapper::toResponse);
+    }
+
+    /**
      * Search Post by Slug (increments view count)
      */
     @Transactional
