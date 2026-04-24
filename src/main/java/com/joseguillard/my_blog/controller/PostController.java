@@ -37,7 +37,7 @@ public class PostController {
     @GetMapping("/my-posts")
     public ResponseEntity<ApiResponse<PageResponse<PostResponse>>> getMyPosts(
             @AuthenticationPrincipal Author author,
-            @PageableDefault(size = 10) Pageable pageable
+            @PageableDefault() Pageable pageable
     ) {
         Page<PostResponse> responses = postService.findMyPosts(author.getId(), pageable);
 
@@ -46,7 +46,7 @@ public class PostController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<PostSummaryResponse>>> getAllPosts(
-            @PageableDefault(size = 10) Pageable pageable
+            @PageableDefault() Pageable pageable
     ) {
         Page<PostSummaryResponse> pageResponse = postService.getPublishedPosts(pageable);
 
@@ -78,7 +78,7 @@ public class PostController {
     @GetMapping("/category/{slug}")
     public ResponseEntity<ApiResponse<PageResponse<PostSummaryResponse>>> getPostsByCategory(
             @PathVariable String slug,
-            @PageableDefault(size = 10) Pageable pageable
+            @PageableDefault() Pageable pageable
     ) {
         Page<PostSummaryResponse> responses = postService.getPostsByCategory(slug, pageable);
 
@@ -88,7 +88,7 @@ public class PostController {
     @GetMapping("/author/{slug}")
     public ResponseEntity<ApiResponse<PageResponse<PostSummaryResponse>>> getPostsByAuthor(
             @PathVariable String slug,
-            @PageableDefault(size = 10, sort = "publishedAt") Pageable pageable
+            @PageableDefault(sort = "publishedAt") Pageable pageable
     ) {
         Page<PostSummaryResponse> responses = postService.getPostByAuthor(slug, pageable);
 
@@ -99,7 +99,7 @@ public class PostController {
     public ResponseEntity<ApiResponse<PageResponse<PostSummaryResponse>>> searchPosts(
             @RequestParam @Size(min = 1, max = 200,
                     message = "Query must be between 1 and 200 characters") String query,
-            @PageableDefault(size = 10) Pageable pageable
+            @PageableDefault() Pageable pageable
     ) {
         Page<PostSummaryResponse> responses = postService.searchPosts(query, pageable);
 
