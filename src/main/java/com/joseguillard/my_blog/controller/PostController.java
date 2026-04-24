@@ -34,6 +34,16 @@ public class PostController {
 
     private final PostService postService;
 
+    @GetMapping("/my-posts")
+    public ResponseEntity<ApiResponse<PageResponse<PostResponse>>> getMyPosts(
+            @AuthenticationPrincipal Author author,
+            @PageableDefault(size = 10) Pageable pageable
+    ) {
+        Page<PostResponse> responses = postService.findMyPosts(author.getId(), pageable);
+
+        return ResponseEntity.ok(ApiResponse.success(PageResponse.of(responses)));
+    }
+
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<PostSummaryResponse>>> getAllPosts(
             @PageableDefault(size = 10) Pageable pageable

@@ -1,5 +1,6 @@
 package com.joseguillard.my_blog.repository;
 
+import com.joseguillard.my_blog.dto.response.post.PostResponse;
 import com.joseguillard.my_blog.entity.Author;
 import com.joseguillard.my_blog.entity.Post;
 import com.joseguillard.my_blog.entity.enums.PostStatus;
@@ -23,6 +24,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @EntityGraph(attributePaths = {"author", "categories"})
     Optional<Post> findBySlug(Slug slug);
+
+    Page<Post> findByAuthor(Author authorId, Pageable pageable);
 
     Page<Post> findByStatusOrderByPublishedAtDesc(PostStatus status, Pageable pageable);
 
