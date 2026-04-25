@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://postgres:5432/blogdb
+    url: jdbc:postgresql://localhost:5432/blogdb
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: postgres
@@ -11,7 +11,9 @@ spring:
     show-sql: false
 
   flyway:
-    enabled: false
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 2
 
 logging:
   level:
@@ -19,6 +21,9 @@ logging:
     org.hibernate.SQL: DEBUG
 
 app:
+  jwt:
+    ########### MOCK JWT SECRET ###########
+    secret: ${APP_JWT_SECRET:ZGV2LWxvY2FsLXNlY3JldC1rZXktbWluaW11bS0zMi1jaGFycy1sb25n}
   cors:
     allowed-origins: http://localhost:3000,http://localhost:8080
   init:
