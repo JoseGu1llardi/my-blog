@@ -34,6 +34,16 @@ public class PostController {
 
     private final PostService postService;
 
+    @GetMapping("/my-posts/{id}")
+    public ResponseEntity<ApiResponse<PostResponse>> getPostById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal Author author
+    ) {
+        PostResponse response = postService.getPostById(id, author.getId());
+
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
     @GetMapping("/my-posts")
     public ResponseEntity<ApiResponse<PageResponse<PostResponse>>> getMyPosts(
             @AuthenticationPrincipal Author author,
@@ -128,16 +138,6 @@ public class PostController {
         return ResponseEntity
                 .created(location)
                 .body(ApiResponse.success("Post created successfully", post));
-    }
-
-    @GetMapping("/my-posts/{id}")
-    public ResponseEntity<ApiResponse<PostResponse>> getPostById(
-            @PathVariable Long id,
-            @AuthenticationPrincipal Author author
-    ) {
-        PostResponse response = postService.getPostById(id, author.getId());
-
-        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @PutMapping("/{id}")
