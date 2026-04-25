@@ -251,6 +251,7 @@ public class PostService {
         }
 
         post.unpublish();
+        post.setPublishedAt(null);
         log.info("Post id {} unpublished successfully", id);
     }
 
