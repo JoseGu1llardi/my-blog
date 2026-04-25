@@ -45,7 +45,7 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<PageResponse<PostSummaryResponse>>> getAllPosts(
+    public ResponseEntity<ApiResponse<PageResponse<PostSummaryResponse>>> getAllPublishedPosts(
             @PageableDefault() Pageable pageable
     ) {
         Page<PostSummaryResponse> pageResponse = postService.getPublishedPosts(pageable);
@@ -128,6 +128,16 @@ public class PostController {
         return ResponseEntity
                 .created(location)
                 .body(ApiResponse.success("Post created successfully", post));
+    }
+
+    @GetMapping("/my-posts/{id}")
+    public ResponseEntity<ApiResponse<PostResponse>> getPostById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal Author author
+    ) {
+        PostResponse response = postService.getPostById(id, author.getId());
+
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @PutMapping("/{id}")
