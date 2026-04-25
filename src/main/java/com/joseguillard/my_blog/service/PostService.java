@@ -54,6 +54,20 @@ public class PostService {
     }
 
     /**
+     * Returns a single Post by ID
+     */
+    public PostResponse getPostById(Long id, Long authorId) {
+
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
+
+        if (!post.getAuthor().getId().equals(authorId))
+            throw new PostOwnershipException();
+
+        return postMapper.toResponse(post);
+    }
+
+    /**
      * Return all posts from the authenticated author (any status)
      */
     public Page<PostResponse> findMyPosts(Long authorId, Pageable pageable) {
