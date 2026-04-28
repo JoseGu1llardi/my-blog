@@ -17,8 +17,9 @@ A content-management REST API built with Spring Boot 3.2 and Java 17. It handles
 | H2 | (Boot-managed) | In-memory database — test profile only |
 | Flyway | (Boot-managed) | Schema versioning and migrations |
 | Caffeine | (Boot-managed) | In-process cache for rate limiters |
-| Docker / Docker Compose | — | Local PostgreSQL provisioning |
-| Railway | — | Staging deployment (PaaS) |
+| Docker / Docker Compose | — | Container orchestration (dev and prod) |
+| GitHub Actions | — | CI/CD pipeline — build and deploy on push |
+| AWS EC2 | t3.small | Production server |
 | JaCoCo | 0.8.10 | Test coverage reporting |
 | RestAssured | (Boot-managed) | Integration test HTTP client |
 | Springdoc OpenAPI | 2.3.0 | Swagger UI (dev profile only) |
@@ -54,19 +55,24 @@ UPDATE Post p SET p.viewsCount = p.viewsCount + 1 WHERE p.id = :id
 ```
 This is a single atomic `UPDATE` at the database level, avoiding the read-modify-write race condition that would occur with `post.incrementViewCount()` followed by a `save()`.
 
+### Admin Seed via Flyway
+The initial admin user is created by `V3__seed_admin.sql` — a Flyway migration that runs once before the application starts. The BCrypt hash is pre-computed and stored directly in the SQL file. This eliminates runtime dependency on environment variables for critical data and makes the seed idempotent (`ON CONFLICT DO NOTHING`).
+
+### Least-Privilege Database User
+The application connects as `blog_user`, a PostgreSQL role with `SELECT`, `INSERT`, `UPDATE`, and `DELETE` on application tables only. The `postgres` superuser is not used by the application. This limits blast radius if the application layer is compromised.
+
 ### Dev/Prod Parity
-- **`dev` profile**: PostgreSQL via Docker Compose, `ddl-auto: update`, Flyway disabled, seed data via `DataInitializer`.
-- **`staging` profile**: PostgreSQL on Railway, `ddl-auto: validate`, Flyway enabled, Swagger disabled.
-- **`prod` profile**: PostgreSQL on AWS RDS (planned), same constraints as staging.
+- **`dev` profile**: PostgreSQL via Docker Compose (`docker-compose.dev.yml`), `ddl-auto: update`, Flyway disabled, seed data via `DataInitializer`.
+- **`prod` profile**: PostgreSQL in a separate Docker container on AWS EC2, `ddl-auto: validate`, Flyway enabled (`V1` → `V2` → `V3`), Swagger disabled.
 - **`test` profile**: H2 in-memory only. H2 is scoped to `test` in `pom.xml` — it cannot be loaded in any other profile.
 
 The base `application.yml` sets `ddl-auto: validate` as the default, so forgetting to set a profile fails loudly on startup rather than silently recreating the schema.
 
 ### `ForwardedHeaderFilter` for Real IP Extraction
-Registered as a Spring `@Bean` in `WebConfig`. Without it, `request.getRemoteAddr()` returns the proxy's IP, making the IP-based rate limiters ineffective behind Railway's or any other reverse proxy. The filter rewrites `X-Forwarded-For` and `X-Forwarded-Proto` headers so all downstream components see real client values. `IpExtractor` reads the rewritten headers.
+Registered as a Spring `@Bean` in `WebConfig`. Without it, `request.getRemoteAddr()` returns the proxy's IP, making the IP-based rate limiters ineffective behind a reverse proxy. The filter rewrites `X-Forwarded-For` and `X-Forwarded-Proto` headers so all downstream components see real client values.
 
 ### Profile-Conditional Security Rules
-`SecurityConfig` reads the active `Environment` profiles at bean construction time. H2 console access and Swagger UI routes are added to the permit list only when the `dev` profile is active. In staging and production, these paths hit the catch-all `anyRequest().authenticated()` rule. This avoids environment-specific security misconfigurations without duplicating the entire filter chain.
+`SecurityConfig` reads the active `Environment` profiles at bean construction time. H2 console access and Swagger UI routes are added to the permit list only when the `dev` profile is active. In production, these paths hit the catch-all `anyRequest().authenticated()` rule.
 
 ---
 
@@ -87,6 +93,8 @@ Registered as a Spring `@Bean` in `WebConfig`. Without it, `request.getRemoteAdd
 | BCrypt password encoding | Offline dictionary attacks on a compromised credential store |
 | Swagger UI and H2 console gated behind `dev` profile | Accidental exposure of admin tooling in non-development environments |
 | `SessionCreationPolicy.STATELESS` | Session fixation and CSRF via session cookies |
+| Least-privilege DB user (`blog_user`) | Superuser access from a compromised application layer |
+| Environment secrets stored in `/etc/blog-api/env` with `chmod 640` | Credential exposure via filesystem |
 
 ---
 
@@ -172,42 +180,15 @@ Full application context on a random port, H2 in-memory, real HTTP.
 - Docker and Docker Compose
 - Maven 3.8+
 
-### 1. Start PostgreSQL
+### 1. Start the full local environment
 
 ```bash
-docker-compose up -d
+docker compose -f docker-compose.dev.yml up
 ```
 
-Starts `postgres:16-alpine` on port 5432 with database `blogdb`.
+Starts `postgres:16-alpine` on port 5432 and the Spring Boot application on port 8080, both in containers. The `dev` profile seeds an initial author and sample posts via `DataInitializer`. Swagger UI is available at `http://localhost:8080/swagger-ui/index.html`.
 
-### 2. Configure Environment Variables
-
-Create a `.env` file in the project root:
-
-```env
-APP_JWT_SECRET=<base64-encoded-secret-min-32-bytes>
-APP_JWT_EXPIRATION=86400000
-DEV_AUTHOR_PASSWORD=changeme-local-only-123!
-DEV_AUTHOR_EMAIL=dev@example.com
-DEV_AUTHOR_GITHUB=https://github.com/your-handle
-DEV_AUTHOR_LINKEDIN=https://linkedin.com/in/your-handle
-DEV_AUTHOR_AVATAR=https://your-avatar-url.com/avatar.jpg
-```
-
-To generate a suitable JWT secret:
-```bash
-openssl rand -base64 32
-```
-
-### 3. Run the Application
-
-```bash
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
-```
-
-The `dev` profile connects to the local Docker PostgreSQL instance and seeds an initial author via `DataInitializer`. Swagger UI is available at `http://localhost:8080/swagger-ui/index.html`.
-
-### 4. Run Tests
+### 2. Run Tests
 
 ```bash
 mvn test
@@ -217,32 +198,74 @@ Tests run against H2 in-memory using the `test` profile. No database or environm
 
 ---
 
-## Environment Variables Reference
+## Deployment
 
-| Variable | Required | Description | Example |
-|---|---|---|---|
-| `APP_JWT_SECRET` | **Required** | Base64-encoded HMAC-SHA256 signing key (min 256 bits / 32 bytes) | `rl1fKrM7L9+BMyejalNy...` |
-| `APP_JWT_EXPIRATION` | Optional (default: `3600000`) | Token expiration in milliseconds | `86400000` (24 h) |
-| `DB_HOST` | Required (prod) | PostgreSQL host | `your-db.rds.amazonaws.com` |
-| `DB_PORT` | Required (prod) | PostgreSQL port | `5432` |
-| `DB_NAME` | Required (prod) | Database name | `blogdb` |
-| `DB_USER` | Required (prod) | Database username | `blog_user` |
-| `DB_PASSWORD` | Required (prod) | Database password | — |
-| `DATABASE_URL` | Required (staging) | Full JDBC URL (Railway format) | `jdbc:postgresql://host:port/db` |
-| `DATABASE_USERNAME` | Required (staging) | Database username | `postgres` |
-| `DATABASE_PASSWORD` | Required (staging) | Database password | — |
-| `CORS_ALLOWED_ORIGINS` | Optional | Exact-match allowed origin | `https://www.mydomain.com` |
-| `AUTHOR_PASSWORD` | Required (prod/staging) | Initial author password | — |
-| `AUTHOR_EMAIL` | Required (prod/staging) | Initial author email | `author@domain.com` |
-| `DEV_AUTHOR_PASSWORD` | Optional (default: `changeme-local-only-123!`) | Seed author password for local dev | `changeme-local-only-123!` |
-| `SERVER_PORT` | Optional (default: `8080`) | HTTP port | `8080` |
+### Infrastructure
 
-> ⚠️ **Local Development**: The `docker-compose.dev.yml` requires an `APP_JWT_SECRET` environment variable set to a valid Base64 string (minimum 32 bytes). The value in this file is for local development only and must never be used in production.
+Production runs on **AWS EC2** (`t3.small`, Ubuntu 24.04, Elastic IP `100.31.169.60`) with the `prod` profile. The application and PostgreSQL run as Docker containers managed by Docker Compose.
+
+```
+EC2 instance
+├── blog-app-prod     (Spring Boot — port 8080)
+└── blog-postgres-prod (PostgreSQL 16 — internal network only)
+```
+
+### CI/CD Pipeline
+
+Every push to `main` triggers a GitHub Actions workflow defined in `.github/workflows/deploy.yml`:
+
+```
+git push origin main
+    ↓
+GitHub Actions (ubuntu-latest)
+    ↓ copies source files to EC2 via SCP
+EC2
+    ↓ docker compose -f docker-compose.prod.yml up -d --build
+Application running with new code
+```
+
+No manual SCP, no manual SSH, no manual restart. End-to-end deploy time is approximately 2–3 minutes.
+
+### Environment Variables (Production)
+
+Stored in `/etc/blog-api/env` on the EC2 instance with `chmod 640, chown root:ubuntu`. Never committed to the repository.
+
+| Variable | Description |
+|---|---|
+| `DB_HOST` | PostgreSQL container hostname (`postgres`) |
+| `DB_PORT` | PostgreSQL port (`5432`) |
+| `DB_NAME` | Database name (`blogdb`) |
+| `DB_USER` | Application database user (`blog_user`) |
+| `DB_PASSWORD` | Application database password |
+| `APP_JWT_SECRET` | Base64-encoded HMAC-SHA512 signing key (min 32 bytes), generated with `openssl rand -base64 32` |
+| `APP_JWT_EXPIRATION` | Token expiration in milliseconds (`3600000` = 1h) |
+| `AUTHOR_PASSWORD` | Admin author password (used by Flyway V3 seed) |
+| `AUTHOR_EMAIL` | Admin author email |
+| `CORS_ALLOWED_ORIGINS` | Exact-match allowed origin |
+
+### GitHub Actions Secrets
+
+| Secret | Description |
+|---|---|
+| `EC2_SSH_KEY` | Contents of `blog-api-key.pem` |
+| `EC2_HOST` | `100.31.169.60` |
+| `EC2_USER` | `ubuntu` |
+
+### Flyway Migrations
+
+| Version | Description |
+|---|---|
+| V1 | Initial schema — authors, posts, categories, post_categories |
+| V2 | Add `token_version` column to authors |
+| V3 | Seed admin user with pre-computed BCrypt hash |
 
 ---
 
-## Deployment
+## Environment Variables Reference (Local Dev)
 
-**Staging** runs on [Railway](https://railway.app) with the `staging` profile. Railway injects `DATABASE_URL`, `DATABASE_USERNAME`, and `DATABASE_PASSWORD` from the provisioned PostgreSQL service. Flyway applies pending migrations on startup. Swagger UI is disabled.
-
-**Planned production target** is AWS EC2 with RDS PostgreSQL using the `prod` profile. The two-phase strategy — Railway first, then EC2 + RDS — trades lower operational overhead in early stages for finer-grained network and IAM control at scale.
+| Variable | Required | Description | Example |
+|---|---|---|---|
+| `APP_JWT_SECRET` | Required | Base64-encoded signing key (min 32 bytes) | `rl1fKrM7L9+BMyejalNy...` |
+| `APP_JWT_EXPIRATION` | Optional (default: `3600000`) | Token expiration in milliseconds | `86400000` |
+| `app.init.password` | Required (dev) | Seed author password | `changeme-local-only-123!` |
+| `app.init.email` | Required (dev) | Seed author email | `dev@example.com` |
