@@ -12,29 +12,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Java 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Build JAR
-        run: mvn package -DskipTests
-
-      - name: Copy JAR to EC2
+      - name: Copy files to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "target/blog-api-1.0.0.jar"
-          target: "/home/ubuntu/"
-          strip_components: 1
+          source: "Dockerfile.prod,docker-compose.prod.yml,src,pom.xml"
+          target: "/home/ubuntu/blog-api/"
 
-      - name: Restart service
+      - name: Build and deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          script: sudo systemctl restart blog-api
+          script: |
+            cd /home/ubuntu/blog-api
+            docker compose -f docker-compose.prod.yml --env-file /etc/blog-api/env up -d --build
