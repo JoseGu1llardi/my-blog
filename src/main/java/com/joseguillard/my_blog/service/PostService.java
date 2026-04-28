@@ -57,7 +57,6 @@ public class PostService {
      * Returns a single Post by ID
      */
     public PostResponse getPostById(Long id, Long authorId) {
-
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
 
