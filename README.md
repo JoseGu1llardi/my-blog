@@ -2,6 +2,8 @@
 
 A content-management REST API built with Spring Boot 3.2 and Java 17. It handles the full lifecycle of blog posts — creation, publishing, search, and soft deletion — with JWT authentication, IP-based rate limiting, and Flyway-managed schema migrations. Built as a portfolio project to demonstrate production-oriented backend practices in a junior engineer context.
 
+**Live API:** `https://api.guillard.dev`
+
 ---
 
 ## Technical Stack
@@ -18,8 +20,10 @@ A content-management REST API built with Spring Boot 3.2 and Java 17. It handles
 | Flyway | (Boot-managed) | Schema versioning and migrations |
 | Caffeine | (Boot-managed) | In-process cache for rate limiters |
 | Docker / Docker Compose | — | Container orchestration (dev and prod) |
+| Nginx | 1.24 | Reverse proxy, SSL termination |
 | GitHub Actions | — | CI/CD pipeline — build and deploy on push |
-| AWS EC2 | t3.small | Production server |
+| AWS EC2 | t3.small | Production application server |
+| AWS RDS | db.t3.micro | Managed PostgreSQL database |
 | JaCoCo | 0.8.10 | Test coverage reporting |
 | RestAssured | (Boot-managed) | Integration test HTTP client |
 | Springdoc OpenAPI | 2.3.0 | Swagger UI (dev profile only) |
@@ -61,15 +65,21 @@ The initial admin user is created by `V3__seed_admin.sql` — a Flyway migration
 ### Least-Privilege Database User
 The application connects as `blog_user`, a PostgreSQL role with `SELECT`, `INSERT`, `UPDATE`, and `DELETE` on application tables only. The `postgres` superuser is not used by the application. This limits blast radius if the application layer is compromised.
 
+### Nginx as Reverse Proxy
+Nginx sits in front of the Spring Boot container, handling SSL termination and routing. The Spring Boot container is not exposed publicly — only Nginx is. This means port 8080 is closed to the internet, all traffic enters via ports 80 (redirected to HTTPS) and 443, and the `ForwardedHeaderFilter` bean reads `X-Forwarded-For` and `X-Forwarded-Proto` headers set by Nginx so IP-based rate limiting sees real client IPs.
+
+### Managed Database (AWS RDS)
+PostgreSQL runs on a dedicated AWS RDS `db.t3.micro` instance, separate from the EC2 application server. Database data persists independently of the EC2 instance lifecycle — terminating and replacing the EC2 instance does not affect the data. RDS provides automated daily backups with 7-day retention and automatic minor version upgrades.
+
 ### Dev/Prod Parity
 - **`dev` profile**: PostgreSQL via Docker Compose (`docker-compose.dev.yml`), `ddl-auto: update`, Flyway disabled, seed data via `DataInitializer`.
-- **`prod` profile**: PostgreSQL in a separate Docker container on AWS EC2, `ddl-auto: validate`, Flyway enabled (`V1` → `V2` → `V3`), Swagger disabled.
+- **`prod` profile**: AWS RDS PostgreSQL, `ddl-auto: validate`, Flyway enabled (`V1` → `V2` → `V3`), Swagger disabled.
 - **`test` profile**: H2 in-memory only. H2 is scoped to `test` in `pom.xml` — it cannot be loaded in any other profile.
 
 The base `application.yml` sets `ddl-auto: validate` as the default, so forgetting to set a profile fails loudly on startup rather than silently recreating the schema.
 
 ### `ForwardedHeaderFilter` for Real IP Extraction
-Registered as a Spring `@Bean` in `WebConfig`. Without it, `request.getRemoteAddr()` returns the proxy's IP, making the IP-based rate limiters ineffective behind a reverse proxy. The filter rewrites `X-Forwarded-For` and `X-Forwarded-Proto` headers so all downstream components see real client values.
+Registered as a Spring `@Bean` in `WebConfig`. Without it, `request.getRemoteAddr()` returns the Nginx proxy IP, making the IP-based rate limiters ineffective. The filter rewrites `X-Forwarded-For` and `X-Forwarded-Proto` headers so all downstream components see real client values.
 
 ### Profile-Conditional Security Rules
 `SecurityConfig` reads the active `Environment` profiles at bean construction time. H2 console access and Swagger UI routes are added to the permit list only when the `dev` profile is active. In production, these paths hit the catch-all `anyRequest().authenticated()` rule.
@@ -95,6 +105,10 @@ Registered as a Spring `@Bean` in `WebConfig`. Without it, `request.getRemoteAdd
 | `SessionCreationPolicy.STATELESS` | Session fixation and CSRF via session cookies |
 | Least-privilege DB user (`blog_user`) | Superuser access from a compromised application layer |
 | Environment secrets stored in `/etc/blog-api/env` with `chmod 640` | Credential exposure via filesystem |
+| Port 8080 closed externally — only Nginx has access | Direct access to Spring Boot bypassing Nginx security layer |
+| HTTPS enforced via Let's Encrypt certificate (auto-renewed every 90 days) | Credential and token interception in transit |
+| RDS not publicly accessible — VPC-internal only | Direct database access from the internet |
+| RDS Security Group allows inbound only from EC2 Security Group | Database access from unauthorized compute resources |
 
 ---
 
@@ -129,6 +143,8 @@ Full application context on a random port, H2 in-memory, real HTTP.
 ---
 
 ## API Endpoints
+
+**Base URL:** `https://api.guillard.dev`
 
 ### Posts
 
@@ -202,13 +218,23 @@ Tests run against H2 in-memory using the `test` profile. No database or environm
 
 ### Infrastructure
 
-Production runs on **AWS EC2** (`t3.small`, Ubuntu 24.04, Elastic IP `100.31.169.60`) with the `prod` profile. The application and PostgreSQL run as Docker containers managed by Docker Compose.
+```
+Internet
+    ↓
+https://api.guillard.dev (port 443)
+    ↓
+Nginx — SSL termination, reverse proxy
+EC2: t3.small, Ubuntu 24.04, Elastic IP 100.31.169.60
+    ↓
+Spring Boot container (localhost:8080 — not publicly accessible)
+    ↓
+AWS RDS PostgreSQL 16 (VPC-internal — not publicly accessible)
+blog-api-db.ci3kkxkpswbz.us-east-1.rds.amazonaws.com
+```
 
-```
-EC2 instance
-├── blog-app-prod     (Spring Boot — port 8080)
-└── blog-postgres-prod (PostgreSQL 16 — internal network only)
-```
+### Auto-start on Reboot
+
+A systemd service (`blog-api-docker.service`) manages Docker Compose. On EC2 reboot, systemd automatically runs `docker compose up -d`. The RDS instance is unaffected by EC2 reboots — data persists independently.
 
 ### CI/CD Pipeline
 
@@ -232,11 +258,11 @@ Stored in `/etc/blog-api/env` on the EC2 instance with `chmod 640, chown root:ub
 
 | Variable | Description |
 |---|---|
-| `DB_HOST` | PostgreSQL container hostname (`postgres`) |
+| `DB_HOST` | RDS endpoint hostname |
 | `DB_PORT` | PostgreSQL port (`5432`) |
 | `DB_NAME` | Database name (`blogdb`) |
-| `DB_USER` | Application database user (`blog_user`) |
-| `DB_PASSWORD` | Application database password |
+| `DB_USER` | Application database user |
+| `DB_PASSWORD` | RDS master password |
 | `APP_JWT_SECRET` | Base64-encoded HMAC-SHA512 signing key (min 32 bytes), generated with `openssl rand -base64 32` |
 | `APP_JWT_EXPIRATION` | Token expiration in milliseconds (`3600000` = 1h) |
 | `AUTHOR_PASSWORD` | Admin author password (used by Flyway V3 seed) |
