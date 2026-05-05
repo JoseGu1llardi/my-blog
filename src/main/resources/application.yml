@@ -14,6 +14,7 @@ server:
 app:
   cors:
     allowed-origins:
+      - http://localhost:3000
       - https://blog.guillard.dev
   base-url: ${APP_BASE_URL:http://localhost:${SERVER_PORT:8080}}
   jwt:

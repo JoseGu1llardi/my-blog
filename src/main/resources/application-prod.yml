@@ -16,7 +16,7 @@ logging:
 
 app:
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://guillard-dev.netlify.app/}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://guillard-dev.netlify.app}
   init:
     password: ${AUTHOR_PASSWORD}
     email: ${AUTHOR_EMAIL}
