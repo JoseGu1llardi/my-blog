@@ -14,7 +14,7 @@ server:
 app:
   cors:
     allowed-origins:
-      - https://guillard-dev.netlify.app/
+      - https://blog.guillard.dev
   base-url: ${APP_BASE_URL:http://localhost:${SERVER_PORT:8080}}
   jwt:
     secret: ${APP_JWT_SECRET}
