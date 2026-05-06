@@ -89,7 +89,7 @@ public class DataInitializer implements CommandLineRunner {
                 .icon("⚡")
                 .build();
 
-        categoryRepository.saveAll(List.of(category1, category2));
+        categoryRepository.saveAll(List.of(category1, category2, category3));
 
         // Builds post with metadata and content
         Post post1 = Post.builder()
