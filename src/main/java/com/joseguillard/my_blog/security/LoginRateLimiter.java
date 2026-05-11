@@ -25,8 +25,7 @@ public class LoginRateLimiter {
     }
 
     public void recordFailure(String ipAddress) {
-        Integer attempts = loginAttempts.getIfPresent(ipAddress);
-        loginAttempts.put(ipAddress, attempts == null ? 1 : attempts + 1);
+        loginAttempts.asMap().merge(ipAddress, 1, Integer::sum);
     }
 
     public void recordSuccess(String ipAddress) {
