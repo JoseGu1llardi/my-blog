@@ -57,10 +57,32 @@ public class LoginRateLimiterTest {
     // 5 failures + TTL expired → NOT blocked
     @Test
     @DisplayName("Should not block after TTL expires")
-    void shouldUnblockAfterTtlExpires() throws InterruptedException {}
+    void shouldUnblockAfterTtlExpires() throws InterruptedException {
+        // Arrange - Short TTL of 100ms
+        LoginRateLimiter shortTtlLimiter = new LoginRateLimiter(Duration.ofMillis(100));
+
+        // Act
+        for (int i = 0; i < 5; i++) {
+            shortTtlLimiter.recordFailure("127.0.0.1");
+        }
+
+        assertThat(shortTtlLimiter.isBlocked("127.0.0.1")).isTrue(); // confirmed blocked
+
+        Thread.sleep(200); // wait for TTL to expire
+
+        // Assert
+        assertThat(shortTtlLimiter.isBlocked("127.0.0.1")).isFalse();
+    }
 
     // different IPs → independent counters
     @Test
     @DisplayName("Should track each IP independently")
-    void shouldTrackEachIpIndependently() {}
+    void shouldTrackEachIpIndependently() {
+        for (int i = 0; i < 5; i++) {
+            limiter.recordFailure("127.0.0.1");
+        }
+
+        assertThat(limiter.isBlocked("127.0.0.1")).isTrue();
+        assertThat(limiter.isBlocked("127.0.0.2")).isFalse();
+    }
 }
