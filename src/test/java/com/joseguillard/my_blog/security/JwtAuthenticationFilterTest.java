@@ -45,4 +45,18 @@ public class JwtAuthenticationFilterTest {
         verify(filterChain).doFilter(request, response);
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
     }
+
+    @Test
+    @DisplayName("Should not authenticate user when Authorization header does not start with Bearer")
+    void shouldPassThroughWhenAuthorizationHeaderDoesNotStartWithBearer() throws Exception {
+        // Arrange
+        when(request.getHeader("Authorization")).thenReturn("XYZ2A5SSS8T7T4T1");
+
+        // Act
+        filter.doFilterInternal(request, response, filterChain);
+
+        // Assert
+        verify(filterChain).doFilter(request, response);
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+    }
 }
