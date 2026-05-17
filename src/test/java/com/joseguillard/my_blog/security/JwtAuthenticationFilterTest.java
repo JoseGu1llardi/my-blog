@@ -1,5 +1,7 @@
 package com.joseguillard.my_blog.security;
 
+import com.joseguillard.my_blog.entity.Author;
+import com.joseguillard.my_blog.entity.enums.UserRole;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -58,5 +60,33 @@ public class JwtAuthenticationFilterTest {
         // Assert
         verify(filterChain).doFilter(request, response);
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+    }
+
+    @Test
+    @DisplayName("Should authenticate user when token is invalid and tokenVersion matches")
+    void shouldAuthenticateWhenTokenIsValidAndTokenVersionMatches() throws Exception {
+        // Arrange
+        Author author = Author.builder()
+                .userName("gr1llard")
+                .password("hashed-password")
+                .role(UserRole.AUTHOR)
+                .active(true)
+                .tokenVersion(1)
+                .build();
+
+        when(request.getHeader("Authorization")).thenReturn("Bearer valid.token.here");
+        when(jwtService.extractUsername("valid.token.here")).thenReturn("gr1llard");
+        when(userDetailsService.loadUserByUsername("gr1llard")).thenReturn(author);
+        when(jwtService.isTokenValid("valid.token.here", author)).thenReturn(true);
+        when(jwtService.extractTokenVersion("valid.token.here")).thenReturn(1);
+
+        // Act
+        filter.doFilterInternal(request, response, filterChain);
+
+        // Assert - SecurityContext must have authentication
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
+        assertThat(SecurityContextHolder.getContext().getAuthentication().getName())
+                .isEqualTo("gr1llard");
+        verify(filterChain).doFilter(request, response);
     }
 }
