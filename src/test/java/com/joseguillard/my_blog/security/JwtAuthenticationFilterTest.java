@@ -2,6 +2,7 @@ package com.joseguillard.my_blog.security;
 
 import com.joseguillard.my_blog.entity.Author;
 import com.joseguillard.my_blog.entity.enums.UserRole;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -91,6 +92,7 @@ public class JwtAuthenticationFilterTest {
     }
 
     @Test
+    @DisplayName("Should not authenticate user when token is valid and tokenVersion does not match")
     void shouldNotAuthenticateWhenTokenIsValidAndTokenVersionDoesNotMatch() throws Exception {
         // Arrange
         Author author = Author.builder()
@@ -113,5 +115,35 @@ public class JwtAuthenticationFilterTest {
         // Assert - SecurityContext must have authentication
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    @DisplayName("Should not authenticate user when token is invalid")
+    void shouldPassThroughWhenTokenSignatureIsInvalid() throws Exception {
+        // Arrange
+        when(request.getHeader("Authorization")).thenReturn("Bearer tampered.token.here");
+        when(jwtService.extractUsername("tampered.token.here")).thenThrow(
+                new JwtException("Invalid signature."));
+
+        // Act
+        filter.doFilterInternal(request, response, filterChain);
+
+        // Assert
+        verify(filterChain).doFilter(request, response);
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+    }
+
+    @Test
+    @DisplayName("Should not filter a public route")
+    void shouldSkipFilterForAuthLoginPath() throws Exception {
+        when(request.getServletPath()).thenReturn("/api/v1/auth/login");
+        assertThat(filter.shouldNotFilter(request)).isTrue();
+    }
+
+    @Test
+    @DisplayName("Should not skip the filter for posts path")
+    void shouldNotSkipFilterForPostsPath() throws Exception {
+        when(request.getServletPath()).thenReturn("/api/v1/posts");
+        assertThat(filter.shouldNotFilter(request)).isFalse();
     }
 }
