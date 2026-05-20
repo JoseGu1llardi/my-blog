@@ -1,5 +1,6 @@
 package com.joseguillard.my_blog.security;
 
+import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,7 +10,9 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import javax.crypto.SecretKey;
 import java.util.Collections;
+import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -60,13 +63,30 @@ public class JwtServiceTest {
 
     @Test
     @DisplayName("Should verify if token version matches")
-    void shouldCheckIfTokenVersionMatch() {
+    void shouldCheckIfTokenVersionMatches() {
         // Generate a real token first, then verify if the token version matches.
         String token = jwtService.generateToken("grillard", 1);
 
         Integer tokenVersion = jwtService.extractTokenVersion(token);
 
         assertThat(tokenVersion).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Should return null when tokenVersion is absent from token")
+    void shouldReturnNullWhenTokenVersionClaimIsAbsent() {
+        SecretKey signingKey = (SecretKey) ReflectionTestUtils.getField(jwtService, "signingKey");
+
+        String tokenWithoutVersion = Jwts.builder()
+                .subject("grillard")
+                .issuer("my-blog-api")
+                .audience().add("my-blog-client").and()
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 3600000L))
+                .signWith(signingKey)
+                .compact();
+
+        assertThat(jwtService.extractTokenVersion(tokenWithoutVersion)).isNull();
     }
 
     @Test
