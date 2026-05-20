@@ -5,7 +5,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -60,6 +59,17 @@ public class JwtServiceTest {
     }
 
     @Test
+    @DisplayName("Should verify if token version matches")
+    void shouldCheckIfTokenVersionMatch() {
+        // Generate a real token first, then verify if the token version matches.
+        String token = jwtService.generateToken("grillard", 1);
+
+        Integer tokenVersion = jwtService.extractTokenVersion(token);
+
+        assertThat(tokenVersion).isEqualTo(1);
+    }
+
+    @Test
     @DisplayName("Should return true when token is valid and username matches")
     void shouldReturnTrueWhenTokenIsValid() {
         // UserDetails is the interface Spring Security uses to represent a user.
@@ -79,10 +89,10 @@ public class JwtServiceTest {
     }
 
     @Test
-    @DisplayName("Should return false when uername does not match token")
+    @DisplayName("Should return false when username does not match token")
     void shouldReturnFalseWhenUsernameDoesNotMatch() {
         // Generate a token for "grillard" but validates against a different user
-        // isTokenValid() compares extracted username from token vs userDetails.getUsername()
+        // isTokenValid() compares extracted username from token vs. userDetails.getUsername()
         // They will not match, so it should return false.
         UserDetails userDetails = User.withUsername("different-username")
                 .password("password")
