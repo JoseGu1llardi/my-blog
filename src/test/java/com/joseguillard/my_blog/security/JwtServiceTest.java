@@ -54,7 +54,7 @@ public class JwtServiceTest {
     }
 
     @Test
-    @DisplayName("Should extract an username from a valid token")
+    @DisplayName("Should extract a username from a valid token")
     void shouldExtractUsernameFromToken() {
         // Generate a real token first, then verify if we can read the subject back.
         // This tests the round-trip: generate -> extract -> same username
@@ -66,8 +66,8 @@ public class JwtServiceTest {
     }
 
     @Test
-    @DisplayName("Should verify if token version matches")
-    void shouldCheckIfTokenVersionMatches() {
+    @DisplayName("Should extract tokenVersion claim from token")
+    void shouldExtractTokenVersionFromToken() {
         // Generate a real token first, then verify if the token version matches.
         String token = jwtService.generateToken("grillard", 1);
 
@@ -91,24 +91,6 @@ public class JwtServiceTest {
                 .compact();
 
         assertThat(jwtService.extractTokenVersion(tokenWithoutVersion)).isNull();
-    }
-
-    @Test
-    void shouldRejectWrongSigningKey() {
-        SecretKey wrongKey = Keys.hmacShaKeyFor(
-                Decoders.BASE64.decode("dGVzdC1vbmx5LW5vdC1hLXJlYWwtc2VjcmV0LWRvLW5vdC11c2UtaW4tcHJvZA=="));
-
-        String tokenWithTamperedKey = Jwts.builder()
-                .subject("grillard")
-                .issuer("my-blog-api")
-                .audience().add("my-blog-client").and()
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 3600000L))
-                .signWith(wrongKey)
-                .compact();
-
-        assertThatThrownBy(() -> jwtService.extractUsername(tokenWithTamperedKey))
-                .isInstanceOf(JwtException.class);
     }
 
     @Test
@@ -169,8 +151,64 @@ public class JwtServiceTest {
     }
 
     @Test
+    @DisplayName("Should throw IllegalArgumentException when secret is shorter than 32 bytes")
     void shouldRejectWeakSecret() {
         assertThatThrownBy(() -> new JwtService("dGVzdA==", 3600000L))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("Should throw JwtException when token is signed with a different key")
+    void shouldThrowJwtExceptionWhenTokenSignedWithDifferentKey() {
+        SecretKey wrongKey = Keys.hmacShaKeyFor(
+                Decoders.BASE64.decode("dGVzdC1vbmx5LW5vdC1hLXJlYWwtc2VjcmV0LWRvLW5vdC11c2UtaW4tcHJvZA=="));
+
+        String tokenWithTamperedKey = Jwts.builder()
+                .subject("grillard")
+                .issuer("my-blog-api")
+                .audience().add("my-blog-client").and()
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 3600000L))
+                .signWith(wrongKey)
+                .compact();
+
+        assertThatThrownBy(() -> jwtService.extractUsername(tokenWithTamperedKey))
+                .isInstanceOf(JwtException.class);
+    }
+
+    @Test
+    @DisplayName("Should throw JwtException when token has wrong issuer")
+    void shouldThrowJwtExceptionWhenTokenHasWrongIssuer() {
+        SecretKey signingKey = (SecretKey) ReflectionTestUtils.getField(jwtService, "signingKey");
+
+        String tokenWithDifferentIssuer = Jwts.builder()
+                .subject("grillard")
+                .issuer("different-issuer")
+                .audience().add("my-blog-client").and()
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 3600000L))
+                .signWith(signingKey)
+                .compact();
+
+        assertThatThrownBy(() -> jwtService.extractUsername(tokenWithDifferentIssuer))
+                .isInstanceOf(JwtException.class);
+    }
+
+    @Test
+    @DisplayName("Should throw JwtException when token has wrong audience")
+    void shouldThrowJwtExceptionWhenTokenHasWrongAudience() {
+        SecretKey signingKey = (SecretKey) ReflectionTestUtils.getField(jwtService, "signingKey");
+
+        String tokenWithDifferentAudience = Jwts.builder()
+                .subject("grillard")
+                .issuer("my-blog-api")
+                .audience().add("different-audience").and()
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 3600000L))
+                .signWith(signingKey)
+                .compact();
+
+        assertThatThrownBy(() -> jwtService.extractUsername(tokenWithDifferentAudience))
+                .isInstanceOf(JwtException.class);
     }
 }
