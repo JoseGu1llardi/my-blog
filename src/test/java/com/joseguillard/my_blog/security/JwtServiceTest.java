@@ -1,6 +1,9 @@
 package com.joseguillard.my_blog.security;
 
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +18,7 @@ import java.util.Collections;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
 public class JwtServiceTest {
@@ -90,6 +94,24 @@ public class JwtServiceTest {
     }
 
     @Test
+    void shouldRejectWrongSigningKey() {
+        SecretKey wrongKey = Keys.hmacShaKeyFor(
+                Decoders.BASE64.decode("dGVzdC1vbmx5LW5vdC1hLXJlYWwtc2VjcmV0LWRvLW5vdC11c2UtaW4tcHJvZA=="));
+
+        String tokenWithTamperedKey = Jwts.builder()
+                .subject("grillard")
+                .issuer("my-blog-api")
+                .audience().add("my-blog-client").and()
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 3600000L))
+                .signWith(wrongKey)
+                .compact();
+
+        assertThatThrownBy(() -> jwtService.extractUsername(tokenWithTamperedKey))
+                .isInstanceOf(JwtException.class);
+    }
+
+    @Test
     @DisplayName("Should return true when token is valid and username matches")
     void shouldReturnTrueWhenTokenIsValid() {
         // UserDetails is the interface Spring Security uses to represent a user.
@@ -144,5 +166,11 @@ public class JwtServiceTest {
         boolean isValid = jwtService.isTokenValid(token, userDetails);
 
         assertThat(isValid).isFalse();
+    }
+
+    @Test
+    void shouldRejectWeakSecret() {
+        assertThatThrownBy(() -> new JwtService("dGVzdA==", 3600000L))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }
