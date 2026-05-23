@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 import java.util.Optional;
@@ -91,11 +92,13 @@ public class AuthServiceTest {
 
         // Assert
 
+        verify(loginRateLimiter).recordSuccess("192.168.1.1");
+
         // Verify that the generated token matches the expected value
         // This confirms that JWT was triggered correctly
         assertThat(result.getToken()).isEqualTo("fake-token");
 
-        // Varify that the correct user data is returned
+        // Verify that the correct user data is returned
         assertThat(result.getUsername()).isEqualTo("joseguillard");
 
         // Ensure the login flow follows the expected order
@@ -127,6 +130,8 @@ public class AuthServiceTest {
         assertThatThrownBy(() -> authService.login(request, "192.168.1.1"))
                 .isInstanceOf(BadCredentialsException.class);
 
+        verify(loginRateLimiter).recordFailure("192.168.1.1");
+
         // Ensure the authentication was attempted
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
 
@@ -135,6 +140,32 @@ public class AuthServiceTest {
         verify(authorRepository, never()).findByUserName(anyString());
 
         // The system must NOT generate a JWT token
+        verify(jwtService, never()).generateToken(anyString(), anyInt());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when author is not active")
+    void shouldThrowExceptionWhenAuthorIsNotActive() {
+        // Arrange
+        author.setActive(false);
+
+        LoginRequest request = LoginRequest.builder()
+                .username("joseguillard")
+                .password("password")
+                .build();
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenThrow(DisabledException.class);
+
+        assertThatThrownBy(() -> authService.login(request, "192.168.1.1"))
+                .isInstanceOf(DisabledException.class);
+
+        verify(loginRateLimiter).recordFailure("192.168.1.1");
+
+        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+
+        verify(authorRepository, never()).findByUserName(anyString());
+
         verify(jwtService, never()).generateToken(anyString(), anyInt());
     }
 }
