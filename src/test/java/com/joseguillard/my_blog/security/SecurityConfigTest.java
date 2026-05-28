@@ -9,6 +9,7 @@ import com.joseguillard.my_blog.service.AuthService;
 import com.joseguillard.my_blog.service.AuthorService;
 import com.joseguillard.my_blog.service.CategoryService;
 import com.joseguillard.my_blog.service.PostService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -39,8 +40,23 @@ public class SecurityConfigTest {
     @MockBean private LoginRateLimiter loginRateLimiter;
 
     @Test
+    @DisplayName("Should allow public access to get posts")
     void shouldAllowPublicAccessToGetPosts() throws Exception {
         mockMvc.perform(get("/api/v1/posts"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Should allow public access to get categories")
+    void shouldAllowPublicAccessToGetCategories() throws Exception {
+        mockMvc.perform(get("/api/v1/categories"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Should allow public access to get authors")
+    void shouldAllowPublicAccessToGetAuthors() throws Exception {
+        mockMvc.perform(get("/api/v1/authors"))
                 .andExpect(status().isOk());
     }
 }
