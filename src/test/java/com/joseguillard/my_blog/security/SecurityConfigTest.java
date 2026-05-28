@@ -59,4 +59,13 @@ public class SecurityConfigTest {
         mockMvc.perform(get("/api/v1/authors"))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    @DisplayName("Should allow public access to login")
+    void shouldAllowPublicAccessToLogin() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/login")
+                .contentType("application/json")
+                .content("{\"username\":\"test\",\"password\":\"test\"}"))
+                .andExpect(status().isOk());
+    }
 }
