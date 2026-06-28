@@ -52,8 +52,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/posts/my-posts/**").authenticated()
-                         // Public routes
+                        .requestMatchers(HttpMethod.GET, "/api/v1/posts/my-posts", "/api/v1/posts/my-posts/**")
+                            .authenticated()
+                        // Public routes
                         .requestMatchers(HttpMethod.GET, "/api/v1/posts/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/authors/**").permitAll()
