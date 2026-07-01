@@ -3,7 +3,6 @@ package com.joseguillard.my_blog.service;
 import com.joseguillard.my_blog.dto.mapper.CategoryMapper;
 import com.joseguillard.my_blog.dto.request.CategoryCreateRequest;
 import com.joseguillard.my_blog.dto.response.category.CategoryResponse;
-import com.joseguillard.my_blog.exception.BusinessException;
 import com.joseguillard.my_blog.exception.DuplicatedResourceException;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.entity.Category;
