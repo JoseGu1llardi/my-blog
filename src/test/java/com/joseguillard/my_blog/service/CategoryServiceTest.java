@@ -1,7 +1,9 @@
 package com.joseguillard.my_blog.service;
 
 import com.joseguillard.my_blog.dto.mapper.CategoryMapper;
+import com.joseguillard.my_blog.dto.response.category.CategoryResponse;
 import com.joseguillard.my_blog.entity.Category;
+import com.joseguillard.my_blog.entity.vo.Slug;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.repository.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,5 +62,33 @@ public class CategoryServiceTest {
         assertThatThrownBy(() -> categoryService.findByName("Javascript"))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Category not found");
+    }
+
+    @Test
+    @DisplayName("Should return category when find by slug")
+    void shouldReturnCategoryWhenFoundBySlug() {
+        // Arrange
+        when(categoryRepository.findBySlug(Slug.of("java"))).thenReturn(Optional.of(category));
+
+        CategoryResponse expectedResponse = new CategoryResponse();
+        when(categoryMapper.toResponse(category)).thenReturn(expectedResponse);
+
+        // Act
+        CategoryResponse result = categoryService.findCategoryBySlug("java");
+
+        // Assert
+        assertThat(result).isEqualTo(expectedResponse);
+    }
+
+    @Test
+    @DisplayName("Should throw ResourceNotFoundException when category not found by slug")
+    void shouldThrowResourceNotFoundExceptionWhenCategoryNotFoundBySlug() {
+        // Arrange
+        when(categoryRepository.findBySlug(Slug.of("javascript"))).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> categoryService.findCategoryBySlug("javascript"))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Category with slug 'javascript' not found");
     }
 }
