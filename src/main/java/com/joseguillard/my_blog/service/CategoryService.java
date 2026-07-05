@@ -54,7 +54,7 @@ public class CategoryService {
     public CategoryResponse createCategory(CategoryCreateRequest request) {
         if (isCategoryExistsByName(request.getName())) {
             throw new DuplicatedResourceException(
-                    "Category with name " + request.getName() + " already exists"
+                    String.format("Category with name '%s' already exists", request.getName())
             );
         }
 
