@@ -1,9 +1,11 @@
 package com.joseguillard.my_blog.service;
 
 import com.joseguillard.my_blog.dto.mapper.CategoryMapper;
+import com.joseguillard.my_blog.dto.request.CategoryCreateRequest;
 import com.joseguillard.my_blog.dto.response.category.CategoryResponse;
 import com.joseguillard.my_blog.entity.Category;
 import com.joseguillard.my_blog.entity.vo.Slug;
+import com.joseguillard.my_blog.exception.DuplicatedResourceException;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.repository.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -91,4 +93,46 @@ public class CategoryServiceTest {
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Category with slug 'javascript' not found");
     }
+
+    @Test
+    @DisplayName("Should throw DuplicatedResourceException when category name already exists")
+    void shouldThrowDuplicatedResourceExceptionWhenCategoryNameAlreadyExists() {
+        // Arrange
+        CategoryCreateRequest request = CategoryCreateRequest.builder()
+                .name("Java")
+                .build();
+
+        when(categoryRepository.existsByName("Java")).thenReturn(true);
+
+        // Act & Assert
+        assertThatThrownBy(() -> categoryService.createCategory(request))
+                .isInstanceOf(DuplicatedResourceException.class)
+                .hasMessageContaining("Category with name 'Java' already exists");
+        }
+
+        @Test
+        @DisplayName("Should create and return category when name is available")
+        void shouldCreateAndReturnCategoryWhenNameIsAvailable() {
+            // Arrange
+            CategoryCreateRequest request = CategoryCreateRequest.builder()
+                    .name("Java")
+                    .build();
+
+            when(categoryRepository.existsByName("Java")).thenReturn(false);
+
+            // Returns a category from @BeforeEach
+            when(categoryMapper.toEntity(request)).thenReturn(category);
+            // Save receives this category and returns it saves
+            when(categoryRepository.save(category)).thenReturn(category);
+            // Mapper maps the category to a response
+            CategoryResponse expectedResponse = new CategoryResponse();
+            when(categoryMapper.toResponse(category)).thenReturn(expectedResponse);
+
+            // Act
+            CategoryResponse result = categoryService.createCategory(request);
+
+            // Assert
+            assertThat(result).isEqualTo(expectedResponse);
+            verify(categoryRepository, times(1)).save(category);
+        }
 }
