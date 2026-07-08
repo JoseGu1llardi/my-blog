@@ -131,9 +131,21 @@ public class PostServiceTest {
     }
 
     @Test
+    @DisplayName("Should throw ResourceNotFoundException when post not found by id")
+    void shouldThrowResourceNotFoundExceptionWhenPostNotFoundById() {
+        // Arrange
+        when(postRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> postService.getPostById(1L, 1L))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Post not found");
+    }
+
+    @Test
     @DisplayName("Should find post by slug and increment views")
     void shouldFindBySlugAndIncrementViews() {
-        // Simulates tha the post exists
+        // Simulates that the post exists
         when(postRepository.findBySlugAndStatus(Slug.of("post-title"), PostStatus.PUBLISHED))
                 .thenReturn(Optional.of(post));
 
