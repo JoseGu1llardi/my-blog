@@ -5,6 +5,6 @@ import org.springframework.security.access.AccessDeniedException;
 
 public class PostOwnershipException extends AccessDeniedException {
     public PostOwnershipException() {
-        super("You do not have permission to modify this post");
+        super("You do not have permission on this post");
     }
 }
