@@ -1,7 +1,9 @@
 package com.joseguillard.my_blog.service;
 
 import com.joseguillard.my_blog.dto.mapper.AuthorMapper;
+import com.joseguillard.my_blog.dto.response.author.AuthorResponse;
 import com.joseguillard.my_blog.entity.Author;
+import com.joseguillard.my_blog.entity.vo.Slug;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.repository.AuthorRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,5 +66,33 @@ public class AuthorServiceTest {
         assertThatThrownBy(() -> authorService.incrementTokenVersion(2L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Author not found");
+    }
+
+    @Test
+    @DisplayName("Should return author when found by slug")
+    void shouldReturnAuthorWhenFoundBySlug() {
+        // Arrange
+        when(authorRepository.findBySlug(Slug.of("userName"))).thenReturn(Optional.of(author));
+
+        AuthorResponse expectedResponse = new AuthorResponse();
+        when(authorMapper.toResponse(author)).thenReturn(expectedResponse);
+
+        // Act
+        AuthorResponse result = authorService.findBySlug("userName");
+
+        // Assert
+        assertThat(result).isEqualTo(expectedResponse);
+    }
+
+    @Test
+    @DisplayName("Should throw ResourceNotFoundException when author not found by slug")
+    void shouldThrowResourceNotFoundExceptionWhenAuthorNotFoundBySlug() {
+        // Arrange
+        when(authorRepository.findBySlug(Slug.of("Username"))).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> authorService.findBySlug("Username"))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Author with slug 'Username' not found");
     }
 }
