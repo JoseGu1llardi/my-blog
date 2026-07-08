@@ -143,6 +143,34 @@ public class PostServiceTest {
     }
 
     @Test
+    @DisplayName("Should throw PostOwnershipException when requester is not post owner")
+    void shouldThrowPostOwnershipExceptionWhenRequesterIsNotPostOwner() {
+        // Arrange
+        when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+
+        // Act & Assert
+        assertThatThrownBy(() -> postService.getPostById(1L, 2L))
+                .isInstanceOf(PostOwnershipException.class)
+                .hasMessageContaining("You do not have permission on this post");
+    }
+
+    @Test
+    @DisplayName("Should return post response when post found and ownership valid")
+    void shouldReturnPostResponseWhenPostFoundAndOwnershipValid() {
+        // Arrange
+        when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+
+        PostResponse response = new PostResponse();
+        when(postMapper.toResponse(post)).thenReturn(response);
+
+        // Act
+        PostResponse result = postService.getPostById(1L, 1L);
+
+        // Assert
+        assertThat(result).isEqualTo(response);
+    }
+
+    @Test
     @DisplayName("Should find post by slug and increment views")
     void shouldFindBySlugAndIncrementViews() {
         // Simulates that the post exists
