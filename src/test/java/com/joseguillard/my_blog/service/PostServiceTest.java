@@ -171,6 +171,18 @@ public class PostServiceTest {
     }
 
     @Test
+    @DisplayName("Should throw IllegalArgumentException when search query is blank")
+    void shouldThrowIllegalArgumentExceptionWhenSearchQueryIsEmpty() {
+        Pageable pageable = PageRequest.of(0, 10);
+
+        assertThatThrownBy(() -> postService.searchPosts("", pageable))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Invalid search query");
+
+        verifyNoInteractions(postRepository);
+    }
+
+    @Test
     @DisplayName("Should find post by slug and increment views")
     void shouldFindBySlugAndIncrementViews() {
         // Simulates that the post exists
