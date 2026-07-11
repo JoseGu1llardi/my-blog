@@ -172,14 +172,50 @@ public class PostServiceTest {
 
     @Test
     @DisplayName("Should throw IllegalArgumentException when search query is blank")
-    void shouldThrowIllegalArgumentExceptionWhenSearchQueryIsEmpty() {
+    void shouldThrowIllegalArgumentExceptionWhenSearchQueryIsBlank() {
+        // Arrange
         Pageable pageable = PageRequest.of(0, 10);
 
+        // Act & Assert
         assertThatThrownBy(() -> postService.searchPosts("", pageable))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Invalid search query");
 
         verifyNoInteractions(postRepository);
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalArgumentException when search query contains only wildcards")
+    void shouldThrowIllegalArgumentExceptionWhenSearchQueryContainsOnlyWildcards() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // Act & Assert
+        assertThatThrownBy(() -> postService.searchPosts("%%", pageable))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Query cannot be only wildcards");
+    }
+
+    @Test
+    @DisplayName("Should return post when search query is valid")
+    void shouldReturnPostWhenSearchQueryIsValid() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Post> page = new PageImpl<>(List.of(post));
+
+        PostSummaryResponse summaryResponse = PostSummaryResponse.builder()
+                .title(post.getTitle())
+                .build();
+
+        when(postRepository.searchPublishedPosts("Java", pageable, PostStatus.PUBLISHED)).thenReturn(page);
+        when(postMapper.toSummaryResponse(post)).thenReturn(summaryResponse);
+
+        // Act
+        Page<PostSummaryResponse> result = postService.searchPosts("Java", pageable);
+
+        // Assert
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getTitle()).isEqualTo(post.getTitle());
     }
 
     @Test
