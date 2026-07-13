@@ -131,6 +131,20 @@ public class PostServiceTest {
     }
 
     @Test
+    @DisplayName("Should throw ResourceNotFoundException when author not found by slug")
+    void shouldThrowResourceNotFoundExceptionWhenAuthorNotFoundBySlug() {
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // Arrange
+        when(authorRepository.findBySlug(Slug.of("author-slug"))).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> postService.getPostByAuthor("author-slug", pageable))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Author with slug 'author-slug' not found");
+    }
+
+    @Test
     @DisplayName("Should throw ResourceNotFoundException when post not found by id")
     void shouldThrowResourceNotFoundExceptionWhenPostNotFoundById() {
         // Arrange
