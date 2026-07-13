@@ -382,6 +382,38 @@ public class PostServiceTest {
         verify(postRepository).findById(1L);
     }
 
+    @Test
+    @DisplayName("Should throw PostStateConflictException when post is not published")
+    void shouldThrowPostStateConflictExceptionWhenPostIsNotPublished() {
+        // Arrange
+        post.setStatus(PostStatus.DRAFT);
+        post.setPublishedAt(null);
+
+        when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+
+        // Act & Assert
+        assertThatThrownBy(() -> postService.unpublishPost(1L, 1L))
+                .isInstanceOf(PostStateConflictException.class)
+                .hasMessageContaining("Post is not published");
+    }
+
+    @Test
+    @DisplayName("Should unpublish post successfully")
+    void shouldUnpublishPostSuccessfully() {
+        // Arrange
+        post.setStatus(PostStatus.PUBLISHED);
+        post.setPublishedAt(LocalDateTime.now());
+
+        when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+
+        // Act
+        postService.unpublishPost(1L, 1L);
+
+        // Assert
+        assertThat(post.getStatus()).isEqualTo(PostStatus.DRAFT);
+        assertThat(post.getPublishedAt()).isNull();
+    }
+
     /**
      * Verifies exception thrown and no save for already-published post
      */
