@@ -11,6 +11,7 @@ import com.joseguillard.my_blog.entity.enums.PostStatus;
 import com.joseguillard.my_blog.entity.enums.UserRole;
 import com.joseguillard.my_blog.entity.vo.Email;
 import com.joseguillard.my_blog.entity.vo.Slug;
+import com.joseguillard.my_blog.exception.DuplicatedResourceException;
 import com.joseguillard.my_blog.exception.PostOwnershipException;
 import com.joseguillard.my_blog.exception.PostStateConflictException;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -375,6 +377,40 @@ public class PostServiceTest {
         inOrder.verify(postMapper).toEntity(request, author, Set.of(category));
         inOrder.verify(postRepository).save(mappedPost);
         inOrder.verify(postMapper).toResponse(mappedPost);
+    }
+
+    @Test
+    @DisplayName("Should throw DuplicatedResourceException when slug already exists")
+    void shouldThrowDuplicatedResourceExceptionWhenSlugAlreadyExists() {
+        // Arrange
+        PostCreateRequest request = PostCreateRequest.builder()
+                .title("Existing Post")
+                .content("Existing Post content")
+                .categoryIds(Set.of(1L))
+                .build();
+
+        // Author exists
+        when(authorRepository.findById(1L)).thenReturn(Optional.of(author));
+
+        // Categories exist
+        when(categoryRepository.findAllById(Set.of(1L))).thenReturn(List.of(category));
+
+        // Mapper creates entity
+        Post entity = Post.builder()
+                .title("Existing Post")
+                .content("Existing Post content")
+                .author(author)
+                .status(PostStatus.DRAFT)
+                .build();
+
+        when(postMapper.toEntity(request, author, Set.of(category))).thenReturn(entity);
+
+        when(postRepository.save(entity)).thenThrow(DataIntegrityViolationException.class);
+
+        // Act & Assert
+        assertThatThrownBy(() -> postService.createPost(request, 1L))
+                .isInstanceOf(DuplicatedResourceException.class)
+                .hasMessageContaining("Post already exists: existing-post");
     }
 
     @Test
