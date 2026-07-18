@@ -141,6 +141,7 @@ public class PostControllerTest {
     @Test
     @DisplayName("GET /api/v1/posts/{slug} should return 404 when post not found")
     void shouldReturn404WhenPostNotFound() throws Exception {
+        // Arrange
         when(postService.findBySlugAndIncrementViews(eq("post-does-not-exist"), any(String.class)))
                 .thenThrow(ResourceNotFoundException.postNotFound("post-does-not-exist"));
 
@@ -150,6 +151,27 @@ public class PostControllerTest {
                 .andExpect(jsonPath("$.error").value("RESOURCE_NOT_FOUND"));
 
         verify(postService).findBySlugAndIncrementViews(eq("post-does-not-exist"), any(String.class));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/posts should return 400 with invalid validation")
+    void shouldReturn400WithInvalidData() throws Exception {
+        // Arrange - request without title (required field)
+        PostCreateRequest request = PostCreateRequest.builder()
+                .content("Content")
+                .build();
+
+        // Act & Assert
+        mockMvc.perform(post("/api/v1/posts")
+                        .param("authorId", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.errors").isArray())
+                .andExpect(jsonPath("$.errors").isNotEmpty())
+                .andExpect(jsonPath("$.errors", org.hamcrest.Matchers.hasSize(1)))
+                .andExpect(jsonPath("$.errors[0].field").value("title"));
     }
 
     @Test
@@ -185,23 +207,21 @@ public class PostControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/v1/posts should return 400 with invalid validation")
-    void shouldReturn400WithInvalidData() throws Exception {
-        // Arrange - request without title (required field)
-        PostCreateRequest request = PostCreateRequest.builder()
-                .content("Content")
-                .build();
-
+    @DisplayName("Should delete post when id exists")
+    void shouldDeletePostWhenIdExists() throws Exception {
         // Act & Assert
-        mockMvc.perform(post("/api/v1/posts")
-                .param("authorId", "1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.errors").isArray())
-                .andExpect(jsonPath("$.errors").isNotEmpty())
-                .andExpect(jsonPath("$.errors", org.hamcrest.Matchers.hasSize(1)))
-                .andExpect(jsonPath("$.errors[0].field").value("title"));
+        mockMvc.perform(delete("/api/v1/posts/{id}", 1L)
+                // Authenticates request as an active author user
+                .with(SecurityMockMvcRequestPostProcessors.user(
+                        Author.builder()
+                                .id(1L)
+                                .userName("guillard")
+                                .password("password")
+                                .role(UserRole.AUTHOR)
+                                .active(true)
+                                .build()
+                ))
+        )
+                .andExpect(status().isNoContent());
     }
 }

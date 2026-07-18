@@ -1,6 +1,5 @@
 package com.joseguillard.my_blog.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.joseguillard.my_blog.dto.request.auth.LoginRequest;
 import com.joseguillard.my_blog.dto.response.AuthResponse;
