@@ -32,10 +32,9 @@ import java.time.Month;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -223,5 +222,28 @@ public class PostControllerTest {
                 ))
         )
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("Should throw ResourceNotFoundException when post not found")
+    void shouldThrowResourceNotFoundExceptionWhenPostNotFound() throws Exception {
+        // Arrange
+        doThrow(ResourceNotFoundException.postNotFound("Post not found"))
+                .when(postService).deletePost(anyLong(), anyLong());
+
+        // Act & Assert
+        mockMvc.perform(delete("/api/v1/posts/{id}", 1L)
+                .with(SecurityMockMvcRequestPostProcessors.user(
+                        Author.builder()
+                                .id(1L)
+                                .userName("guillard")
+                                .password("password")
+                                .role(UserRole.AUTHOR)
+                                .active(true)
+                                .build()
+                ))
+        )
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("RESOURCE_NOT_FOUND"));
     }
 }
