@@ -225,6 +225,24 @@ public class PostControllerTest {
     }
 
     @Test
+    @DisplayName("PATCH /api/v1/posts/{id}/unpublish should return 204 when post is unpublished successfully")
+    void shouldUnpublishPostSuccessfully() throws Exception {
+        // Act & Assert
+        mockMvc.perform(patch("/api/v1/posts/{id}/unpublish", 1L)
+                .with(SecurityMockMvcRequestPostProcessors.user(
+                        Author.builder()
+                                .id(1L)
+                                .userName("guillard")
+                                .password("password")
+                                .role(UserRole.AUTHOR)
+                                .active(true)
+                                .build()
+                ))
+        )
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
     @DisplayName("PATCH /api/v1/posts/{id}/publish should return 404 when post does not exist")
     void shouldThrow404WhenPublishingNonExistingPost() throws Exception {
         // Arrange
@@ -234,6 +252,27 @@ public class PostControllerTest {
         // Act & Assert
         mockMvc.perform(patch("/api/v1/posts/{id}/publish", 1L)
 
+                .with(SecurityMockMvcRequestPostProcessors.user(
+                        Author.builder()
+                                .id(1L)
+                                .userName("guillard")
+                                .password("password")
+                                .role(UserRole.AUTHOR)
+                                .active(true)
+                                .build()
+                ))
+        ).andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/v1/posts/{id}/unpublish should return 404 when post does not exist")
+    void shouldThrow404WhenUnpublishingNonExistingPost() throws Exception {
+        // Arrange
+        doThrow(ResourceNotFoundException.postNotFound("Post not found"))
+                .when(postService).unpublishPost(1L, 1L);
+
+        // Act & Assert
+        mockMvc.perform(patch("/api/v1/posts/{id}/unpublish", 1L)
                 .with(SecurityMockMvcRequestPostProcessors.user(
                         Author.builder()
                                 .id(1L)
