@@ -2,6 +2,7 @@ package com.joseguillard.my_blog.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.joseguillard.my_blog.dto.response.category.CategoryResponse;
+import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.security.JwtService;
 import com.joseguillard.my_blog.security.UserDetailsServiceImpl;
 import com.joseguillard.my_blog.service.CategoryService;
@@ -74,5 +75,20 @@ public class CategoryControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.slug").value("java"))
                 .andExpect(jsonPath("$.data.name").value("Java"));
+    }
+
+    @Test
+    @DisplayName("GET api/v1/categories/{slug} should return 404 when category not found")
+    void shouldReturn404WhenCategoryNotFound() throws Exception {
+        // Arrange
+        when( categoryService.findCategoryBySlug(eq("category-does-not-exist")))
+                .thenThrow(ResourceNotFoundException.categoryNotFound("category-does-not-exist"));
+
+        // Verifies 404 status and error response for missing category
+        mockMvc.perform(get("/api/v1/categories/{slug}", "category-does-not-exist"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").value("RESOURCE_NOT_FOUND"));
+
     }
 }
