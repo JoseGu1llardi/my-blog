@@ -175,14 +175,14 @@ public class PostControllerTest {
 
     @Test
     @DisplayName("POST /api/v1/posts should create a post")
-    void  shouldCreatePost() throws Exception {
+    void shouldCreatePost() throws Exception {
         // Arrange
         PostCreateRequest request = PostCreateRequest.builder()
                 .title("Post Title")
                 .content("Content")
                 .build();
 
-        when(postService.createPost(any(PostCreateRequest.class), any()))
+        when(postService.createPost(any(PostCreateRequest.class), anyLong()))
                 .thenReturn(postResponse);
 
         // Act & Assert

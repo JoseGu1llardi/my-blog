@@ -1,7 +1,10 @@
 package com.joseguillard.my_blog.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.joseguillard.my_blog.dto.request.CategoryCreateRequest;
 import com.joseguillard.my_blog.dto.response.category.CategoryResponse;
+import com.joseguillard.my_blog.entity.Author;
+import com.joseguillard.my_blog.entity.enums.UserRole;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.security.JwtService;
 import com.joseguillard.my_blog.security.UserDetailsServiceImpl;
@@ -14,6 +17,8 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.*;
@@ -90,5 +95,35 @@ public class CategoryControllerTest {
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.error").value("RESOURCE_NOT_FOUND"));
 
+    }
+
+    @Test
+    @DisplayName("POST api/v1/categories should create a category")
+    void shouldCreateCategory() throws Exception {
+        // Arrange
+        CategoryCreateRequest request = CategoryCreateRequest.builder()
+                .name("Java")
+                .slug("java")
+                .build();
+
+        when( categoryService.createCategory(any(CategoryCreateRequest.class)))
+                .thenReturn(categoryResponse);
+
+        // Act & Assert
+        mockMvc.perform(post("/api/v1/categories")
+                .with(SecurityMockMvcRequestPostProcessors.user(
+                        Author.builder()
+                                .id(1L)
+                                .userName("joseguillard")
+                                .password("joseguillard")
+                                .role(UserRole.ADMIN)
+                                .active(true)
+                                .build()
+                ))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "/api/v1/categories/1"))
+                .andExpect(jsonPath("$.data.name").value("Java"));
     }
 }
