@@ -5,6 +5,7 @@ import com.joseguillard.my_blog.dto.request.CategoryCreateRequest;
 import com.joseguillard.my_blog.dto.response.category.CategoryResponse;
 import com.joseguillard.my_blog.entity.Author;
 import com.joseguillard.my_blog.entity.enums.UserRole;
+import com.joseguillard.my_blog.exception.DuplicatedResourceException;
 import com.joseguillard.my_blog.exception.ResourceNotFoundException;
 import com.joseguillard.my_blog.security.JwtService;
 import com.joseguillard.my_blog.security.UserDetailsServiceImpl;
@@ -86,7 +87,7 @@ public class CategoryControllerTest {
     @DisplayName("GET api/v1/categories/{slug} should return 404 when category not found")
     void shouldReturn404WhenCategoryNotFound() throws Exception {
         // Arrange
-        when( categoryService.findCategoryBySlug(eq("category-does-not-exist")))
+        when(categoryService.findCategoryBySlug(eq("category-does-not-exist")))
                 .thenThrow(ResourceNotFoundException.categoryNotFound("category-does-not-exist"));
 
         // Verifies 404 status and error response for missing category
@@ -106,7 +107,7 @@ public class CategoryControllerTest {
                 .slug("java")
                 .build();
 
-        when( categoryService.createCategory(any(CategoryCreateRequest.class)))
+        when(categoryService.createCategory(any(CategoryCreateRequest.class)))
                 .thenReturn(categoryResponse);
 
         // Act & Assert
@@ -125,5 +126,35 @@ public class CategoryControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/api/v1/categories/1"))
                 .andExpect(jsonPath("$.data.name").value("Java"));
+    }
+
+    @Test
+    @DisplayName("POST api/v1/categories should 409 when Category already exists")
+    void shouldReturn409WhenCategoryAlreadyExists() throws Exception {
+        // Arrange
+        CategoryCreateRequest request = CategoryCreateRequest.builder()
+                .name("Java")
+                .slug("java")
+                .build();
+
+        when(categoryService.createCategory(any(CategoryCreateRequest.class)))
+                .thenThrow(DuplicatedResourceException.class);
+
+        // Act & Assert
+        mockMvc.perform(post("/api/v1/categories")
+                .with(SecurityMockMvcRequestPostProcessors.user(
+                        Author.builder()
+                                .id(1L)
+                                .userName("joseguillard")
+                                .password("joseguillard")
+                                .role(UserRole.ADMIN)
+                                .active(true)
+                                .build()
+                ))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.error").value("DUPLICATED_RESOURCE"));
     }
 }
