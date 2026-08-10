@@ -112,17 +112,17 @@ public class CategoryControllerTest {
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/categories")
-                .with(SecurityMockMvcRequestPostProcessors.user(
-                        Author.builder()
-                                .id(1L)
-                                .userName("joseguillard")
-                                .password("joseguillard")
-                                .role(UserRole.ADMIN)
-                                .active(true)
-                                .build()
-                ))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                        .with(SecurityMockMvcRequestPostProcessors.user(
+                                Author.builder()
+                                        .id(1L)
+                                        .userName("joseguillard")
+                                        .password("password")
+                                        .role(UserRole.ADMIN)
+                                        .active(true)
+                                        .build()
+                        ))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/api/v1/categories/1"))
                 .andExpect(jsonPath("$.data.name").value("Java"));
@@ -142,19 +142,46 @@ public class CategoryControllerTest {
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/categories")
-                .with(SecurityMockMvcRequestPostProcessors.user(
-                        Author.builder()
-                                .id(1L)
-                                .userName("joseguillard")
-                                .password("joseguillard")
-                                .role(UserRole.ADMIN)
-                                .active(true)
-                                .build()
-                ))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                        .with(SecurityMockMvcRequestPostProcessors.user(
+                                Author.builder()
+                                        .id(1L)
+                                        .userName("joseguillard")
+                                        .password("password")
+                                        .role(UserRole.ADMIN)
+                                        .active(true)
+                                        .build()
+                        ))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.error").value("DUPLICATED_RESOURCE"));
+    }
+
+    @Test
+    @DisplayName("POST api/v1/categories should return 400 when name is missing")
+    void shouldReturn400WhenNameIsMissing() throws Exception {
+        // Arrange
+        CategoryCreateRequest request = CategoryCreateRequest.builder()
+                .slug("java")
+                .build();
+
+        // Act & Assert
+        mockMvc.perform(post("/api/v1/categories")
+                        .with(SecurityMockMvcRequestPostProcessors.user(
+                                Author.builder()
+                                        .id(1L)
+                                        .userName("joseguillard")
+                                        .password("password")
+                                        .role(UserRole.ADMIN)
+                                        .active(true)
+                                        .build()
+                        ))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.errors").isArray())
+                .andExpect(jsonPath("$.errors[0].field").value("name"));
     }
 }
