@@ -1,6 +1,5 @@
 package com.joseguillard.my_blog.dto.response.author;
 
-import com.joseguillard.my_blog.entity.enums.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
