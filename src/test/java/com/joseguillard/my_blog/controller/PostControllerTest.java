@@ -182,7 +182,7 @@ public class PostControllerTest {
                 .content("Content")
                 .build();
 
-        when(postService.createPost(any(PostCreateRequest.class), anyLong()))
+        when(postService.createPost(any(PostCreateRequest.class), any()))
                 .thenReturn(postResponse);
 
         // Act & Assert
