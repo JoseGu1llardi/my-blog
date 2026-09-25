@@ -27,7 +27,7 @@ jobs:
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
-          echo "$EC2_SSH_KEY" > private_key.pem
+          echo "$EC2_SSH_KEY" | base64 -d > private_key.pem
           chmod 600 private_key.pem
           scp -o StrictHostKeyChecking=no -i private_key.pem \
             target/blog-api-1.0.0.jar \
