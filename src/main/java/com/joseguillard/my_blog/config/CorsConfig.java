@@ -1,6 +1,5 @@
 package com.joseguillard.my_blog.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -12,11 +11,13 @@ import java.util.List;
 @Configuration
 public class CorsConfig {
 
-    @Value("${app.cors.allowed-origins}")
-    private List<String> allowedOrigins;
-
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource(AppProperties appProperties) {
+        List<String> allowedOrigins = appProperties.cors() == null ? null : appProperties.cors().allowedOrigins();
+        if (allowedOrigins == null || allowedOrigins.isEmpty()) {
+            throw new IllegalStateException("app.cors.allowed-origins must define at least one origin");
+        }
+
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowCredentials(true);
