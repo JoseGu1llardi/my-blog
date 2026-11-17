@@ -19,7 +19,8 @@ A content-management REST API built with Spring Boot 3.2 and Java 17. It handles
 | H2 | (Boot-managed) | In-memory database — test profile only |
 | Flyway | (Boot-managed) | Schema versioning and migrations |
 | Caffeine | (Boot-managed) | In-process cache for rate limiters |
-| Docker / Docker Compose | — | Container orchestration (dev and prod) |
+| Docker / Docker Compose | — | Local development environment (app + PostgreSQL) |
+| systemd | — | Runs the application JAR in production |
 | Nginx | 1.24 | Reverse proxy, SSL termination |
 | GitHub Actions | — | CI/CD pipeline — build and deploy on push |
 | AWS EC2 | t3.small | Production application server |
@@ -66,7 +67,7 @@ The initial admin user is created by `V3__seed_admin.sql` — a Flyway migration
 The application connects as `blog_user`, a PostgreSQL role with `SELECT`, `INSERT`, `UPDATE`, and `DELETE` on application tables only. The `postgres` superuser is not used by the application. This limits blast radius if the application layer is compromised.
 
 ### Nginx as Reverse Proxy
-Nginx sits in front of the Spring Boot container, handling SSL termination and routing. The Spring Boot container is not exposed publicly — only Nginx is. This means port 8080 is closed to the internet, all traffic enters via ports 80 (redirected to HTTPS) and 443, and the `ForwardedHeaderFilter` bean reads `X-Forwarded-For` and `X-Forwarded-Proto` headers set by Nginx so IP-based rate limiting sees real client IPs.
+Nginx sits in front of the Spring Boot application, handling SSL termination and routing. The application is not exposed publicly — only Nginx is. This means port 8080 is closed to the internet, all traffic enters via ports 80 (redirected to HTTPS) and 443, and the `ForwardedHeaderFilter` bean reads `X-Forwarded-For` and `X-Forwarded-Proto` headers set by Nginx so IP-based rate limiting sees real client IPs.
 
 ### Managed Database (AWS RDS)
 PostgreSQL runs on a dedicated AWS RDS `db.t3.micro` instance, separate from the EC2 application server. Database data persists independently of the EC2 instance lifecycle — terminating and replacing the EC2 instance does not affect the data. RDS provides automated daily backups with 7-day retention and automatic minor version upgrades.
