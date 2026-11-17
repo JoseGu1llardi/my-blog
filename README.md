@@ -226,7 +226,7 @@ https://api.guillard.dev (port 443)
 Nginx — SSL termination, reverse proxy
 EC2: t3.small, Ubuntu 24.04, Elastic IP 100.31.169.60
     ↓
-Spring Boot container (localhost:8080 — not publicly accessible)
+Spring Boot JAR via systemd service `blog-api` (localhost:8080 — not publicly accessible)
     ↓
 AWS RDS PostgreSQL 16 (VPC-internal — not publicly accessible)
 blog-api-db.ci3kkxkpswbz.us-east-1.rds.amazonaws.com
@@ -234,7 +234,7 @@ blog-api-db.ci3kkxkpswbz.us-east-1.rds.amazonaws.com
 
 ### Auto-start on Reboot
 
-A systemd service (`blog-api-docker.service`) manages Docker Compose. On EC2 reboot, systemd automatically runs `docker compose up -d`. The RDS instance is unaffected by EC2 reboots — data persists independently.
+The application runs as a systemd service (`blog-api`) that executes the JAR at `/opt/blog-api/blog-api.jar`. On EC2 reboot, systemd starts it automatically. The RDS instance is unaffected by EC2 reboots — data persists independently.
 
 ### CI/CD Pipeline
 
@@ -243,14 +243,18 @@ Every push to `main` triggers a GitHub Actions workflow defined in `.github/work
 ```
 git push origin main
     ↓
-GitHub Actions (ubuntu-latest)
-    ↓ copies source files to EC2 via SCP
+GitHub Actions (ubuntu-latest, Java 17 Temurin)
+    ↓ mvn clean package -DskipTests
+target/blog-api-1.0.0.jar
+    ↓ copied to EC2 via SCP → /opt/blog-api/blog-api.jar
 EC2
-    ↓ docker compose -f docker-compose.prod.yml up -d --build
+    ↓ ssh: sudo systemctl restart blog-api
 Application running with new code
 ```
 
-No manual SCP, no manual SSH, no manual restart. End-to-end deploy time is approximately 2–3 minutes.
+The SSH key is stored base64-encoded in the `EC2_SSH_KEY` secret, decoded to a temporary file during the job, and removed after the deploy. No manual SCP, no manual SSH, no manual restart. End-to-end deploy time is approximately 2–3 minutes.
+
+> **Note:** the pipeline currently builds with `-DskipTests`, so tests are not run before deploy. Run `mvn test` locally before pushing to `main`.
 
 ### Environment Variables (Production)
 
@@ -273,7 +277,7 @@ Stored in `/etc/blog-api/env` on the EC2 instance with `chmod 640, chown root:ub
 
 | Secret | Description |
 |---|---|
-| `EC2_SSH_KEY` | Contents of `blog-api-key.pem` |
+| `EC2_SSH_KEY` | Base64-encoded contents of `blog-api-key.pem` (decoded with `base64 -d` in the workflow) |
 | `EC2_HOST` | `100.31.169.60` |
 | `EC2_USER` | `ubuntu` |
 
