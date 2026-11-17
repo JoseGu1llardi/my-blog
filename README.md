@@ -224,12 +224,11 @@ Internet
 https://api.guillard.dev (port 443)
     ↓
 Nginx — SSL termination, reverse proxy
-EC2: t3.small, Ubuntu 24.04, Elastic IP 100.31.169.60
+EC2: t3.small, Ubuntu 24.04, Elastic IP
     ↓
 Spring Boot JAR via systemd service `blog-api` (localhost:8080 — not publicly accessible)
     ↓
 AWS RDS PostgreSQL 16 (VPC-internal — not publicly accessible)
-blog-api-db.ci3kkxkpswbz.us-east-1.rds.amazonaws.com
 ```
 
 ### Auto-start on Reboot
@@ -278,7 +277,7 @@ Stored in `/etc/blog-api/env` on the EC2 instance with `chmod 640, chown root:ub
 | Secret | Description |
 |---|---|
 | `EC2_SSH_KEY` | Base64-encoded contents of `blog-api-key.pem` (decoded with `base64 -d` in the workflow) |
-| `EC2_HOST` | `100.31.169.60` |
+| `EC2_HOST` | Elastic IP of the EC2 instance |
 | `EC2_USER` | `ubuntu` |
 
 ### Flyway Migrations
